@@ -1,0 +1,4 @@
+name: McRaspiSystem
+version: '${project.version}'
+main: eu.goodyfx.mcraspisystem.McRaspiSystem
+api-version: '1.20'
