@@ -1,0 +1,5 @@
+system:
+  - prefix: '<green>McRaspi'
+    spacer: '<white>||'
+error:
+  - noPermission: '%p %s <red>Du hast keine Rechte.'
