@@ -2,6 +2,7 @@ package eu.goodyfx.mcraspisystem;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,6 +42,16 @@ public final class McRaspiSystem extends JavaPlugin {
      */
     public void setCommand(String commandLabel, CommandExecutor commandExecutor){
         Objects.requireNonNull(getCommand(commandLabel)).setExecutor(commandExecutor);
+    }
+
+    /**
+     * Setup Command Class and load.
+     * @param commandLabel The Command Name / Alias
+     * @param commandExecutor The Executor Class
+     */
+    public void setCommand(String commandLabel, CommandExecutor commandExecutor, TabCompleter commandTabCompleter){
+        Objects.requireNonNull(getCommand(commandLabel)).setExecutor(commandExecutor);
+        Objects.requireNonNull(getCommand(commandLabel)).setTabCompleter(commandTabCompleter);
     }
 
     /**
