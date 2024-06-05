@@ -37,7 +37,7 @@ public class WarteschlangeCommand implements CommandExecutor, TabCompleter {
     }
 
     private void addSubCommands() {
-        subCommands.add(new WarteschlangeCommandSet(plugin.getData(), manager));
+        subCommands.add(new WarteschlangeCommandSet(plugin.getModule().getRaspiMessages(), manager));
         subCommands.add(new WarteschlangeCommandReload(plugin));
     }
 

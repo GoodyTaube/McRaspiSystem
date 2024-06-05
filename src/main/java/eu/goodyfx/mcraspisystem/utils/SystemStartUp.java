@@ -6,7 +6,7 @@ import eu.goodyfx.mcraspisystem.events.*;
 
 public class SystemStartUp {
 
-    private void runSetup(McRaspiSystem plugin) {
+    public SystemStartUp(McRaspiSystem plugin) {
         addCommands(plugin);
         addEvents(plugin);
     }

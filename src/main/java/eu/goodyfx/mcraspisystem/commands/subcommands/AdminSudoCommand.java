@@ -1,7 +1,7 @@
 package eu.goodyfx.mcraspisystem.commands.subcommands;
 
-import eu.goodyfx.goodysutilities.commands.SubCommand;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
+import eu.goodyfx.mcraspisystem.commands.SubCommand;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 
 public class AdminSudoCommand extends SubCommand {
 

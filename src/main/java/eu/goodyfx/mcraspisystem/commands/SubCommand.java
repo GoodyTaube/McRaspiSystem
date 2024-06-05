@@ -1,6 +1,6 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 
 @SuppressWarnings("unused")
 public abstract class SubCommand {

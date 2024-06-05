@@ -1,12 +1,11 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
 import eu.goodyfx.goodysutilities.events.PlayerAFKEvent;
-import eu.goodyfx.goodysutilities.managers.LocationManager;
-import eu.goodyfx.goodysutilities.managers.WarteschlangenManager;
-import eu.goodyfx.goodysutilities.utils.PlayerValues;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.managers.LocationManager;
+import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
+import eu.goodyfx.mcraspisystem.utils.PlayerValues;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,8 +28,8 @@ public class AFKCommand implements CommandExecutor {
 
     public AFKCommand(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.warteschlangenManager = plugin.getWarteschlangenManager();
-        this.locationManager = plugin.getLocationManager();
+        this.warteschlangenManager = plugin.getModule().getWarteschlangenManager();
+        this.locationManager = plugin.getModule().getLocationManager();
         plugin.setCommand("afk", this);
     }
 

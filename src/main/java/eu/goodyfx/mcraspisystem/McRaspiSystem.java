@@ -1,14 +1,22 @@
 package eu.goodyfx.mcraspisystem;
 
+import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
+import eu.goodyfx.mcraspisystem.utils.SystemStartUp;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public final class McRaspiSystem extends JavaPlugin {
+
+    private RaspiModuleManager moduleManager;
 
     @Override
     public void onEnable() {
@@ -16,49 +24,53 @@ public final class McRaspiSystem extends JavaPlugin {
         init();
     }
 
-    private void init(){
+    private void init() {
         getLogger().info("Welcome to McRaspiSystem");
         setupConfigs();
-        registerCommands();
-        registerEvents();
+        moduleManager = new RaspiModuleManager(this);
+        new SystemStartUp(this);
     }
 
-    private void setupConfigs(){
+    private void setupConfigs() {
         //ALLE Config bezogenen sachen
-    }
-
-    private void registerCommands(){
-        //Alle Commands sortiert nach Wichtigkeit
-    }
-
-    private void registerEvents(){
-        //Alle Events sortiert nach Wichtigkeit
     }
 
     /**
      * Setup Command Class and load.
-     * @param commandLabel The Command Name / Alias
+     *
+     * @param commandLabel    The Command Name / Alias
      * @param commandExecutor The Executor Class
      */
-    public void setCommand(String commandLabel, CommandExecutor commandExecutor){
+    public void setCommand(String commandLabel, CommandExecutor commandExecutor) {
         Objects.requireNonNull(getCommand(commandLabel)).setExecutor(commandExecutor);
     }
 
     /**
+     * Get All Raspi "Modules" like Managers and Data Stuff
+     *
+     * @return a McRaspi Module
+     */
+    public RaspiModuleManager getModule() {
+        return moduleManager;
+    }
+
+    /**
      * Setup Command Class and load.
-     * @param commandLabel The Command Name / Alias
+     *
+     * @param commandLabel    The Command Name / Alias
      * @param commandExecutor The Executor Class
      */
-    public void setCommand(String commandLabel, CommandExecutor commandExecutor, TabCompleter commandTabCompleter){
+    public void setCommand(String commandLabel, CommandExecutor commandExecutor, TabCompleter commandTabCompleter) {
         Objects.requireNonNull(getCommand(commandLabel)).setExecutor(commandExecutor);
         Objects.requireNonNull(getCommand(commandLabel)).setTabCompleter(commandTabCompleter);
     }
 
     /**
      * Setup Listeners and load
+     *
      * @param listeners The Listeners Class
      */
-    public void setListeners(Listener listeners){
+    public void setListeners(Listener listeners) {
         Bukkit.getPluginManager().registerEvents(listeners, this);
     }
 
@@ -67,4 +79,27 @@ public final class McRaspiSystem extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
     }
+
+    /**
+     * Get List of RaspiPlayers by {@link Bukkit#getOnlinePlayers()}
+     *
+     * @return A list of RaspiPlayers
+     */
+    public Set<RaspiPlayer> getRaspiPlayers() {
+        Set<RaspiPlayer> playerSet = new HashSet<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            playerSet.add(new RaspiPlayer(this, player));
+        }
+        return playerSet;
+    }
+
+    /**
+     * Convert normal Player to RaspiPlayer
+     * @param player The Bukkit Player
+     * @return Converted Raspi PLayer
+     */
+    public RaspiPlayer getRaspiPlayer(Player player) {
+        return new RaspiPlayer(this, player);
+    }
+
 }

@@ -1,14 +1,11 @@
 package eu.goodyfx.mcraspisystem.commands;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.commands.subcommands.*;
-import eu.goodyfx.goodysutilities.utils.Data;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
-import eu.goodyfx.goodysutilities.utils.Settings;
-import eu.goodyfx.goodysutilities.utils.UtilitieModule;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.subcommands.*;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
+import eu.goodyfx.mcraspisystem.utils.Settings;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -34,14 +31,14 @@ import java.util.logging.Level;
 public class AdminCommand implements CommandExecutor, TabCompleter {
 
     private final McRaspiSystem plugin;
-    private final Data data;
+    private final RaspiMessages data;
 
     private final List<SubCommand> subCommands = new ArrayList<>();
 
     public AdminCommand(@NotNull McRaspiSystem plugin) {
         plugin.setCommand("admin", this, this);
         this.plugin = plugin;
-        this.data = plugin.getData();
+        this.data = plugin.getModule().getRaspiMessages();
         addSubCommands();
 
     }
@@ -51,8 +48,6 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminSudoCommand());
         subCommands.add(new AdminDebugSubCommand(plugin));
         subCommands.add(new AdminAuaSubCommand());
-        subCommands.add(new AdminModuleCSubommand(plugin));
-        subCommands.add(new AdminChatSubCommand(plugin));
         subCommands.add(new AdminSkullSubCommand());
     }
 
@@ -66,13 +61,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 Collections.sort(results);
                 return results;
             }
-            if (args.length == 2 && args[0].equalsIgnoreCase("module")) {
-                for (UtilitieModule module : plugin.getModuleManager().getModules()) {
-                    results.add(module.getLabel());
-                }
-                Collections.sort(results);
-                return results;
-            }
+
             if ((args.length > 2 && args.length < 6) && args[0].equalsIgnoreCase("skull")) {
 
                 if (sender instanceof Player player) {

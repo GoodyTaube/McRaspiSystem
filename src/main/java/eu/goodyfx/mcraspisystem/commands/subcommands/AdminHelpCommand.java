@@ -1,17 +1,17 @@
 package eu.goodyfx.mcraspisystem.commands.subcommands;
 
-import eu.goodyfx.goodysutilities.commands.AdminCommand;
-import eu.goodyfx.goodysutilities.commands.SubCommand;
-import eu.goodyfx.goodysutilities.utils.Data;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
+import eu.goodyfx.mcraspisystem.commands.AdminCommand;
+import eu.goodyfx.mcraspisystem.commands.SubCommand;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 
 public class AdminHelpCommand extends SubCommand {
 
-    private final Data data;
+    private final RaspiMessages data;
 
     private final AdminCommand mainCommand;
 
-    public AdminHelpCommand(Data data, AdminCommand mainCommand) {
+    public AdminHelpCommand(RaspiMessages data, AdminCommand mainCommand) {
         this.data = data;
         this.mainCommand = mainCommand;
     }

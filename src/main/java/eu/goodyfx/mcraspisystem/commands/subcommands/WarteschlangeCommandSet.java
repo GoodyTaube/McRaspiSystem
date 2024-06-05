@@ -1,9 +1,9 @@
 package eu.goodyfx.mcraspisystem.commands.subcommands;
 
-import eu.goodyfx.goodysutilities.commands.SubCommand;
-import eu.goodyfx.goodysutilities.managers.LocationManager;
-import eu.goodyfx.goodysutilities.utils.Data;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
+import eu.goodyfx.mcraspisystem.commands.SubCommand;
+import eu.goodyfx.mcraspisystem.managers.LocationManager;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import org.bukkit.entity.Player;
 
 public class WarteschlangeCommandSet extends SubCommand {
@@ -13,11 +13,11 @@ public class WarteschlangeCommandSet extends SubCommand {
 
     private static final String FIRST_SPAWN = "firstSpawn";
 
-    private final Data data;
+    private final RaspiMessages data;
 
     private final LocationManager locationManager;
 
-    public WarteschlangeCommandSet(Data data, LocationManager locationManager) {
+    public WarteschlangeCommandSet(RaspiMessages data, LocationManager locationManager) {
         this.locationManager = locationManager;
         this.data = data;
     }
