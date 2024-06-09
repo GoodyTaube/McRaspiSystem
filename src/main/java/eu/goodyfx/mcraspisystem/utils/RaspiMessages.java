@@ -10,8 +10,8 @@ public class RaspiMessages {
     private final McRaspiSystem plugin;
     private final PlayerNameController playerNameController;
 
-    public Data(McRaspiSystem plugin) {
-        this.playerNameController = plugin.getPlayerNameController();
+    public RaspiMessages(McRaspiSystem plugin) {
+        this.playerNameController = plugin.getModule().getPlayerNameController();
         this.plugin = plugin;
     }
 
@@ -93,15 +93,15 @@ public class RaspiMessages {
     }
 
     public boolean debugMode() {
-        return plugin.getMessageManager().getBoolean("debug");
+        return plugin.getModule().getMessageManager().getBoolean("debug");
     }
 
     public boolean blockChat() {
-        return plugin.getMessageManager().getBoolean("messages.blockieren.chat");
+        return plugin.getModule().getMessageManager().getBoolean("messages.blockieren.chat");
     }
 
     public boolean blockTeleport() {
-        return plugin.getMessageManager().getBoolean("messages.blockieren.teleport");
+        return plugin.getModule().getMessageManager().getBoolean("messages.blockieren.teleport");
     }
 
     public String refreshed() {
@@ -156,7 +156,7 @@ public class RaspiMessages {
 
 
     public String get(String subPath) {
-        return Objects.requireNonNull(OldColors.convert(plugin.getMessageManager().getString("messages." + subPath)));
+        return Objects.requireNonNull(OldColors.convert(plugin.getModule().getMessageManager().getString("messages." + subPath)));
     }
 
 

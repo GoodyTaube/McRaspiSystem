@@ -19,7 +19,7 @@ public class IdleTask extends BukkitRunnable {
     public IdleTask(McRaspiSystem utilities, Plugin plugin) {
         this.plugin = plugin;
         this.utilities = utilities;
-        this.playerSettingsManager = utilities.getPlayerSettingsManager();
+        this.playerSettingsManager = utilities.getModule().getPlayerSettingsManager();
         start();
     }
 
@@ -45,7 +45,7 @@ public class IdleTask extends BukkitRunnable {
                 return;
             }
 
-            if (utilities.getUserManager().getAfkContainer().containsKey(all.getUniqueId())) {
+            if (utilities.getModule().getUserManager().getAfkContainer().containsKey(all.getUniqueId())) {
                 //Check if Player is already AFK
                 return;
             }

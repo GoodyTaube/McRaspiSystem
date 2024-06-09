@@ -1,9 +1,11 @@
 package eu.goodyfx.mcraspisystem;
 
+import eu.goodyfx.mcraspisystem.managers.RaspiHookManager;
 import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.SystemStartUp;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
@@ -17,6 +19,7 @@ import java.util.Set;
 public final class McRaspiSystem extends JavaPlugin {
 
     private RaspiModuleManager moduleManager;
+    private RaspiHookManager hookManager;
 
     @Override
     public void onEnable() {
@@ -26,6 +29,7 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private void init() {
         getLogger().info("Welcome to McRaspiSystem");
+        hookManager = new RaspiHookManager(this, this);
         setupConfigs();
         moduleManager = new RaspiModuleManager(this);
         new SystemStartUp(this);
@@ -52,6 +56,14 @@ public final class McRaspiSystem extends JavaPlugin {
      */
     public RaspiModuleManager getModule() {
         return moduleManager;
+    }
+
+    /**
+     * Get all third Party Plugins to Run System
+     * @return A Manager with all NEEDED API'S
+     */
+    public RaspiHookManager getHookManager() {
+        return hookManager;
     }
 
     /**
@@ -95,6 +107,7 @@ public final class McRaspiSystem extends JavaPlugin {
 
     /**
      * Convert normal Player to RaspiPlayer
+     *
      * @param player The Bukkit Player
      * @return Converted Raspi PLayer
      */
@@ -102,4 +115,13 @@ public final class McRaspiSystem extends JavaPlugin {
         return new RaspiPlayer(this, player);
     }
 
+    /**
+     * Get a NameSpacedKey for Different actions.     *
+     *
+     * @param key the Value
+     * @return A NameSpacedKey out of GoodyUtilities
+     */
+    public NamespacedKey getNameSpaced(String key) {
+        return new NamespacedKey(this, key);
+    }
 }

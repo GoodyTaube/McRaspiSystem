@@ -46,7 +46,7 @@ public class CommandListeners implements Listener {
     public void onCommand(PlayerCommandPreprocessEvent commandEvent) {
         String[] command = commandEvent.getMessage().split(" ");
         RaspiPlayer player = new RaspiPlayer(plugin, commandEvent.getPlayer());
-        if ((command[0].equalsIgnoreCase("/msg") || command[0].equalsIgnoreCase("/tell") || command[0].equalsIgnoreCase("/me")) && (plugin.getUserManager().isMuted(commandEvent.getPlayer()))) {
+        if ((command[0].equalsIgnoreCase("/msg") || command[0].equalsIgnoreCase("/tell") || command[0].equalsIgnoreCase("/me")) && (plugin.getModule().getUserManager().isMuted(commandEvent.getPlayer()))) {
             commandEvent.getPlayer().sendRichMessage("<red><hover:show_text:'<red>Sei einfach Leise bitte.<gray> Kuss'>Du bist Stumm. Das geht so nicht..");
             commandEvent.setCancelled(true);
 

@@ -1,8 +1,8 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.UserManager;
-import eu.goodyfx.goodysutilities.utils.Data;
+import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.managers.UserManager;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import net.luckperms.api.model.group.Group;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -18,15 +18,15 @@ import java.util.concurrent.CompletableFuture;
 
 public class MuteCommand implements CommandExecutor {
 
-    private final Data data;
-    private final GoodysUtilities plugin;
+    private final RaspiMessages data;
+    private final McRaspiSystem plugin;
     private final UserManager userManager;
 
-    public MuteCommand(GoodysUtilities plugin) {
+    public MuteCommand(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.userManager = this.plugin.getUserManager();
+        this.userManager = this.plugin.getModule().getUserManager();
         plugin.setCommand("mute", this);
-        this.data = plugin.getData();
+        this.data = plugin.getModule().getRaspiMessages();
     }
 
     @Override
@@ -108,7 +108,7 @@ public class MuteCommand implements CommandExecutor {
 
 
     public CompletableFuture<Boolean> isDefault(UUID userUID) {
-        return plugin.getLuckPerms().getUserManager().loadUser(userUID)
+        return plugin.getHookManager().getLuckPerms().getUserManager().loadUser(userUID)
                 .thenApplyAsync(user -> {
                     Collection<Group> inheritedGroups = user.getInheritedGroups(user.getQueryOptions());
                     return inheritedGroups.stream().anyMatch(group -> group.getName().equalsIgnoreCase("default"));

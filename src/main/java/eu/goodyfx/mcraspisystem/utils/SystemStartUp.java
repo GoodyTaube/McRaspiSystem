@@ -31,7 +31,6 @@ public class SystemStartUp {
 
     private void addEvents(McRaspiSystem plugin) {
         new CommandListeners(plugin);
-        new PlayerAFKEvent(plugin);
         new PlayerChatListeners(plugin);
         new PlayerListeners(plugin);
         new ServerListeners(plugin);

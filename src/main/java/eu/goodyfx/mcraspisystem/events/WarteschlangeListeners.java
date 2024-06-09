@@ -11,6 +11,7 @@ import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
 import eu.goodyfx.mcraspisystem.utils.OldColors;
 import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
 import eu.goodyfx.mcraspisystem.utils.PlayerValues;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -21,7 +22,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import javax.xml.crypto.Data;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,18 +34,18 @@ public class WarteschlangeListeners implements Listener {
     private final PlayerNameController playerNameController;
     private final RequestManager requestManager;
     private final UserManager userManager;
-    private final Data data;
+    private final RaspiMessages data;
 
     private final Map<InetAddress, String> IP_CONTAINER = new HashMap<>();
 
 
     public WarteschlangeListeners(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.playerNameController = plugin.getPlayerNameController();
-        this.requestManager = plugin.getRequestManager();
-        this.userManager = plugin.getUserManager();
-        this.settings = plugin.getWarteschlangenManager();
-        this.data = plugin.getData();
+        this.playerNameController = plugin.getModule().getPlayerNameController();
+        this.requestManager = plugin.getModule().getRequestManager();
+        this.userManager = plugin.getModule().getUserManager();
+        this.settings = plugin.getModule().getWarteschlangenManager();
+        this.data = plugin.getModule().getRaspiMessages();
         plugin.setListeners(this);
     }
 
@@ -53,10 +53,10 @@ public class WarteschlangeListeners implements Listener {
         //Check if Locations Exist
         if (player.isOp()) {
             if (!manager.exist("warteraum")) {
-                player.sendRichMessage(plugin.getData().noSpawnPoint(2));
+                player.sendRichMessage(data.noSpawnPoint(2));
             }
             if (!manager.exist("spawn")) {
-                player.sendRichMessage(plugin.getData().noSpawnPoint(1));
+                player.sendRichMessage(data.noSpawnPoint(1));
             }
         }
     }
@@ -115,7 +115,7 @@ public class WarteschlangeListeners implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onJoined(PlayerJoinEvent playerJoinEvent) {
         Player player = playerJoinEvent.getPlayer();
-        LocationManager manager = plugin.getLocationManager();
+        LocationManager manager = plugin.getModule().getLocationManager();
         checkSystemLocations(player, manager);
         checkIP(player);
         //Check if joining Player joins in Active World
@@ -124,9 +124,9 @@ public class WarteschlangeListeners implements Listener {
         //REQUEST
         suitRequest(player);
 
-        plugin.getPrefixManager().checkOld(player);
+        plugin.getModule().getPrefixManager().checkOld(player);
         playerNameController.setPlayerList(player);
-        playerJoinEvent.joinMessage(MiniMessage.miniMessage().deserialize(OldColors.convert(plugin.getJoinMessageManager().get(player))));
+        playerJoinEvent.joinMessage(MiniMessage.miniMessage().deserialize(OldColors.convert(plugin.getModule().getJoinMessageManager().get(player))));
 
         if (userManager.hasTimePlayed(player, 100) && (!player.isPermissionSet("system.bypass"))) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + player.getName() + " permission set system.bypass");
@@ -144,7 +144,7 @@ public class WarteschlangeListeners implements Listener {
         SitCommand.remove(player);
 
         if (plugin.getConfig().getBoolean("Utilities.leaveMessage")) {
-            playerQuitEvent.quitMessage(MiniMessage.miniMessage().deserialize(plugin.getData().getLeave(player)));
+            playerQuitEvent.quitMessage(MiniMessage.miniMessage().deserialize(data.getLeave(player)));
         }
         //IF player was in ActiveWorld
         if (settings.isInActiveWorld(player)) {
@@ -166,7 +166,7 @@ public class WarteschlangeListeners implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                plugin.getWarteschlangenManager().setHeader();
+                plugin.getModule().getWarteschlangenManager().setHeader();
             }
         }.runTaskLater(plugin, 30L);
 

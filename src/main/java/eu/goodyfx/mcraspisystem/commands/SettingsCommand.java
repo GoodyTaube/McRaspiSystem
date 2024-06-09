@@ -1,10 +1,9 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.PlayerSettingsManager;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
-import eu.goodyfx.goodysutilities.utils.Settings;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.managers.PlayerSettingsManager;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
+import eu.goodyfx.mcraspisystem.utils.Settings;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,7 +23,7 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
 
     public SettingsCommand(McRaspiSystem plugin) {
         this.system = plugin;
-        this.playerSettingsManager = plugin.getPlayerSettingsManager();
+        this.playerSettingsManager = plugin.getModule().getPlayerSettingsManager();
         plugin.setCommand("settings", this, this);
     }
 

@@ -1,7 +1,8 @@
 package eu.goodyfx.mcraspisystem.commands.subcommands;
 
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
+
 import eu.goodyfx.mcraspisystem.commands.SubCommand;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

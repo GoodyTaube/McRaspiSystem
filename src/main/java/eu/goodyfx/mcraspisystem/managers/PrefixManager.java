@@ -1,7 +1,7 @@
 package eu.goodyfx.mcraspisystem.managers;
 
-import eu.goodyfx.goodysutilities.utils.PlayerValues;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.utils.PlayerValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -16,7 +16,7 @@ public class PrefixManager {
     private final UserManager userManager;
 
     public PrefixManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getUserManager();
+        this.userManager = plugin.getModule().getUserManager();
         Bukkit.getLogger().info("Loading Prefix Manager.");
     }
 

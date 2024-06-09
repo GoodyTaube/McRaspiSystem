@@ -1,7 +1,7 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.events.PlayerAFKEvent;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.events.PlayerAFKEvent;
 import eu.goodyfx.mcraspisystem.managers.LocationManager;
 import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
 import eu.goodyfx.mcraspisystem.utils.PlayerValues;

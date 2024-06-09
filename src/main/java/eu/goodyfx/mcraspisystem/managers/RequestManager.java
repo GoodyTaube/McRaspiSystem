@@ -28,7 +28,7 @@ public class RequestManager {
     private FileConfiguration config;
 
     public RequestManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getUserManager();
+        this.userManager = plugin.getModule().getUserManager();
         this.file = new File(plugin.getDataFolder(), "reasons.yml");
         this.config = YamlConfiguration.loadConfiguration(file);
         this.plugin = plugin;
@@ -38,7 +38,7 @@ public class RequestManager {
         try {
             config.save(file);
         } catch (IOException e) {
-            plugin.getErrorHandler().sendError(this.getClass(), e);
+            plugin.getHookManager().getDiscordIntegrationError().sendError(this.getClass(), e);
         }
     }
 

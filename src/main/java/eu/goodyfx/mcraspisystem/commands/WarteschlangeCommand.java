@@ -1,14 +1,10 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.commands.subcommands.WarteschlangeCommandReload;
-import eu.goodyfx.goodysutilities.commands.subcommands.WarteschlangeCommandSet;
-import eu.goodyfx.goodysutilities.managers.LocationManager;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.subcommands.WarteschlangeCommandReload;
 import eu.goodyfx.mcraspisystem.commands.subcommands.WarteschlangeCommandSet;
 import eu.goodyfx.mcraspisystem.managers.LocationManager;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -31,7 +27,7 @@ public class WarteschlangeCommand implements CommandExecutor, TabCompleter {
 
     public WarteschlangeCommand(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.manager = plugin.getLocationManager();
+        this.manager = plugin.getModule().getLocationManager();
         plugin.setCommand("warteschlange", this, this);
         addSubCommands();
     }
@@ -68,7 +64,7 @@ public class WarteschlangeCommand implements CommandExecutor, TabCompleter {
                     }
                 }
             } else {
-                player.sendRichMessage(plugin.getData().getUsage("/warteschlange <set : reload> [<location>]"));
+                player.sendRichMessage(plugin.getModule().getRaspiMessages().getUsage("/warteschlange <set : reload> [<location>]"));
             }
         }
         return false;

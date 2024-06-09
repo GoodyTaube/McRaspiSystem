@@ -1,8 +1,5 @@
 package eu.goodyfx.mcraspisystem.commands.subcommands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.commands.SubCommand;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.SubCommand;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
@@ -34,8 +31,8 @@ public class WarteschlangeCommandReload extends SubCommand {
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         if (args.length == 1) {
             system.reloadConfig();
-            system.getWarteschlangenManager().setHeader();
-            player.getPlayer().sendRichMessage(system.getData().getPrefix() + "<green>Die Config Datei wurde neu Geladen!");
+            system.getModule().getWarteschlangenManager().setHeader();
+            player.getPlayer().sendRichMessage(system.getModule().getRaspiMessages().getPrefix() + "<green>Die Config Datei wurde neu Geladen!");
             return true;
         }
         return false;

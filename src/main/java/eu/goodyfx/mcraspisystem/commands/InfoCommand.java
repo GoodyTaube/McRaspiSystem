@@ -1,11 +1,11 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.ExtraInfos;
-import eu.goodyfx.goodysutilities.managers.UserManager;
-import eu.goodyfx.goodysutilities.utils.Data;
-import eu.goodyfx.goodysutilities.utils.PlayerInfo;
+
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.managers.ExtraInfos;
+import eu.goodyfx.mcraspisystem.managers.UserManager;
+import eu.goodyfx.mcraspisystem.utils.PlayerInfo;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -27,14 +27,14 @@ import java.util.List;
 @SuppressWarnings("ConstantConditions")
 public class InfoCommand implements CommandExecutor, TabCompleter {
 
-    private final Data data;
+    private final RaspiMessages data;
     private final UserManager userManager;
-    private final GoodysUtilities plugin;
+    private final McRaspiSystem plugin;
 
     public InfoCommand(McRaspiSystem plugin) {
-        this.data = plugin.getData();
+        this.data = plugin.getModule().getRaspiMessages();
         this.plugin = plugin;
-        this.userManager = plugin.getUserManager();
+        this.userManager = plugin.getModule().getUserManager();
         plugin.setCommand("playerinfo", this, this);
     }
 
@@ -96,10 +96,10 @@ public class InfoCommand implements CommandExecutor, TabCompleter {
     }
 
     private void add(Player player, String[] args, boolean mod) {
-        OfflinePlayer target = plugin.getOfflinePlayer(args[0]);
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
 
         if (!target.hasPlayedBefore()) {
-            player.sendRichMessage(plugin.getData().getUsage("/playerinfo <player> [<add:remove>] [<id>]"));
+            player.sendRichMessage(data.getUsage("/playerinfo <player> [<add:remove>] [<id>]"));
         }
 
         StringBuilder message = new StringBuilder();
@@ -125,10 +125,10 @@ public class InfoCommand implements CommandExecutor, TabCompleter {
     }
 
     private void remove(Player player, String[] args, boolean mod) {
-        OfflinePlayer target = plugin.getOfflinePlayer(args[0]);
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
 
         if (!target.hasPlayedBefore()) {
-            player.sendRichMessage(plugin.getData().getUsage("/playerinfo <player> [<add:remove>] [<id>]"));
+            player.sendRichMessage(data.getUsage("/playerinfo <player> [<add:remove>] [<id>]"));
         }
         ExtraInfos extraInfos = new ExtraInfos(player);
         extraInfos.remove(target, args[2], mod);

@@ -1,10 +1,6 @@
 package eu.goodyfx.mcraspisystem.commands.subcommands;
 
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.commands.SubCommand;
-import eu.goodyfx.goodysutilities.utils.RaspiPlayer;
-import eu.goodyfx.goodysutilities.utils.Settings;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.SubCommand;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
@@ -41,12 +37,12 @@ public class AdminDebugSubCommand extends SubCommand {
         if (args.length == 3 && args[1].equalsIgnoreCase("settings")) {
             Player target = Bukkit.getPlayer(args[2]);
             if (target == null) {
-                player.sendMessage(plugin.getData().playerNotOnline(args[2]));
+                player.sendMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[2]));
                 return true;
             }
             player.sendMessage(target.getName() + " Settings:");
             for (Settings setting : Settings.values()) {
-                player.sendMessage(setting.getLabel() + ": " + plugin.getPlayerSettingsManager().contains(setting, target));
+                player.sendMessage(setting.getLabel() + ": " + plugin.getModule().getPlayerSettingsManager().contains(setting, target));
             }
 
         }

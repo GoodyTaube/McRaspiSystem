@@ -26,8 +26,8 @@ public class PlayerNameController {
 
 
     public PlayerNameController(McRaspiSystem utilities) {
-        this.userManager = utilities.getUserManager();
-        this.prefixManager = utilities.getPrefixManager();
+        this.userManager = utilities.getModule().getUserManager();
+        this.prefixManager = utilities.getModule().getPrefixManager();
     }
 
     public void setPlayerColor(String colorString, Player player) {

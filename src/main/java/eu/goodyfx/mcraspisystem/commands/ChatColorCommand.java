@@ -1,10 +1,10 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.utils.Data;
-import eu.goodyfx.goodysutilities.utils.OldColors;
-import eu.goodyfx.goodysutilities.utils.PlayerNameController;
+
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.utils.OldColors;
+import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,13 +21,13 @@ import java.util.Locale;
 public class ChatColorCommand implements CommandExecutor, TabCompleter {
 
     private final PlayerNameController playerNameController;
-    private final Data data;
+    private final RaspiMessages data;
 
     private static final String RANDOM = "random";
 
     public ChatColorCommand(McRaspiSystem utilities) {
-        this.data = utilities.getData();
-        this.playerNameController = utilities.getPlayerNameController();
+        this.data = utilities.getModule().getRaspiMessages();
+        this.playerNameController = utilities.getModule().getPlayerNameController();
         utilities.setCommand("chatColor", this, this);
         setColors();
     }

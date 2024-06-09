@@ -1,6 +1,5 @@
 package eu.goodyfx.mcraspisystem.managers;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

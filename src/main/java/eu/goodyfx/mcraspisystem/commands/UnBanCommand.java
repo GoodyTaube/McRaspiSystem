@@ -1,9 +1,5 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.PlayerBanManager;
-import eu.goodyfx.goodysutilities.managers.UserManager;
-import eu.goodyfx.goodysutilities.utils.Data;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PlayerBanManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
@@ -28,9 +24,9 @@ public class UnBanCommand implements CommandExecutor, TabCompleter {
     private final RaspiMessages data;
 
     public UnBanCommand(McRaspiSystem plugin) {
-        this.userManager = plugin.getUserManager();
-        this.playerBanManager = plugin.getPlayerBanManager();
-        this.data = plugin.getData();
+        this.userManager = plugin.getModule().getUserManager();
+        this.playerBanManager = plugin.getModule().getPlayerBanManager();
+        this.data = plugin.getModule().getRaspiMessages();
         plugin.setCommand("unban", this);
     }
 

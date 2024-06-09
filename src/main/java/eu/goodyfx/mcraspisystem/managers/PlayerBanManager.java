@@ -1,7 +1,7 @@
 package eu.goodyfx.mcraspisystem.managers;
 
-import eu.goodyfx.goodysutilities.utils.RaspiTimes;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.utils.RaspiTimes;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +10,7 @@ public class PlayerBanManager {
     private final UserManager userManager;
 
     public PlayerBanManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getUserManager();
+        this.userManager = plugin.getModule().getUserManager();
     }
 
     /**

@@ -3,15 +3,12 @@ package eu.goodyfx.mcraspisystem.events;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.commands.AFKCommand;
-import eu.goodyfx.goodysutilities.commands.SitCommand;
-import eu.goodyfx.goodysutilities.managers.UserManager;
-import eu.goodyfx.goodysutilities.managers.WarteschlangenManager;
-import eu.goodyfx.goodysutilities.utils.PlayerValues;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.commands.AFKCommand;
+import eu.goodyfx.mcraspisystem.commands.SitCommand;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
+import eu.goodyfx.mcraspisystem.utils.PlayerValues;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -53,8 +50,8 @@ public class PlayerListeners implements Listener {
 
     public PlayerListeners(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.userManager = plugin.getUserManager();
-        this.warteschlangenManager = plugin.getWarteschlangenManager();
+        this.userManager = plugin.getModule().getUserManager();
+        this.warteschlangenManager = plugin.getModule().getWarteschlangenManager();
         plugin.setListeners(this);
     }
 
@@ -131,7 +128,7 @@ public class PlayerListeners implements Listener {
     private void sendDemoGUIPacket(Player target) {
         PacketContainer container = new PacketContainer(PacketType.Play.Server.GAME_STATE_CHANGE);
         container.getGameStateIDs().write(0, 5);
-        plugin.getProtocolManager().sendServerPacket(target, container);
+        plugin.getHookManager().getProtocolManager().sendServerPacket(target, container);
     }
 
     /**
@@ -171,7 +168,7 @@ public class PlayerListeners implements Listener {
         Entity entity = event.getRightClicked();
         Player player = event.getPlayer();
         if ((entity instanceof Animals || entity instanceof WaterMob) && (entity.getPassengers().isEmpty() && player.getInventory().getItem(EquipmentSlot.HAND).getType().equals(Material.AIR))) {
-            if(entity instanceof Cat || entity instanceof Wolf){
+            if (entity instanceof Cat || entity instanceof Wolf) {
                 return;
             }
             entity.addPassenger(player);
@@ -211,9 +208,9 @@ public class PlayerListeners implements Listener {
         Player player = teleportEvent.getPlayer();
 
         Location dest = teleportEvent.getTo();
-        if (warteschlangenManager.isQueue(player) && plugin.getData().blockTeleport() && plugin.getLocationManager().get("waiting").getWorld() != Objects.requireNonNull(teleportEvent.getTo()).getWorld()) {
+        if (warteschlangenManager.isQueue(player) && plugin.getModule().getRaspiMessages().blockTeleport() && plugin.getModule().getLocationManager().get("waiting").getWorld() != Objects.requireNonNull(teleportEvent.getTo()).getWorld()) {
             teleportEvent.setCancelled(true);
-            player.sendRichMessage(plugin.getData().blocking());
+            player.sendRichMessage(plugin.getModule().getRaspiMessages().blocking());
 
         }
     }
@@ -226,7 +223,7 @@ public class PlayerListeners implements Listener {
         int exp = deathEvent.getDroppedExp();
 
         userManager.setPersistantValue(player, PlayerValues.DEATH, System.currentTimeMillis());
-        if (plugin.getSignOnDeath()) {
+        if (plugin.getConfig().getBoolean("Utilities.dead-signs")) {
             Location location = deathEvent.getEntity().getLocation();
             Block highest = location.getBlock();
             Location blockLoc = highest.getLocation();

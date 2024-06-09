@@ -1,7 +1,7 @@
 package eu.goodyfx.mcraspisystem.managers;
 
-import eu.goodyfx.goodysutilities.utils.PlayerValues;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.utils.PlayerValues;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -18,7 +18,7 @@ public class WarteschlangenManager {
     private final UserManager userManager;
 
     public WarteschlangenManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getUserManager();
+        this.userManager = plugin.getModule().getUserManager();
         this.plugin = plugin;
     }
 
@@ -109,7 +109,7 @@ public class WarteschlangenManager {
 
     public void addToQueue(UUID uuid, Location location) {
         String world = Objects.requireNonNull(location.getWorld()).getName();
-        Location waiting = plugin.getLocationManager().get("waiting");
+        Location waiting = plugin.getModule().getLocationManager().get("waiting");
         if (!world.equalsIgnoreCase(Objects.requireNonNull(waiting.getWorld()).getName())) {
             locationHashMap.put(uuid, location);
         }
@@ -144,11 +144,11 @@ public class WarteschlangenManager {
 
             if (userManager.getAfkContainer().size() > 0) {
                 all.sendPlayerListHeaderAndFooter(Component.text("Spieler Online: " + Bukkit.getOnlinePlayers().size()
-                        + "/" + getMaxPlayers() + " wartende Spieler " + plugin.getWarteschlangenManager().queueSize()).append(Component.newline()).append(Component.text("Spieler Abwesend: "
+                        + "/" + getMaxPlayers() + " wartende Spieler " + plugin.getModule().getWarteschlangenManager().queueSize()).append(Component.newline()).append(Component.text("Spieler Abwesend: "
                         + afk)), Component.empty());
             } else {
                 all.sendPlayerListHeaderAndFooter(Component.text("Spieler Online: " + Bukkit.getOnlinePlayers().size()
-                        + "/" + getMaxPlayers() + " wartende Spieler " + plugin.getWarteschlangenManager().queueSize()), Component.empty());
+                        + "/" + getMaxPlayers() + " wartende Spieler " + plugin.getModule().getWarteschlangenManager().queueSize()), Component.empty());
             }
 
         });
@@ -175,11 +175,11 @@ public class WarteschlangenManager {
                     if (locationHashMap.containsKey(uuid)) {
                         player.teleport(locationHashMap.get(uuid));
                     } else {
-                        player.teleport(plugin.getLocationManager().get("spawn"));
+                        player.teleport(plugin.getModule().getLocationManager().get("spawn"));
                     }
 
 
-                    player.sendRichMessage(plugin.getData().endWaiting());
+                    player.sendRichMessage(plugin.getModule().getRaspiMessages().endWaiting());
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
                     sendQueuePosition();
                 }
@@ -203,7 +203,7 @@ public class WarteschlangenManager {
             if (player != null) {
                 if (queuePosition.get(uuid) != id) {
 
-                    player.sendRichMessage(plugin.getData().getPosition(id));
+                    player.sendRichMessage(plugin.getModule().getRaspiMessages().getPosition(id));
 
                     queuePosition.put(uuid, id);
                 }
@@ -242,13 +242,13 @@ public class WarteschlangenManager {
             id++;
             if (uuid.equals(player.getUniqueId())) {
                 queuePosition.put(uuid, id);
-                player.sendRichMessage(plugin.getData().getPosition(id));
+                player.sendRichMessage(plugin.getModule().getRaspiMessages().getPosition(id));
             }
         }
 
         Bukkit.getOnlinePlayers().forEach(all -> {
             if (!all.getName().equalsIgnoreCase(player.getName())) {
-                all.sendRichMessage(plugin.getData().broadcastPlayerInsert(player.getName()));
+                all.sendRichMessage(plugin.getModule().getRaspiMessages().broadcastPlayerInsert(player.getName()));
             }
         });
 

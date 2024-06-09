@@ -13,7 +13,7 @@ public class JoinMessageManager {
     private final UtilityFileManager manager;
 
     public JoinMessageManager(McRaspiSystem plugin) {
-        this.controller = plugin.getPlayerNameController();
+        this.controller = plugin.getModule().getPlayerNameController();
         this.manager = new UtilityFileManager(plugin, "join.yml");
     }
     public String get(Player player) {

@@ -1,14 +1,10 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.PlayerBanManager;
-import eu.goodyfx.goodysutilities.managers.UserManager;
-import eu.goodyfx.goodysutilities.utils.Data;
-import eu.goodyfx.goodysutilities.utils.RaspiTimes;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
-import eu.goodyfx.mcraspisystem.managers.MessageManager;
 import eu.goodyfx.mcraspisystem.managers.PlayerBanManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
+import eu.goodyfx.mcraspisystem.utils.RaspiTimes;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -22,16 +18,16 @@ import java.text.SimpleDateFormat;
 
 public class TempBanCommand implements CommandExecutor {
 
-    private final MessageManager data;
+    private final RaspiMessages data;
     private final McRaspiSystem plugin;
     private final PlayerBanManager playerBanManager;
     private final UserManager userManager;
 
     public TempBanCommand(McRaspiSystem plugin) {
-        this.data = plugin.getData();
+        this.data = plugin.getModule().getRaspiMessages();
         this.plugin = plugin;
-        this.playerBanManager = plugin.getPlayerBanManager();
-        this.userManager = plugin.getUserManager();
+        this.playerBanManager = plugin.getModule().getPlayerBanManager();
+        this.userManager = plugin.getModule().getUserManager();
         plugin.setCommand("tempban", this);
     }
 
@@ -108,7 +104,7 @@ public class TempBanCommand implements CommandExecutor {
                     }
                     playerBanManager.tempBanPlayer(target, reason, time, multiplier, player.getName());
                     RaspiTimes.MilliSeconds finalTime = time;
-                    Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(plugin.getData().getPrefix() + "<red>" + target.getName() + " <gray>wurde von: <red>" + player.getName() + " <gray>für: <yellow>" + reason.toString().replace("@", " ") + " <gray>" + multiplier + " " + finalTime.getLabel() + " gesperrt."));
+                    Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(data.getPrefix() + "<red>" + target.getName() + " <gray>wurde von: <red>" + player.getName() + " <gray>für: <yellow>" + reason.toString().replace("@", " ") + " <gray>" + multiplier + " " + finalTime.getLabel() + " gesperrt."));
                     kickPlayer(target);
 
                 } catch (NumberFormatException e) {
@@ -153,7 +149,7 @@ public class TempBanCommand implements CommandExecutor {
                     }
                     playerBanManager.tempBanPlayer(target, reason, time, multiplier, "SERVER");
                     RaspiTimes.MilliSeconds finalTime = time;
-                    Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(plugin.getData().getPrefix() + "<red>" + target.getName() + " <gray>wurde von: <red>" + "SERVER" + " <gray>für: <yellow>" + reason.toString().replace("@", " ") + " <gray>" + multiplier + " " + finalTime.getLabel() + " gesperrt."));
+                    Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(data.getPrefix() + "<red>" + target.getName() + " <gray>wurde von: <red>" + "SERVER" + " <gray>für: <yellow>" + reason.toString().replace("@", " ") + " <gray>" + multiplier + " " + finalTime.getLabel() + " gesperrt."));
                     sender.sendRichMessage(data.getPrefix() + "<gray>Der Spieler wurde für: <yellow>" + multiplier + time.getLabel() + " <gray>gesperrt.");
                     kickPlayer(target);
                     return true;

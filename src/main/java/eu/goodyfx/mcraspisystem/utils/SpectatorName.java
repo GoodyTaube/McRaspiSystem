@@ -9,7 +9,6 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
-import eu.goodyfx.goodysutilities.GoodysUtilities;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import org.bukkit.entity.Player;
 

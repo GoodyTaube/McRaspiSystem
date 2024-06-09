@@ -1,9 +1,8 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.utils.Data;
-import eu.goodyfx.goodysutilities.utils.PlayerNameController;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,12 +12,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class MessageCommand implements CommandExecutor {
 
-    private final Data data;
+    private final RaspiMessages data;
     private final PlayerNameController playerNameController;
 
     public MessageCommand(McRaspiSystem plugin) {
-        this.data = plugin.getData();
-        this.playerNameController = plugin.getPlayerNameController();
+        this.data = plugin.getModule().getRaspiMessages();
+        this.playerNameController = plugin.getModule().getPlayerNameController();
         plugin.setCommand("message", this);
     }
 

@@ -1,14 +1,11 @@
 package eu.goodyfx.mcraspisystem.events;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.UserManager;
-import eu.goodyfx.goodysutilities.utils.OldColors;
-import eu.goodyfx.goodysutilities.utils.PlayerNameController;
-import eu.goodyfx.goodysutilities.utils.RaspiTimes;
-import eu.goodyfx.goodysutilities.utils.Settings;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
+import eu.goodyfx.mcraspisystem.utils.OldColors;
 import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
+import eu.goodyfx.mcraspisystem.utils.RaspiTimes;
+import eu.goodyfx.mcraspisystem.utils.Settings;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -33,8 +30,8 @@ public class PlayerChatListeners implements Listener {
 
     public PlayerChatListeners(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.userManager = plugin.getUserManager();
-        this.playerNameController = plugin.getPlayerNameController();
+        this.userManager = plugin.getModule().getUserManager();
+        this.playerNameController = plugin.getModule().getPlayerNameController();
         plugin.setListeners(this);
     }
 
@@ -74,19 +71,19 @@ public class PlayerChatListeners implements Listener {
 
         String finalPlainMessage = plainMessage;
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (plugin.getPlayerSettingsManager().contains(Settings.ADVANCED_CHAT, onlinePlayer)) {
+            if (plugin.getModule().getPlayerSettingsManager().contains(Settings.ADVANCED_CHAT, onlinePlayer)) {
                 onlinePlayer.sendRichMessage("<" + commandClick("/playerinfo " + player.getName()) + hoverText("<gray>Player Infos<br>" +
                         "Bisher Gespielt: <aqua>" + RaspiTimes.Ticks.getTimeUnit(player.getStatistic(Statistic.PLAY_ONE_MINUTE)) + "<br>" +
                         "<gray><italic>Klicke um mehr Infos zu bekommen.") + playerNameController.getNameDisplay(player) + "> " + hoverText("<aqua>" + new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())) + finalPlainMessage);
 
-            } else if (!plugin.getPlayerSettingsManager().contains(Settings.ADVANCED_CHAT, onlinePlayer)) {
+            } else if (!plugin.getModule().getPlayerSettingsManager().contains(Settings.ADVANCED_CHAT, onlinePlayer)) {
                 onlinePlayer.sendRichMessage("<" + playerNameController.getNameDisplay(player) + "> " + finalPlainMessage);
             }
 
         }
         String log = String.format("[RaspiChat] <%s> %s", player.getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
         Bukkit.getLogger().info(log);
-        plugin.getDiscord().sendDiscord("<" + player.getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+        plugin.getHookManager().getDiscordIntegration().sendDiscord("<" + player.getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
     }
 
     private boolean checkUp(Player player) {
@@ -96,8 +93,8 @@ public class PlayerChatListeners implements Listener {
             failed = true;
         }
 
-        if (plugin.getWarteschlangenManager().isQueue(player) && plugin.getData().blockChat()) {
-            player.sendRichMessage(plugin.getData().blocking());
+        if (plugin.getModule().getWarteschlangenManager().isQueue(player) && plugin.getModule().getRaspiMessages().blockChat()) {
+            player.sendRichMessage(plugin.getModule().getRaspiMessages().blocking());
             failed = true;
         }
 

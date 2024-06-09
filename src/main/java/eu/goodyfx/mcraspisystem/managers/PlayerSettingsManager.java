@@ -1,7 +1,7 @@
 package eu.goodyfx.mcraspisystem.managers;
 
-import eu.goodyfx.goodysutilities.utils.Settings;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.utils.Settings;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -13,7 +13,7 @@ public class PlayerSettingsManager {
     private final UserManager userManager;
 
     public PlayerSettingsManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getUserManager();
+        this.userManager = plugin.getModule().getUserManager();
     }
 
 

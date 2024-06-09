@@ -1,11 +1,11 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.PrefixManager;
-import eu.goodyfx.goodysutilities.utils.Data;
-import eu.goodyfx.goodysutilities.utils.OldColors;
-import eu.goodyfx.goodysutilities.utils.PlayerNameController;
+
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.managers.PrefixManager;
+import eu.goodyfx.mcraspisystem.utils.OldColors;
+import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,13 +17,13 @@ public class PrefixCommand implements CommandExecutor {
     private final McRaspiSystem plugin;
     private final PlayerNameController playerNameController;
     private final PrefixManager prefixManager;
-    private final Data data;
+    private final RaspiMessages data;
 
     public PrefixCommand(McRaspiSystem plugin) {
-        this.data = plugin.getData();
+        this.data = plugin.getModule().getRaspiMessages();
         this.plugin = plugin;
-        this.playerNameController = plugin.getPlayerNameController();
-        this.prefixManager = plugin.getPrefixManager();
+        this.playerNameController = plugin.getModule().getPlayerNameController();
+        this.prefixManager = plugin.getModule().getPrefixManager();
         plugin.setCommand("prefix", this);
     }
 

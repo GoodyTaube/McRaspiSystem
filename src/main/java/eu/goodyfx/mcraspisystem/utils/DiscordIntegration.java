@@ -1,6 +1,6 @@
 package eu.goodyfx.mcraspisystem.utils;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
+
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import org.bukkit.Bukkit;
 import org.json.simple.JSONObject;
@@ -28,13 +28,13 @@ public class DiscordIntegration {
     private static final String ENABLED = "discord.enabled";
 
 
-    public DiscordIntegration(McRaspiSystem goodysUtilities, boolean isDefault) {
-        this.plugin = goodysUtilities;
+    public DiscordIntegration(McRaspiSystem system, boolean isDefault) {
+        this.plugin = system;
         if (isDefault) {
-            if (goodysUtilities.getConfig().contains(DISCORD_URL)) {
+            if (system.getConfig().contains(DISCORD_URL)) {
                 try {
-                    this.url = new URL(Objects.requireNonNull(goodysUtilities.getConfig().getString(DISCORD_URL)));
-                    String log = String.format("Webhook Enabled! Connecting to: %1s", goodysUtilities.getConfig().getString(DISCORD_URL));
+                    this.url = new URL(Objects.requireNonNull(system.getConfig().getString(DISCORD_URL)));
+                    String log = String.format("Webhook Enabled! Connecting to: %1s", system.getConfig().getString(DISCORD_URL));
                     Bukkit.getLogger().info(log);
                     connected = true;
                 } catch (MalformedURLException ignore) {
@@ -43,10 +43,10 @@ public class DiscordIntegration {
 
             }
         } else {
-            if (goodysUtilities.getConfig().contains(DISCORD_ERROR_URL)) {
+            if (system.getConfig().contains(DISCORD_ERROR_URL)) {
                 try {
-                    this.url = new URL(Objects.requireNonNull(goodysUtilities.getConfig().getString(DISCORD_ERROR_URL)));
-                    String log = String.format("Webhook Enabled! Connecting to: %1s", goodysUtilities.getConfig().getString(DISCORD_ERROR_URL));
+                    this.url = new URL(Objects.requireNonNull(system.getConfig().getString(DISCORD_ERROR_URL)));
+                    String log = String.format("Webhook Enabled! Connecting to: %1s", system.getConfig().getString(DISCORD_ERROR_URL));
                     Bukkit.getLogger().info(log);
                     connectedError = true;
                 } catch (MalformedURLException ignore) {

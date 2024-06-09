@@ -1,13 +1,10 @@
 package eu.goodyfx.mcraspisystem.events;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.PlayerBanManager;
-import eu.goodyfx.goodysutilities.managers.UserManager;
-import eu.goodyfx.goodysutilities.utils.OldColors;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PlayerBanManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
+import eu.goodyfx.mcraspisystem.utils.OldColors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -46,8 +43,8 @@ public class ServerListeners implements Listener {
 
     public ServerListeners(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.playerBanManager = plugin.getPlayerBanManager();
-        this.userManager = plugin.getUserManager();
+        this.playerBanManager = plugin.getModule().getPlayerBanManager();
+        this.userManager = plugin.getModule().getUserManager();
 
         plugin.setListeners(this);
     }
@@ -70,7 +67,7 @@ public class ServerListeners implements Listener {
             }
             if (!userManager.hasTimePlayed(player, hours)) {
                 tntPrimeEvent.setCancelled(true);
-                player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getData().getPrefix() + "<red>TNT gibt es erst ab: <gray>" + hours + " <red>Spielstunden."));
+                player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "<red>TNT gibt es erst ab: <gray>" + hours + " <red>Spielstunden."));
             }
         }
     }
@@ -192,7 +189,7 @@ public class ServerListeners implements Listener {
                 event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, Component.text("§cDu wurdest temporär gesperrt!").append(Component.newline()).append(Component.newline()).append(Component.text("§7Du wurdest von: §b" + playerBanManager.performer(player) + " §7für folgendes gesperrt: ")).append(Component.newline()).append(Component.text("' " + playerBanManager.reason(player) + " '").color(NamedTextColor.YELLOW)).append(Component.newline()).append(Component.newline()).append(Component.text("§7Du wirst am §d" + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(playerBanManager.expire(player)) + " §7entsperrt.")));
             } else {
                 playerBanManager.removeBan(player);
-                Bukkit.getLogger().info(plugin.getData().getPrefix() + " " + player.getName() + " wurde Entsperrt weil seine sperrzeit bagelaufen ist.");
+                Bukkit.getLogger().info(plugin.getModule().getRaspiMessages().getPrefix() + " " + player.getName() + " wurde Entsperrt weil seine sperrzeit bagelaufen ist.");
                 event.allow();
             }
         }
@@ -203,7 +200,7 @@ public class ServerListeners implements Listener {
 
 
         if (plugin.getConfig().getBoolean("Utilities.kickNewbies")) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Component.text("MCRaspi Kick").color(NamedTextColor.YELLOW).append(Component.newline()).append(Component.newline()).append(Component.text(plugin.getData().getDisallowNewbie()[0])).append(Component.newline()).append(Component.text(plugin.getData().getDisallowNewbie()[1])));
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Component.text("MCRaspi Kick").color(NamedTextColor.YELLOW).append(Component.newline()).append(Component.newline()).append(Component.text(plugin.getModule().getRaspiMessages().getDisallowNewbie()[0])).append(Component.newline()).append(Component.text(plugin.getModule().getRaspiMessages().getDisallowNewbie()[1])));
         }
     }
 

@@ -3,6 +3,9 @@ package eu.goodyfx.mcraspisystem.utils;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -27,7 +30,7 @@ public class PlayerInfo {
 
     public PlayerInfo(McRaspiSystem plugin, OfflinePlayer player) {
         this.plugin = plugin;
-        this.userManager = plugin.getUserManager();
+        this.userManager = plugin.getModule().getUserManager();
         this.player = player;
 
         parseGroups();
@@ -67,7 +70,7 @@ public class PlayerInfo {
 
         StringBuilder builder = new StringBuilder();
         Set<String> groups = new HashSet<>();
-        User user = plugin.getLuckPerms().getUserManager().getUser(player.getUniqueId());
+        User user = plugin.getHookManager().getLuckPerms().getUserManager().getUser(player.getUniqueId());
         if (user != null) {
             groups = user.getNodes(NodeType.INHERITANCE)
                     .stream()
@@ -112,14 +115,14 @@ public class PlayerInfo {
         }
         PlayerProfile profile = Bukkit.createProfile(player.getUniqueId());
         BanList<PlayerProfile> entry = Bukkit.getBanList(BanList.Type.PROFILE);
-        if (plugin.getPlayerBanManager().contains(player)) {
-            parseValueToInfo(PlayerInfosValues.BANNED, plugin.getPlayerBanManager().reason(player));
+        if (plugin.getModule().getPlayerBanManager().contains(player)) {
+            parseValueToInfo(PlayerInfosValues.BANNED, plugin.getModule().getPlayerBanManager().reason(player));
         }
         if (entry.isBanned(profile)) {
             parseValueToInfo(PlayerInfosValues.BANNED, entry.getBanEntry(profile).getReason());
         }
-        if (plugin.getRequestManager().isBlocked(player)) {
-            parseValueToInfo(PlayerInfosValues.DENYED, "(" + plugin.getRequestManager().getReason(player).replace("@", " ") + ")");
+        if (plugin.getModule().getRequestManager().isBlocked(player)) {
+            parseValueToInfo(PlayerInfosValues.DENYED, "(" + plugin.getModule().getRequestManager().getReason(player).replace("@", " ") + ")");
         }
 
     }

@@ -1,8 +1,7 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.utils.Data;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -23,10 +22,10 @@ public class SitCommand implements CommandExecutor {
 
     private static final Map<UUID, Entity> sits = new HashMap<>();
 
-    private final Data data;
+    private final RaspiMessages data;
 
     public SitCommand(McRaspiSystem plugin) {
-        this.data = plugin.getData();
+        this.data = plugin.getModule().getRaspiMessages();
         plugin.setCommand("sit", this);
     }
 

@@ -1,6 +1,6 @@
 package eu.goodyfx.mcraspisystem.events;
 
-import eu.goodyfx.goodysutilities.utils.PlayerValues;
+import eu.goodyfx.mcraspisystem.utils.PlayerValues;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

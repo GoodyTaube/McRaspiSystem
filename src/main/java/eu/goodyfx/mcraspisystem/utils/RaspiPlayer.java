@@ -29,19 +29,19 @@ public class RaspiPlayer {
     }
 
     public String getPrefix() {
-        return plugin.getPrefixManager().get(player);
+        return plugin.getModule().getPrefixManager().get(player);
     }
 
     public boolean hasSetting(Settings setting) {
-        return plugin.getPlayerSettingsManager().contains(setting, player);
+        return plugin.getModule().getPlayerSettingsManager().contains(setting, player);
     }
 
     public PlayerNameController nameController() {
-        return plugin.getPlayerNameController();
+        return plugin.getModule().getPlayerNameController();
     }
 
     public PlayerSettingsManager getPlayerSettingsManager() {
-        return plugin.getPlayerSettingsManager();
+        return plugin.getModule().getPlayerSettingsManager();
     }
 
     /**
@@ -77,7 +77,7 @@ public class RaspiPlayer {
      * @return The User Manager
      */
     public UserManager userManager() {
-        return plugin.getUserManager();
+        return plugin.getModule().getUserManager();
     }
 
 

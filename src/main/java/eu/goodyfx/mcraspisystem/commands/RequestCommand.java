@@ -1,10 +1,9 @@
 package eu.goodyfx.mcraspisystem.commands;
 
-import eu.goodyfx.goodysutilities.GoodysUtilities;
-import eu.goodyfx.goodysutilities.managers.RequestManager;
-import eu.goodyfx.goodysutilities.managers.UserManager;
-import eu.goodyfx.goodysutilities.utils.Data;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.managers.RequestManager;
+import eu.goodyfx.mcraspisystem.managers.UserManager;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
@@ -28,13 +27,13 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
     private final McRaspiSystem plugin;
     private final UserManager userManager;
     private final RequestManager requestManager;
-    private final Data data;
+    private final RaspiMessages data;
 
     public RequestCommand(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.userManager = plugin.getUserManager();
-        this.requestManager = plugin.getRequestManager();
-        this.data = plugin.getData();
+        this.userManager = plugin.getModule().getUserManager();
+        this.requestManager = plugin.getModule().getRequestManager();
+        this.data = plugin.getModule().getRaspiMessages();
         plugin.setCommand("request", this, this);
     }
 
@@ -148,7 +147,7 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + target.getName() + " permission set group." + groupLabel.toLowerCase(Locale.ROOT));
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + target.getName() + " permission unset group.default");
                         } else {
-                            LuckPerms luckPerms = plugin.getLuckPerms();
+                            LuckPerms luckPerms = plugin.getHookManager().getLuckPerms();
                             luckPerms.getUserManager().modifyUser(target.getUniqueId(), user1 -> {
                                 user1.data().add(Node.builder("group.spieler").build());
                                 user1.setPrimaryGroup("group.spieler");
@@ -196,11 +195,11 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
                             }
 
                             if (targetPlayer.isPermissionSet("group.default")) {
-                                targetPlayer.kick(Component.text("MCRaspi - Disconnect").color(NamedTextColor.GOLD).append(Component.newline()).append(Component.newline()).append(Component.text(plugin.getData().getKickMessage())));
+                                targetPlayer.kick(Component.text("MCRaspi - Disconnect").color(NamedTextColor.GOLD).append(Component.newline()).append(Component.newline()).append(Component.text(data.getKickMessage())));
                             } else {
                                 player.sendRichMessage(data.getPrefix() + "<red>Der Spieler ist nicht als Abgelehnt Deklariert.");
                             }
-                        } else player.sendRichMessage(plugin.getData().playerNotOnline(args[1]));
+                        } else player.sendRichMessage(data.playerNotOnline(args[1]));
                         return true;
                     }
 
@@ -218,7 +217,7 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean groupExist(String groupName) {
-        Group group = plugin.getLuckPerms().getGroupManager().getGroup(groupName);
+        Group group = plugin.getHookManager().getLuckPerms().getGroupManager().getGroup(groupName);
         return group == null;
     }
 
