@@ -1,0 +1,37 @@
+#Settings to Enable Plugin
+prefix:
+  length: 20 #Max Prefix length
+  replaceChar: true #Replace "_" Char with " "
+  coloredPrefix: true #Use Minecraft Formatting codes.
+  remove: k
+#Utilities
+Utilities:
+  database: false #Enable Database usage with Modules
+  joinMessage: true
+  default-welcome-message: "{player} ist wieder back! "
+  leaveMessage: true
+  dead-signs: true #Create Sign at Player Death Position
+  playerGroup: Spieler #Default Player group for PermissionsEx
+  kickNewbies: false
+  colorChat: false #Chat color codes "&"
+  tempban:
+    time: 180 #time in Minutes
+    kick_times: 5 #Amount of kicks from target before ban
+  afk: #ALPHA use Carefully!
+    autoAFK: true #Player gets AFK while IDLE on Server
+    idleTime: 180 #Time in seconds player can Idle before AFK
+#Settings to Manage Warteschlange
+errorHandler: true
+Warteschlange:
+  MAX_PLAYERS: 15
+  ACTIVE_WORLDS:
+    - world
+    - world_nether
+    - world_the_end
+join:
+  default-welcome-message: "&e{player} &eist zurückgekehrt!"
+  groups:
+    developer:
+      message: "{player} &eist zurückgekehrt. &r&6Developer"
+      container:
+        - Mistergoody

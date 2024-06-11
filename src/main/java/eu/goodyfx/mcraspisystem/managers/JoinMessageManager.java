@@ -12,15 +12,15 @@ public class JoinMessageManager {
     private final PlayerNameController controller;
     private final UtilityFileManager manager;
 
-    public JoinMessageManager(McRaspiSystem plugin) {
-        this.controller = plugin.getModule().getPlayerNameController();
-        this.manager = new UtilityFileManager(plugin, "join.yml");
+    public JoinMessageManager(RaspiModuleManager moduleManager) {
+        this.controller = moduleManager.getPlayerNameController();
+        this.manager = new UtilityFileManager(moduleManager.getPlugin(), "config.yml");
     }
     public String get(Player player) {
         String name = player.getName();
-        if (Boolean.TRUE.equals(manager.contains("groups"))) {
-            for (String groups : Objects.requireNonNull(manager.config().getConfigurationSection("groups")).getKeys(false)) {
-                String groupPath = "groups.";
+        if (Boolean.TRUE.equals(manager.contains("join.groups"))) {
+            for (String groups : Objects.requireNonNull(manager.config().getConfigurationSection("join.groups")).getKeys(false)) {
+                String groupPath = "join.groups.";
                 if (Boolean.TRUE.equals(manager.contains(groupPath + groups + ".container"))) {
                     List<String> userContainer = manager.config().getStringList(groupPath + groups + ".container");
                     if (userContainer.contains(name)) {

@@ -53,9 +53,9 @@ public class WarteschlangeCommandSet extends SubCommand {
                     break;
                 case WARTERAUM:
                     if (locationManager.exist(WARTERAUM)) {
-                        player.sendMessage(data.refreshed());
+                        player.sendMessage(data.refreshedWaiting());
                     } else {
-                        player.sendMessage(data.created());
+                        player.sendMessage(data.createdWaiting());
                     }
                     locationManager.set(player1, WARTERAUM);
                     break;

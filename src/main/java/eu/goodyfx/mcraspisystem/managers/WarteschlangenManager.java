@@ -17,9 +17,9 @@ public class WarteschlangenManager {
     private final McRaspiSystem plugin;
     private final UserManager userManager;
 
-    public WarteschlangenManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getModule().getUserManager();
-        this.plugin = plugin;
+    public WarteschlangenManager(RaspiModuleManager moduleManager) {
+        this.userManager = moduleManager.getUserManager();
+        this.plugin = moduleManager.getPlugin();
     }
 
 

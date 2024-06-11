@@ -9,8 +9,8 @@ public class PlayerBanManager {
 
     private final UserManager userManager;
 
-    public PlayerBanManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getModule().getUserManager();
+    public PlayerBanManager(RaspiModuleManager moduleManager) {
+        this.userManager = moduleManager.getUserManager();
     }
 
     /**

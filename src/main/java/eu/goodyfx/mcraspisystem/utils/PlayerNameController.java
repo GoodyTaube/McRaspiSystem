@@ -3,6 +3,7 @@ package eu.goodyfx.mcraspisystem.utils;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PrefixManager;
+import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
@@ -25,9 +26,9 @@ public class PlayerNameController {
     private final SecureRandom random = new SecureRandom();
 
 
-    public PlayerNameController(McRaspiSystem utilities) {
-        this.userManager = utilities.getModule().getUserManager();
-        this.prefixManager = utilities.getModule().getPrefixManager();
+    public PlayerNameController(RaspiModuleManager moduleManager) {
+        this.userManager = moduleManager.getUserManager();
+        this.prefixManager = moduleManager.getPrefixManager();
     }
 
     public void setPlayerColor(String colorString, Player player) {

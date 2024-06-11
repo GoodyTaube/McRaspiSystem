@@ -1,6 +1,7 @@
 package eu.goodyfx.mcraspisystem.utils;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;
@@ -10,9 +11,9 @@ public class RaspiMessages {
     private final McRaspiSystem plugin;
     private final PlayerNameController playerNameController;
 
-    public RaspiMessages(McRaspiSystem plugin) {
-        this.playerNameController = plugin.getModule().getPlayerNameController();
-        this.plugin = plugin;
+    public RaspiMessages(RaspiModuleManager moduleManager) {
+        this.playerNameController = moduleManager.getPlayerNameController();
+        this.plugin = moduleManager.getPlugin();
     }
 
 

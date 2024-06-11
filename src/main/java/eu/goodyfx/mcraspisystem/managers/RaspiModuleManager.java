@@ -17,20 +17,24 @@ public class RaspiModuleManager {
     private final WarteschlangenManager warteschlangenManager;
     private final RaspiMessages raspiMessages;
     private final PrefixManager prefixManager;
+    private final McRaspiSystem plugin;
 
     public RaspiModuleManager(McRaspiSystem system) {
+        this.plugin = system;
         system.getLogger().info("Initialize Modules...");
-        this.raspiMessages = new RaspiMessages(system);
-        this.joinMessageManager = new JoinMessageManager(system);
-        this.locationManager = new LocationManager(system);
-        this.messageManager = new MessageManager(system);
-        this.playerBanManager = new PlayerBanManager(system);
-        this.playerSettingsManager = new PlayerSettingsManager(system);
-        this.playerNameController = new PlayerNameController(system);
-        this.requestManager = new RequestManager(system);
         this.userManager = new UserManager(system);
-        this.warteschlangenManager = new WarteschlangenManager(system);
-        this.prefixManager =new PrefixManager(system);
+        this.prefixManager = new PrefixManager(this);
+        this.playerNameController = new PlayerNameController(this);
+        this.messageManager = new MessageManager(system);
+        this.raspiMessages = new RaspiMessages(this);
+        this.joinMessageManager = new JoinMessageManager(this);
+        this.locationManager = new LocationManager(system);
+        this.playerBanManager = new PlayerBanManager(this);
+        this.playerSettingsManager = new PlayerSettingsManager(this);
+        this.requestManager = new RequestManager(this);
+        this.warteschlangenManager = new WarteschlangenManager(this);
+
+
     }
 
     public JoinMessageManager getJoinMessageManager() {
@@ -75,5 +79,9 @@ public class RaspiModuleManager {
 
     public PrefixManager getPrefixManager() {
         return prefixManager;
+    }
+
+    public McRaspiSystem getPlugin() {
+        return this.plugin;
     }
 }

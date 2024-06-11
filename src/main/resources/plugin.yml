@@ -5,3 +5,45 @@ api-version: '1.20'
 depend:
   - LuckPerms
   - ProtocolLib
+commands:
+  request:
+    description: request system mod command
+    usage: "Benutze: /request <accept:deny> <player> [reason]"
+    permission: "system.moderator"
+  warteschlange:
+    description: Main Plugin Command by GoodyFX
+  prefix:
+    description: Set Chat Prefix
+  afk:
+    description: AFK Command
+    usage: "Benutze: /afk"
+  playerinfo:
+    usage: "Benutze: /playerinfo <player>"
+    description: 'get Infos about player <player>'
+  settings:
+    description: Player Settings
+    usage: "Benutze: /settings <chat>"
+  mute:
+    description: System Command to Mute player
+    permission: system.moderator
+    usage: "Bitte nutze: /mute <player> <[Grund]>"
+  tempban:
+    description: Temporary Ban a player
+    permission: system.moderator
+    usage: "Bitte nutze: /tempban <player> <timeVal> <[Grund]>"
+  unban:
+    description: Unban Player
+    permission: group.op
+    usage: "Bitte nutze: /unban <player>"
+  chatColor:
+    aliases: cc
+  admin:
+    usage: Admin commands
+  message:
+    aliases:
+      - msg
+      - tell
+    description: "Replace for MSG Command."
+    usage: "Bitte nutze: /msg <player> <msg>"
+  sit:
+    description: Sit replacement by GoodyFX

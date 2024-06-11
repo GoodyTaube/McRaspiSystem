@@ -37,6 +37,8 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private void setupConfigs() {
         //ALLE Config bezogenen sachen
+        getConfig().options().copyDefaults(true);
+        saveConfig();
     }
 
     /**

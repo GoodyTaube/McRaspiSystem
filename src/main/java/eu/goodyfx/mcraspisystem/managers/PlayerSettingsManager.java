@@ -12,8 +12,8 @@ public class PlayerSettingsManager {
 
     private final UserManager userManager;
 
-    public PlayerSettingsManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getModule().getUserManager();
+    public PlayerSettingsManager(RaspiModuleManager plugin) {
+        this.userManager = plugin.getUserManager();
     }
 
 

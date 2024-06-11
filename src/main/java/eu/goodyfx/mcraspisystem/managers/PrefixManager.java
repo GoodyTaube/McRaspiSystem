@@ -15,8 +15,8 @@ public class PrefixManager {
     private final Map<UUID, String> prefixContainer = new HashMap<>();
     private final UserManager userManager;
 
-    public PrefixManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getModule().getUserManager();
+    public PrefixManager(RaspiModuleManager module) {
+        this.userManager = module.getUserManager();
         Bukkit.getLogger().info("Loading Prefix Manager.");
     }
 

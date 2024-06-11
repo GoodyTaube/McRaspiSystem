@@ -27,11 +27,11 @@ public class RequestManager {
     private final UserManager userManager;
     private FileConfiguration config;
 
-    public RequestManager(McRaspiSystem plugin) {
-        this.userManager = plugin.getModule().getUserManager();
-        this.file = new File(plugin.getDataFolder(), "reasons.yml");
+    public RequestManager(RaspiModuleManager moduleManager) {
+        this.userManager = moduleManager.getUserManager();
+        this.file = new File(moduleManager.getPlugin().getDataFolder(), "reasons.yml");
         this.config = YamlConfiguration.loadConfiguration(file);
-        this.plugin = plugin;
+        this.plugin = moduleManager.getPlugin();
     }
 
     private void save() {
