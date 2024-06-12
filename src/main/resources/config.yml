@@ -4,11 +4,11 @@ prefix:
   replaceChar: true #Replace "_" Char with " "
   coloredPrefix: true #Use Minecraft Formatting codes.
   remove: k
+########------------------########
 #Utilities
+########------------------########
 Utilities:
-  database: false #Enable Database usage with Modules
   joinMessage: true
-  default-welcome-message: "{player} ist wieder back! "
   leaveMessage: true
   dead-signs: true #Create Sign at Player Death Position
   playerGroup: Spieler #Default Player group for PermissionsEx
@@ -20,14 +20,30 @@ Utilities:
   afk: #ALPHA use Carefully!
     autoAFK: true #Player gets AFK while IDLE on Server
     idleTime: 180 #Time in seconds player can Idle before AFK
+########------------------########
+#Discord Integration
+########------------------########
+discord:
+  #Use Discord Web Hook to display chat to Discord
+  default:
+    enabled: false
+    url: 'YourWebHook'
+  #Use Discord Web Hook to display Errors in Discord
+  error:
+    enabled: false
+    url: 'YourWebHook'
+########------------------########
 #Settings to Manage Warteschlange
-errorHandler: true
+########------------------########
 Warteschlange:
   MAX_PLAYERS: 15
   ACTIVE_WORLDS:
     - world
     - world_nether
     - world_the_end
+########------------------########
+# Join Message Modify
+########------------------########
 join:
   default-welcome-message: "&e{player} &eist zurückgekehrt!"
   groups:

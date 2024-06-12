@@ -1,6 +1,5 @@
 package eu.goodyfx.mcraspisystem.managers;
 
-import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
 import org.bukkit.entity.Player;
 
@@ -16,6 +15,7 @@ public class JoinMessageManager {
         this.controller = moduleManager.getPlayerNameController();
         this.manager = new UtilityFileManager(moduleManager.getPlugin(), "config.yml");
     }
+
     public String get(Player player) {
         String name = player.getName();
         if (Boolean.TRUE.equals(manager.contains("join.groups"))) {

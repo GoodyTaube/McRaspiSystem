@@ -18,7 +18,6 @@ public class RaspiHookManager {
 
     private LuckPerms luckPerms;
     private DiscordIntegration discordIntegration;
-    private DiscordIntegration discordIntegrationError;
     private ProtocolManager protocolManager;
 
 
@@ -32,8 +31,7 @@ public class RaspiHookManager {
         boolean hook = false;
         hook = luckPermsHook();
         hook = protocolManager();
-        discordIntegration = new DiscordIntegration(system, true);
-        discordIntegrationError = new DiscordIntegration(system, false);
+        discordIntegration = new DiscordIntegration(system);
         if (!hook) {
             plugin.getLogger().log(Level.SEVERE, "Hooking Failed!");
             Bukkit.getPluginManager().disablePlugin(plugin);
@@ -72,7 +70,4 @@ public class RaspiHookManager {
         return this.protocolManager;
     }
 
-    public DiscordIntegration getDiscordIntegrationError() {
-        return discordIntegrationError;
-    }
 }

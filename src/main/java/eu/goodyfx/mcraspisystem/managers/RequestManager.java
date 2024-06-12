@@ -38,7 +38,7 @@ public class RequestManager {
         try {
             config.save(file);
         } catch (IOException e) {
-            plugin.getHookManager().getDiscordIntegrationError().sendError(this.getClass(), e);
+            plugin.getHookManager().getDiscordIntegration().sendError(this.getClass(), e);
         }
     }
 

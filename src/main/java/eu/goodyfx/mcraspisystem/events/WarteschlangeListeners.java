@@ -132,6 +132,7 @@ public class WarteschlangeListeners implements Listener {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + player.getName() + " permission set system.bypass");
 
         }
+        plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
     }
 
 
@@ -176,7 +177,7 @@ public class WarteschlangeListeners implements Listener {
         }
 
         playerNameController.resetRandom(player);
-
+        plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> hat uns verlassen.`", player.getName()));
     }
 
 

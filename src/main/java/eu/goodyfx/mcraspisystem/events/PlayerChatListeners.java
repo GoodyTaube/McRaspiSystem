@@ -83,7 +83,7 @@ public class PlayerChatListeners implements Listener {
         }
         String log = String.format("[RaspiChat] <%s> %s", player.getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
         Bukkit.getLogger().info(log);
-        plugin.getHookManager().getDiscordIntegration().sendDiscord("<" + player.getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+        plugin.getHookManager().getDiscordIntegration().send("<" + player.getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
     }
 
     private boolean checkUp(Player player) {

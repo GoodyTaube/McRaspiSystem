@@ -102,7 +102,7 @@ public class UtilityFileManager {
         try {
             config.save(file);
         } catch (IOException e) {
-            system.getHookManager().getDiscordIntegrationError().sendError(this.getClass(), e);
+            system.getHookManager().getDiscordIntegration().sendError(this.getClass(), e);
         }
     }
 }
