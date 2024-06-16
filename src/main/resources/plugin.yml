@@ -47,3 +47,5 @@ commands:
     usage: "Bitte nutze: /msg <player> <msg>"
   sit:
     description: Sit replacement by GoodyFX
+  loot:
+    description: Raspi Item Command

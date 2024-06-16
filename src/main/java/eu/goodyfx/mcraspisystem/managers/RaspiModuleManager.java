@@ -18,6 +18,7 @@ public class RaspiModuleManager {
     private final RaspiMessages raspiMessages;
     private final PrefixManager prefixManager;
     private final McRaspiSystem plugin;
+    private final LootManager lootManager;
 
     public RaspiModuleManager(McRaspiSystem system) {
         this.plugin = system;
@@ -33,7 +34,7 @@ public class RaspiModuleManager {
         this.playerSettingsManager = new PlayerSettingsManager(this);
         this.requestManager = new RequestManager(this);
         this.warteschlangenManager = new WarteschlangenManager(this);
-
+        this.lootManager = new LootManager(system);
 
     }
 
@@ -83,5 +84,9 @@ public class RaspiModuleManager {
 
     public McRaspiSystem getPlugin() {
         return this.plugin;
+    }
+
+    public LootManager getLootManager() {
+        return lootManager;
     }
 }

@@ -25,7 +25,7 @@ public class SystemStartUp {
         new TempBanCommand(plugin);
         new UnBanCommand(plugin);
         new WarteschlangeCommand(plugin);
-
+        new RaspiItemsCommand(plugin);
     }
 
 
@@ -36,6 +36,7 @@ public class SystemStartUp {
         new ServerListeners(plugin);
         new TeleportListeners(plugin);
         new WarteschlangeListeners(plugin);
+        new ConsumeEvents(plugin);
     }
 
 
