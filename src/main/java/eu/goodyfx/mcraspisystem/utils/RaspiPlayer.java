@@ -24,6 +24,11 @@ public class RaspiPlayer {
         this.player = player;
     }
 
+    public RaspiPlayer(McRaspiSystem plugin, UUID uuid) {
+        this.plugin = plugin;
+        this.player = Bukkit.getPlayer(uuid);
+    }
+
     public Player getPlayer() {
         return this.player;
     }

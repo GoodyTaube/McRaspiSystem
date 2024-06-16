@@ -35,9 +35,9 @@ discord:
 ########------------------########
 #Settings to Manage Warteschlange
 ########------------------########
-Warteschlange:
-  MAX_PLAYERS: 15
-  ACTIVE_WORLDS:
+warteschlange:
+  maxPlayer: 15
+  activeWorlds:
     - world
     - world_nether
     - world_the_end

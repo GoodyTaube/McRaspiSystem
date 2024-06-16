@@ -16,10 +16,10 @@ public class IdleTask extends BukkitRunnable {
 
     private final Plugin plugin;
 
-    public IdleTask(McRaspiSystem utilities, Plugin plugin) {
+    public IdleTask(McRaspiSystem raspiSystem, Plugin plugin) {
         this.plugin = plugin;
-        this.utilities = utilities;
-        this.playerSettingsManager = utilities.getModule().getPlayerSettingsManager();
+        this.utilities = raspiSystem;
+        this.playerSettingsManager = raspiSystem.getModule().getPlayerSettingsManager();
         start();
     }
 
