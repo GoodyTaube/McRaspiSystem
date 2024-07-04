@@ -26,6 +26,9 @@ public class SystemStartUp {
         new UnBanCommand(plugin);
         new WarteschlangeCommand(plugin);
         new RaspiItemsCommand(plugin);
+        new ReiseCommand(plugin);
+        new ReiseSucheCommand(plugin);
+        new ReisePortCommand(plugin);
     }
 
 

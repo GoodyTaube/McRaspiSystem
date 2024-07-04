@@ -49,3 +49,9 @@ commands:
     description: Sit replacement by GoodyFX
   loot:
     description: Raspi Item Command
+  reise:
+    description: Main Command from RB System
+  reisePort:
+    description: Teleport to RB Port
+  rbsuche:
+    description: Search and Mark RB Port
