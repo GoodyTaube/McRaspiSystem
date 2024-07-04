@@ -51,7 +51,9 @@ public class DiscordIntegration {
     }
 
     public void send(String message) {
-        defaultHandler.send(message);
+        if(defaultHandler != null){
+            defaultHandler.send(message);
+        }
     }
 
 }

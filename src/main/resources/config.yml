@@ -51,3 +51,41 @@ join:
       message: "{player} &eist zurückgekehrt. &r&6Developer"
       container:
         - Mistergoody
+#####################################
+#Haupt Item Beschreibung
+#####################################
+item:
+  lore: "COOLER_RASPI_COIN"
+#####################################
+#Einzelne Powers Einstellungen
+#####################################
+powers:
+  fly:
+    id: 1
+    duration: 30
+  night_vision:
+    id: 2
+    duration: 30
+  haste:
+    id: 3
+    duration: 30
+#####################################
+#Einzelne Items Einstellungen
+#####################################
+  items:
+  sponge: #Super Sponge
+    id: 1
+    radius: 30
+  knock: #Knockback Stick
+    id: 1
+    power: 100
+    uses: 3
+  mapLabel: #DynMap label addon
+    type: STONE
+    id: 1
+loot: #Commands für Random Auswahl
+  #CustomModelData: ist der wert der Wichtig ist für die einzelnen Items
+  #DisplayName: Name des Items
+  #Lore: Beschreibung von Item
+  items:
+    - "summon item %x% %y% %z% {Item:{id:\"minecraft:golden_apple\",count:1,components:{\"minecraft:max_stack_size\":1,\"minecraft:custom_name\":'{\"text\":\"Flug Item\"}',\"minecraft:custom_model_data\":1}}}" #Flug Item Beispiel

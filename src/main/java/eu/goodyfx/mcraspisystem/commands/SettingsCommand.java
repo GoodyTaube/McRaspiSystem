@@ -34,6 +34,7 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
             results.add("afk");
             results.add("chat");
             results.add("opt-chat");
+            results.add("pvp");
             return results;
 
         }
@@ -55,6 +56,9 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
                     break;
                 case "opt-chat":
                     perform(Settings.ADVANCED_CHAT, player);
+                    break;
+                case "pvp":
+                    perform(Settings.PVP, player);
                     break;
                 default:
                     return false;

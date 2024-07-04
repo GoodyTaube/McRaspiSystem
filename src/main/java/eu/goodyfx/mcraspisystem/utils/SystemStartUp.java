@@ -39,7 +39,10 @@ public class SystemStartUp {
         new ServerListeners(plugin);
         new TeleportListeners(plugin);
         new WarteschlangeListeners(plugin);
-        new ConsumeEvents(plugin);
+        new LootConsumeEvents(plugin);
+        new LootEvents(plugin);
+        new LootPlayerInteractEvents(plugin);
+        new LootSpongeEvents(plugin);
     }
 
 

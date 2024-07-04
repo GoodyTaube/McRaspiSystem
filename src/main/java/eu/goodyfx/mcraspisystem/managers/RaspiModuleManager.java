@@ -20,6 +20,7 @@ public class RaspiModuleManager {
     private final McRaspiSystem plugin;
     private final LootManager lootManager;
 
+
     public RaspiModuleManager(McRaspiSystem system) {
         this.plugin = system;
         system.getLogger().info("Initialize Modules...");

@@ -1,7 +1,7 @@
 package eu.goodyfx.mcraspisystem.tasks;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
-import eu.goodyfx.mcraspisystem.events.ConsumeEvents;
+import eu.goodyfx.mcraspisystem.events.LootConsumeEvents;
 import eu.goodyfx.mcraspisystem.utils.Powers;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.text.SimpleDateFormat;
 import java.util.UUID;
@@ -29,17 +28,17 @@ public class RaspiItemsTimer extends BukkitRunnable {
     @Override
     public void run() {
         long now = System.currentTimeMillis();
-        for (UUID uuid : ConsumeEvents.getTimeStampMap().keySet()) {
+        for (UUID uuid : LootConsumeEvents.getTimeStampMap().keySet()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player == null) {
                 return;
             }
 
-            long diff = (ConsumeEvents.getTimeStampMap().get(uuid) + minutes) - now;
+            long diff = (LootConsumeEvents.getTimeStampMap().get(uuid) + minutes) - now;
 
             player.sendActionBar(MiniMessage.miniMessage().deserialize(getMessage(diff)));
 
-            if (now >= (ConsumeEvents.getTimeStampMap().get(uuid) + minutes)) {
+            if (now >= (LootConsumeEvents.getTimeStampMap().get(uuid) + minutes)) {
 
                 if (player.isFlying()) {
                     Location location = player.getLocation().clone();
@@ -60,7 +59,7 @@ public class RaspiItemsTimer extends BukkitRunnable {
                 }
 
                 //Remove logic here
-                ConsumeEvents.remove(uuid);
+                LootConsumeEvents.remove(uuid);
             }
         }
     }

@@ -23,12 +23,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-public class ConsumeEvents implements Listener {
+public class LootConsumeEvents implements Listener {
 
 
     private final McRaspiSystem plugin;
 
-    public ConsumeEvents(McRaspiSystem plugin) {
+    public LootConsumeEvents(McRaspiSystem plugin) {
         this.plugin = plugin;
         plugin.setListeners(this);
     }
@@ -153,6 +153,7 @@ public class ConsumeEvents implements Listener {
         List<String> commands = plugin.getConfig().getStringList("loot.items");
         int random = new Random().nextInt(commands.size());
         String result = commands.get(random);
+        plugin.getLogger().info(result);
         result = result.replace("%x%", String.valueOf(location.getX()));
         result = result.replace("%y%", String.valueOf(location.getY()));
         result = result.replace("%z%", String.valueOf(location.getZ()));

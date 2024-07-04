@@ -29,10 +29,7 @@ import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ServerListeners implements Listener {
 
@@ -82,7 +79,7 @@ public class ServerListeners implements Listener {
             Skull skull = (Skull) block.getState();
 
             PersistentDataContainer skulldata = skull.getPersistentDataContainer();
-            if (skull.getPlayerProfile().getId() != null) {
+            if (Objects.requireNonNull(skull.getPlayerProfile()).getId() != null) {
 
                 PlayerProfile pP = skull.getPlayerProfile();
                 PlayerProfile playerProfile = Bukkit.createProfile("Voting");

@@ -4,9 +4,11 @@ import eu.goodyfx.mcraspisystem.managers.RaspiHookManager;
 import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
 import eu.goodyfx.mcraspisystem.tasks.IdleTask;
 import eu.goodyfx.mcraspisystem.tasks.RaspiItemsTimer;
+import eu.goodyfx.mcraspisystem.utils.Item;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.SystemStartUp;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -27,6 +29,9 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private BukkitTask raspiItemsRunner;
     private BukkitRunnable idleTask;
+
+    private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
+    private Item mapItem = null;
 
     @Override
     public void onEnable() {
@@ -50,6 +55,16 @@ public final class McRaspiSystem extends JavaPlugin {
         //ALLE Config bezogenen sachen
         getConfig().options().copyDefaults(true);
         saveConfig();
+
+        if (getConfig().contains("items.mapLabel")) {
+            try {
+                Material material = Material.valueOf(getConfig().getString("items.mapLabel.type"));
+                mapItem = new Item(material, getConfig().getInt("items.mapLabel.id"));
+            } catch (EnumConstantNotPresentException e) {
+                String log = String.format("Das Item %s existiert nicht.", getConfig().getString("items.mapLabel.type"));
+                getLogger().info(log);
+            }
+        }
     }
 
     /**
@@ -139,5 +154,16 @@ public final class McRaspiSystem extends JavaPlugin {
      */
     public NamespacedKey getNameSpaced(String key) {
         return new NamespacedKey(this, key);
+    }
+
+    public NamespacedKey getRaspiItemKey() {
+        return this.raspiItemKey;
+    }
+
+    public Item getMapItem() throws NullPointerException {
+        if (mapItem != null) {
+            return this.mapItem;
+        }
+        throw new NullPointerException("Item is Null!");
     }
 }
