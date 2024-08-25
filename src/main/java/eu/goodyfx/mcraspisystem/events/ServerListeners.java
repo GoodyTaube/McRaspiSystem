@@ -5,6 +5,7 @@ import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PlayerBanManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import eu.goodyfx.mcraspisystem.utils.OldColors;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -75,6 +76,13 @@ public class ServerListeners implements Listener {
         Player player = breakEvent.getPlayer();
         Block block = breakEvent.getBlock();
 
+        if(RaspiMessages.isDefault(player)){
+             breakEvent.setCancelled(true);
+            return;
+        }
+
+
+
         if (block.getType().equals(Material.PLAYER_HEAD) || block.getType().equals(Material.PLAYER_WALL_HEAD)) {
             Skull skull = (Skull) block.getState();
 
@@ -117,11 +125,18 @@ public class ServerListeners implements Listener {
     }
 
 
+
     @EventHandler
     public void onBlockPlaced(@NotNull BlockPlaceEvent placeEvent) {
+
         Player player = placeEvent.getPlayer();
         Block block = placeEvent.getBlock();
         Location location = block.getLocation();
+
+        if(RaspiMessages.isDefault(player)){
+            placeEvent.setCancelled(true);
+            return;
+        }
 
         if ((block.getType().equals(Material.PLAYER_HEAD) || block.getType().equals(Material.PLAYER_WALL_HEAD)) && player.getInventory().getItemInMainHand().hasItemMeta() && player.getInventory().getItemInMainHand().getItemMeta().displayName() != null) {
             Skull skull = (Skull) block.getState();

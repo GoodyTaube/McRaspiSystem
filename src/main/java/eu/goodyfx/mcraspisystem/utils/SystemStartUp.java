@@ -41,8 +41,10 @@ public class SystemStartUp {
         new WarteschlangeListeners(plugin);
         new LootConsumeEvents(plugin);
         new LootEvents(plugin);
-        new LootPlayerInteractEvents(plugin);
         new LootSpongeEvents(plugin);
+        new PlayerMoveListener(plugin);
+        new PlayerInteractAtEntitiesListeners(plugin);
+        new PlayerInteractListeners(plugin);
     }
 
 

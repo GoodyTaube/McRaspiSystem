@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public enum LootItems {
     SPONGE(Material.SPONGE, "<green>Super Sponge", 1, null, "<aqua>Absorbation: <gray>x100", "<red>Test"), SWIFT(Material.ENCHANTED_BOOK, "Schnelligkeit 3", 1, Enchantment.SOUL_SPEED, "<gray>Schnelligkeit III"), FLY(Material.GOLDEN_APPLE, "<green>Flug Power", Powers.FLIGHT.getId(), null, "<gray>Aktiviere um zu Fliegen.", "<aqua>Zeit: <gray>" + Powers.FLIGHT.getTime() + " min"), NIGHT(Material.GOLDEN_APPLE, "<green>SAW Power", Powers.NIGHT_VISION.getId(), null, "<gray>Aktiviere um in der Nacht zu Sehen.", "<aqua>Zeit: <gray>" + Powers.NIGHT_VISION.getTime() + " min"),
 
-    COIN(Material.GOLDEN_APPLE, "Raspi Apple", 0, null, "COOLER_RASPI_COIN"), HASTE(Material.GOLDEN_APPLE, "<green>Schnelligkeit Power", Powers.HASTE.getId(), null, "<gray>Aktiviere um Schneller Abzubauen.", "<aqua>Zeit: <gray>" + Powers.HASTE.getTime() + " min"), KNOCK(Material.STICK, "<green>Knockback Stick", 1, null, null),
+    COIN(Material.GOLDEN_APPLE, "Raspi Apple", 10, null, "COOLER_RASPI_COIN"), HASTE(Material.GOLDEN_APPLE, "<green>Schnelligkeit Power", Powers.HASTE.getId(), null, "<gray>Aktiviere um Schneller Abzubauen.", "<aqua>Zeit: <gray>" + Powers.HASTE.getTime() + " min"), KNOCK(Material.STICK, "<green>Knockback Stick", 1, null, null),
 
     Adult_Stick(Material.STICK, "<green>Adult Stick", 2, null, null),
 

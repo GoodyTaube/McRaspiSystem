@@ -2,7 +2,6 @@ package eu.goodyfx.mcraspisystem.commands;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PlayerSettingsManager;
-import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.Settings;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -19,10 +18,8 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
 
     private final PlayerSettingsManager playerSettingsManager;
 
-    private final McRaspiSystem system;
 
     public SettingsCommand(McRaspiSystem plugin) {
-        this.system = plugin;
         this.playerSettingsManager = plugin.getModule().getPlayerSettingsManager();
         plugin.setCommand("settings", this, this);
     }
@@ -34,7 +31,6 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
             results.add("afk");
             results.add("chat");
             results.add("opt-chat");
-            results.add("pvp");
             return results;
 
         }
@@ -46,7 +42,6 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
 
         if (sender instanceof Player player && (args.length == 1)) {
             // settings chat
-            RaspiPlayer raspiPlayer = new RaspiPlayer(system, player);
             switch (args[0]) {
                 case "chat":
                     perform(Settings.MESSAGES, player);
@@ -56,9 +51,6 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
                     break;
                 case "opt-chat":
                     perform(Settings.ADVANCED_CHAT, player);
-                    break;
-                case "pvp":
-                    perform(Settings.PVP, player);
                     break;
                 default:
                     return false;

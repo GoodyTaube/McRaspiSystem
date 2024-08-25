@@ -9,6 +9,7 @@ import eu.goodyfx.mcraspisystem.commands.SitCommand;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
 import eu.goodyfx.mcraspisystem.utils.PlayerValues;
+import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -26,6 +27,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -56,143 +58,18 @@ public class PlayerListeners implements Listener {
     }
 
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onSneak(PlayerToggleSneakEvent sneakEvent) {
-        if (!sneakEvent.isSneaking() && (warteschlangenManager.getQueuedPlayers().contains(sneakEvent.getPlayer().getUniqueId()) && (userManager.hasPersistantValue(sneakEvent.getPlayer(), PlayerValues.AFK)))) {
-            Bukkit.dispatchCommand(sneakEvent.getPlayer(), "afk");
-        }
-    }
+
+
 
     @EventHandler
-    public void onJump(PlayerJumpEvent jumpEvent) {
-        if (warteschlangenManager.getQueuedPlayers().contains(jumpEvent.getPlayer().getUniqueId()) && (userManager.hasPersistantValue(jumpEvent.getPlayer(), PlayerValues.AFK))) {
-            Bukkit.dispatchCommand(jumpEvent.getPlayer(), "afk");
-        }
-
-    }
-
-    @EventHandler
-    public void onInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        Action action = event.getAction();
-
-        if (action.equals(Action.RIGHT_CLICK_BLOCK) && event.getHand() == EquipmentSlot.HAND && event.getPlayer().getInventory().getItem(EquipmentSlot.HAND).getType().equals(Material.AIR) && !SitCommand.getSits().containsKey(player.getUniqueId())) {
-            if (event.getClickedBlock().getLocation().getY() > player.getLocation().getY()) {
-                return;
-            }
-            Block block = event.getClickedBlock();
-            if (block != null && (block.getBlockData() instanceof Stairs || block.getBlockData() instanceof Slab)) {
-                Location location = block.getLocation();
-                SitCommand.add(player, location, -0.53);
-            }
-            if (block != null && Tag.WOOL_CARPETS.isTagged(block.getType())) {
-                Location location = block.getLocation();
-                SitCommand.add(player, location, 0.046);
+    public void onHunger(FoodLevelChangeEvent event){
+        if(event.getEntity() instanceof Player player){
+            if(RaspiMessages.isDefault(player)){
+                event.setCancelled(true);
             }
         }
     }
 
-    @EventHandler
-    public void onInteractEntity(PlayerInteractAtEntityEvent event) {
-        Entity entity = event.getRightClicked();
-        Player player = event.getPlayer(); //The player who click Animal
-        sit(event); //Sit Implementation
-        if (player.getInventory().getItemInMainHand().getType().equals(Material.STICK)) {
-            ItemStack debug = player.getInventory().getItemInMainHand();
-            if (debug.hasItemMeta() && debug.getItemMeta().hasCustomModelData() && debug.getItemMeta().getCustomModelData() == 777) {
-                Player target = null;
-                if (entity instanceof Player pl) {
-                    target = pl;
-                }
-                if (target == null) {
-                    return;
-                }
-                if (debugActivation.contains(entity.getUniqueId()) && !player.isSneaking()) {
-                    sendDemoGUIPacket(target);
-                } else if (debugActivation.contains(entity.getUniqueId()) && player.isSneaking()) {
-                    debugActivation.remove(entity.getUniqueId());
-                } else {
-                    debugActivation.add(entity.getUniqueId());
-                    fakeVirusInjection(target);
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Create and Send Demo Packet to Player
-     *
-     * @param target The Packet receiver
-     */
-    private void sendDemoGUIPacket(Player target) {
-        PacketContainer container = new PacketContainer(PacketType.Play.Server.GAME_STATE_CHANGE);
-        container.getGameStateIDs().write(0, 5);
-        plugin.getHookManager().getProtocolManager().sendServerPacket(target, container);
-    }
-
-    /**
-     * Send Fake virus Injection to Target Player
-     *
-     * @param target The Injection receiver
-     */
-    private void fakeVirusInjection(Player target) {
-        new BukkitRunnable() {
-            int per = 0;
-
-            @Override
-            public void run() {
-
-                int rando = random.nextInt(4);
-                if (per + rando > 100) {
-                    per++;
-                } else {
-                    per = per + rando;
-                }
-                target.sendActionBar(MiniMessage.miniMessage().deserialize("<green>Injection: <red>p_22cX3_Exploit <reset>|| <gray>" + per + "%"));
-                if (per == 100) {
-                    cancel();
-                    target.sendActionBar(MiniMessage.miniMessage().deserialize("<red><b>Injection Success!"));
-                    sendDemoGUIPacket(target);
-                }
-            }
-        }.runTaskTimerAsynchronously(plugin, random.nextInt(2), random.nextInt(3));
-    }
-
-    /**
-     * Check if Player can Sit on Animal
-     *
-     * @param event The Event
-     */
-    private void sit(PlayerInteractAtEntityEvent event) {
-        Entity entity = event.getRightClicked();
-        Player player = event.getPlayer();
-        if ((entity instanceof Animals || entity instanceof WaterMob) && (entity.getPassengers().isEmpty() && player.getInventory().getItem(EquipmentSlot.HAND).getType().equals(Material.AIR))) {
-            if (entity instanceof Cat || entity instanceof Wolf) {
-                return;
-            }
-            entity.addPassenger(player);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onMove(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
-
-
-        AFKCommand.getPlayerIDLE().remove(player.getUniqueId());
-
-        if (userManager.hasPersistantValue(player, PlayerValues.AFK)) {
-            if (!playerChangedWorld.contains(player.getUniqueId())) {
-                if (userManager.getAfkContainer().containsKey(player.getUniqueId()) && userManager.getAfkContainer().get(player.getUniqueId()).distance(event.getTo()) > 2 && !warteschlangenManager.playersQueue.contains(player.getUniqueId())) {
-                    Bukkit.dispatchCommand(event.getPlayer(), "afk");
-                }
-            } else {
-                userManager.getAfkContainer().put(player.getUniqueId(), player.getLocation());
-                playerChangedWorld.remove(event.getPlayer().getUniqueId());
-            }
-        }
-    }
 
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

@@ -6,17 +6,12 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -31,56 +26,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class LootPlayerInteractEvents implements Listener {
+public class PlayerInteractListeners implements Listener {
 
     private final McRaspiSystem plugin;
 
-    public LootPlayerInteractEvents(McRaspiSystem plugin) {
-        this.plugin = plugin;
-        plugin.setListeners(this);
+    public PlayerInteractListeners(McRaspiSystem system) {
+        this.plugin = system;
+        system.setListeners(this);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onStick(PlayerInteractAtEntityEvent event) {
-        Player player = event.getPlayer();
-        Entity entity = event.getRightClicked();
-
-
-        if (event.getHand().equals(EquipmentSlot.HAND) && (player.getInventory().getItemInMainHand().getType().equals(Material.STICK))) {
-            ItemStack stack = player.getInventory().getItemInMainHand();
-            if (stack.hasItemMeta() && (stack.getItemMeta().hasCustomModelData()) && entity instanceof Animals animal) {
-                int data = stack.getItemMeta().getCustomModelData();
-                if (data == 2) {
-                    //ADULT
-                    animal.setAdult();
-                    animal.setAgeLock(true);
-                    stack.setAmount(stack.getAmount() - 1);
-                    player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
-                }
-                if (data == 3) {
-                    //BABY
-                    animal.setBaby();
-                    animal.setAgeLock(true);
-                    stack.setAmount(stack.getAmount() - 1);
-                    player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
-                }
-                event.setCancelled(true);
-            }
-        }
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent interactEvent) {
+        //MainEvent to call for all Systems
+        lootSystem(interactEvent);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        Action action = event.getAction();
+
+    private void lootSystem(PlayerInteractEvent interactEvent) {
+        Player player = interactEvent.getPlayer();
+        Action action = interactEvent.getAction();
         if (action.equals(Action.LEFT_CLICK_BLOCK) || action.equals(Action.LEFT_CLICK_AIR)) {
-            performLevelFleisch(event);
-        } else if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            Block clicked = event.getClickedBlock();
+            lootItemLevelMeet(interactEvent);
+        } else if (interactEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            Block clicked = interactEvent.getClickedBlock();
             if (clicked != null && clicked.getType().equals(Material.POLISHED_BLACKSTONE_BUTTON)) {
                 Location location = clicked.getLocation();
                 if (plugin.getModule().getLootManager().warpExist(location)) {
-                    Location locationTel = plugin.getModule().getLootManager().get(event.getClickedBlock().getLocation());
+                    Location locationTel = plugin.getModule().getLootManager().get(interactEvent.getClickedBlock().getLocation());
                     locationTel.setYaw(player.getBodyYaw());
                     locationTel.setPitch(player.getLocation().getPitch());
 
@@ -95,7 +67,7 @@ public class LootPlayerInteractEvents implements Listener {
         }
     }
 
-    private void performLevelFleisch(PlayerInteractEvent interactEvent) {
+    private void lootItemLevelMeet(PlayerInteractEvent interactEvent) {
         Player player = interactEvent.getPlayer();
         if (player.getInventory().getItemInMainHand().getType().equals(Material.COOKED_BEEF) && Objects.equals(interactEvent.getHand(), EquipmentSlot.HAND) && player.getLevel() != 0) {
             ItemStack stack = player.getInventory().getItemInMainHand().clone();
@@ -121,5 +93,6 @@ public class LootPlayerInteractEvents implements Listener {
             }
         }
     }
+
 
 }

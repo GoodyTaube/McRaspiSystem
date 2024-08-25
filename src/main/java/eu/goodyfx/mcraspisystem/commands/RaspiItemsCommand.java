@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RaspiItemsCommand implements CommandExecutor {
 
+    //TODO RASPI COIN STACK
+
     private final RaspiMessages messages;
 
     public RaspiItemsCommand(McRaspiSystem plugin) {

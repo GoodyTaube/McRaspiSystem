@@ -55,6 +55,6 @@ public class RaspiUser {
     public boolean isDenied() {
         return fileManager.contains(userPath + uuid + ".state");
     }
-
+    
 
 }

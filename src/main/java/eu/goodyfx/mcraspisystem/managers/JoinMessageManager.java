@@ -29,7 +29,7 @@ public class JoinMessageManager {
                 }
             }
         }
-        return Objects.requireNonNull(manager.config().getString("default-welcome-message")).replace("{player}", controller.getName(player));
+        return Objects.requireNonNull(manager.config().getString("join.default-welcome-message")).replace("{player}", controller.getName(player));
     }
 
 
