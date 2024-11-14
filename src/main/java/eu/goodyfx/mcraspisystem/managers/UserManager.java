@@ -201,7 +201,7 @@ public class UserManager {
 
     public long lastSeen(OfflinePlayer player) {
         if (contains("last", player)) {
-            return (long) get("last", player);
+            return (System.currentTimeMillis() - (long) get("last", player));
         }
         return 0;
     }

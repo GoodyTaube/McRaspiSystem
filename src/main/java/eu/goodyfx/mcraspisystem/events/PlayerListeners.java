@@ -63,11 +63,9 @@ public class PlayerListeners implements Listener {
 
     @EventHandler
     public void onHunger(FoodLevelChangeEvent event){
-        if(event.getEntity() instanceof Player player){
-            if(RaspiMessages.isDefault(player)){
+        if(event.getEntity() instanceof Player player && RaspiMessages.isDefault(player)){
                 event.setCancelled(true);
             }
-        }
     }
 
 
@@ -75,7 +73,6 @@ public class PlayerListeners implements Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onChangeWorld(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
-
         playerChangedWorld.add(event.getPlayer().getUniqueId());
     }
 

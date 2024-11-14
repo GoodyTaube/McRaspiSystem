@@ -38,6 +38,7 @@ public class PlayerInfo {
         firstDocumentation();
         lastNames();
         timePlayed();
+        timePlayedWeekly();
         lastDeath();
         lastSeen();
         playerXP();
@@ -132,6 +133,11 @@ public class PlayerInfo {
         parseValueToInfo(PlayerInfosValues.TIME_PLAYED, RaspiTimes.Ticks.getTimeUnit(time));
     }
 
+    private void timePlayedWeekly(){
+        long time = plugin.getModule().getTimeDBManager().get( Bukkit.getOfflinePlayer(player.getUniqueId()));
+        parseValueToInfo(PlayerInfosValues.TIME_PLAYED_WEEKLY, RaspiTimes.MilliSeconds.getTimeUnit(time));
+    }
+
     private void lastDeath() {
         long death = player.getStatistic(Statistic.TIME_SINCE_DEATH);
         parseValueToInfo(PlayerInfosValues.LAST_DEATH, RaspiTimes.Ticks.getTimeUnit(death));
@@ -140,12 +146,13 @@ public class PlayerInfo {
 
     public void lastSeen() {
         if (player.isOnline()) {
-
             parseValueToInfo(PlayerInfosValues.BACK_AFTER, RaspiTimes.MilliSeconds.getTimeUnit(userManager.lastSeen(player)));
         } else {
             parseValueToInfo(PlayerInfosValues.LAST_SEEN, RaspiTimes.MilliSeconds.getTimeUnit(player.getLastSeen()));
         }
     }
+
+
 
 
     public void playerXP() {

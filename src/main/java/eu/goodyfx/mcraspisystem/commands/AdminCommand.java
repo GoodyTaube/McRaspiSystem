@@ -28,6 +28,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
+/**
+ * Represents a command executor and tab completer for admin commands in the McRaspiSystem plugin.
+ * This class handles the registration and execution of subcommands associated with administrative operations.
+ * Utilizes the McRaspiSystem and RaspiMessages for command handling and messaging.
+ */
 public class AdminCommand implements CommandExecutor, TabCompleter {
 
     private final McRaspiSystem plugin;
@@ -49,6 +54,9 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminDebugSubCommand(plugin));
         subCommands.add(new AdminAuaSubCommand());
         subCommands.add(new AdminSkullSubCommand());
+        subCommands.add(new AdminTraderSubCommand(plugin));
+        subCommands.add(new AdminChatBotSubCommand(plugin));
+        subCommands.add(new AdminLootChestSubCommand(plugin));
     }
 
 
@@ -83,11 +91,21 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         return null;
     }
 
+    /**
+     * Handles the execution of the admin command from both players and the console.
+     *
+     * @param sender  The source of the command, which can be a player or the console.
+     * @param command The command that was executed.
+     * @param label   The alias of the command which was used.
+     * @param args    The arguments passed to the command.
+     * @return true if the command was successful, false otherwise.
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player player) {
             //ARGS
             if (args.length > 0) {
+                syntaxCheck(player, args);
                 for (SubCommand subCommand : subCommands) {
                     if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
                         return subCommand.commandPerform(new RaspiPlayer(plugin, player), args);
@@ -107,6 +125,17 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             }
         }
         return true;
+    }
+
+
+    private void syntaxCheck(Player player, String[] args) {
+        if (args.length == 1) {
+            for (SubCommand subCommand : subCommands) {
+                if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
+                    player.sendMessage(subCommand.getSyntax());
+                }
+            }
+        }
     }
 
     private boolean skull(CommandSender sender, String[] args) {

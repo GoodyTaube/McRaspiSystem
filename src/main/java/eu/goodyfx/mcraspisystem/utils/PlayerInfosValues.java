@@ -8,6 +8,7 @@ public enum PlayerInfosValues {
     FIRST_JOIN("Erste Dokumentation"),
     LAST_NAMES("AKA"),
     TIME_PLAYED("Bisher Gespielt (Spielzeit)"),
+    TIME_PLAYED_WEEKLY("Diese Woche Gespielt (Realzeit)"),
     LAST_DEATH("Zuletzt Gestorben (Spielzeit)"),
     LAST_SEEN("Zuletzt Gesehen (Realzeit)"),
     BACK_AFTER("Zurückgekehrt nach (Realzeit)"),

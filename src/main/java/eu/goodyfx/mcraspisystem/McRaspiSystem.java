@@ -2,8 +2,10 @@ package eu.goodyfx.mcraspisystem;
 
 import eu.goodyfx.mcraspisystem.managers.RaspiHookManager;
 import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
+import eu.goodyfx.mcraspisystem.tasks.AnimationBlockDisplay;
 import eu.goodyfx.mcraspisystem.tasks.IdleTask;
 import eu.goodyfx.mcraspisystem.tasks.RaspiItemsTimer;
+import eu.goodyfx.mcraspisystem.tasks.WeeklyTimer;
 import eu.goodyfx.mcraspisystem.utils.Item;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.SystemStartUp;
@@ -29,6 +31,8 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private BukkitTask raspiItemsRunner;
     private BukkitRunnable idleTask;
+    private BukkitRunnable weeklyTimer;
+    private BukkitRunnable animation;
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
     private Item mapItem = null;
@@ -48,8 +52,10 @@ public final class McRaspiSystem extends JavaPlugin {
 
         this.raspiItemsRunner = new RaspiItemsTimer(this).runTaskTimerAsynchronously(this, 0L, 20L);
         this.idleTask = new IdleTask(this, this);
-
+        this.weeklyTimer = new WeeklyTimer(this);
+        this.animation = new AnimationBlockDisplay(this);
     }
+
 
     private void setupConfigs() {
         //ALLE Config bezogenen sachen
@@ -121,6 +127,8 @@ public final class McRaspiSystem extends JavaPlugin {
         // Plugin shutdown logic
         this.raspiItemsRunner.cancel();
         this.idleTask.cancel();
+        this.weeklyTimer.cancel();
+        this.animation.cancel();
     }
 
     /**
@@ -166,4 +174,6 @@ public final class McRaspiSystem extends JavaPlugin {
         }
         throw new NullPointerException("Item is Null!");
     }
+
+
 }

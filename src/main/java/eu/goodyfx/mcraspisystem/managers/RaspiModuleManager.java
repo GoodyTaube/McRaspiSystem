@@ -19,6 +19,7 @@ public class RaspiModuleManager {
     private final PrefixManager prefixManager;
     private final McRaspiSystem plugin;
     private final LootManager lootManager;
+    private final TimeDBManager timeDBManager;
 
 
     public RaspiModuleManager(McRaspiSystem system) {
@@ -36,6 +37,7 @@ public class RaspiModuleManager {
         this.requestManager = new RequestManager(this);
         this.warteschlangenManager = new WarteschlangenManager(this);
         this.lootManager = new LootManager(system);
+        this.timeDBManager = new TimeDBManager(system);
 
     }
 
@@ -89,5 +91,9 @@ public class RaspiModuleManager {
 
     public LootManager getLootManager() {
         return lootManager;
+    }
+
+    public TimeDBManager getTimeDBManager(){
+        return this.timeDBManager;
     }
 }

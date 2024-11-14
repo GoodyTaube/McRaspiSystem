@@ -8,10 +8,7 @@ import eu.goodyfx.mcraspisystem.managers.LocationManager;
 import eu.goodyfx.mcraspisystem.managers.RequestManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
-import eu.goodyfx.mcraspisystem.utils.OldColors;
-import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
-import eu.goodyfx.mcraspisystem.utils.PlayerValues;
-import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
+import eu.goodyfx.mcraspisystem.utils.*;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -37,7 +34,7 @@ public class WarteschlangeListeners implements Listener {
     private final RaspiMessages data;
 
     private final Map<InetAddress, String> IP_CONTAINER = new HashMap<>();
-
+    private final Map<UUID, PlayerTime> timeContainer = new HashMap<>();
 
     public WarteschlangeListeners(McRaspiSystem plugin) {
         this.plugin = plugin;
@@ -133,6 +130,7 @@ public class WarteschlangeListeners implements Listener {
 
         }
         plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
+        timeContainer.put(player.getUniqueId(), new PlayerTime(player));
     }
 
 
@@ -178,6 +176,10 @@ public class WarteschlangeListeners implements Listener {
 
         playerNameController.resetRandom(player);
         plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> hat uns verlassen.`", player.getName()));
+        if (timeContainer.containsKey(player.getUniqueId())) {
+            PlayerTime playerTime = timeContainer.get(player.getUniqueId());
+            playerTime.end(plugin.getModule().getTimeDBManager());
+        }
     }
 
 

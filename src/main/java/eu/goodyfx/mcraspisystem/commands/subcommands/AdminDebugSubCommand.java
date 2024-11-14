@@ -44,8 +44,10 @@ public class AdminDebugSubCommand extends SubCommand {
             for (Settings setting : Settings.values()) {
                 player.sendMessage(setting.getLabel() + ": " + plugin.getModule().getPlayerSettingsManager().contains(setting, target));
             }
-
         }
+
         return true;
     }
+
+
 }

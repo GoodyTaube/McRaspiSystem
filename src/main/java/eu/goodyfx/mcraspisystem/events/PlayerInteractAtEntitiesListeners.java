@@ -5,6 +5,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -35,9 +36,10 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
         lootItemSticks(event);
         fakeVirus(event);
+        villagerInteraction(event);
     }
 
-    private void fakeVirus(PlayerInteractAtEntityEvent event){
+    private void fakeVirus(PlayerInteractAtEntityEvent event) {
         Entity entity = event.getRightClicked();
         Player player = event.getPlayer(); //The player who click Animal
         sit(event); //Sit Implementation
@@ -63,7 +65,6 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
         }
 
     }
-
 
 
     private void lootItemSticks(PlayerInteractAtEntityEvent event) {
@@ -137,6 +138,7 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
             }
             entity.addPassenger(player);
         }
+        interactLootChest(event);
     }
 
     /**
@@ -150,6 +152,27 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
         plugin.getHookManager().getProtocolManager().sendServerPacket(target, container);
     }
 
+
+    private void villagerInteraction(PlayerInteractAtEntityEvent event) {
+        if (event.getRightClicked().getType().equals(EntityType.VILLAGER)) {
+            Villager villager = (Villager) event.getRightClicked();
+            if (villager.getPersistentDataContainer().has(new NamespacedKey(plugin, "special"))) {
+                event.setCancelled(true);
+                event.getPlayer().sendRichMessage("<white>[<green>Trader<white>] <green><Johan> <gray>: Hello there... Ive got something for you!");
+                event.getPlayer().openGrindstone(event.getPlayer().getLocation(), true);
+            }
+        }
+    }
+
+    private void interactLootChest(PlayerInteractAtEntityEvent event) {
+        if (event.getRightClicked() instanceof Interaction) {
+            Interaction interaction = (Interaction) event.getRightClicked();
+            if (interaction.getPersistentDataContainer().has(new NamespacedKey(plugin, "special"))) {
+                event.setCancelled(true);
+                event.getPlayer().performCommand("admin lootChest open");
+            }
+        }
+    }
 
 
 }

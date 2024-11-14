@@ -2,6 +2,7 @@ package eu.goodyfx.mcraspisystem.managers;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import org.apache.commons.lang3.Validate;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +16,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * UtilityFileManager manages configuration files in a McRaspiSystem environment.
+ * It loads, saves, and modifies YAML configuration files.
+ */
 public class UtilityFileManager {
 
     private final String fileName;
@@ -35,10 +40,38 @@ public class UtilityFileManager {
         }
     }
 
+    public FileConfiguration getConfig() {
+        return config;
+    }
+
+    /**
+     * Sets a value in the configuration at the specified path.
+     *
+     * @param path The path within the configuration file where the value should be set.
+     * @param val  The value to be set at the specified path.
+     */
     public void set(String path, Object val) {
         config.set(path, val);
         save();
     }
+
+
+    /**
+     * Sets the location values in the configuration file.
+     *
+     * @param path The base path in the configuration file where the location details should be stored.
+     * @param locationName The name associated with the location, used as part of the path in the configuration file.
+     * @param location The Location object containing the world and coordinate details to be stored.
+     */
+    public void setLocation(String path, String locationName, Location location){
+        set(path + "." + locationName + ".world", location.getWorld().getName());
+        set(path + "." + locationName + ".x", location.getX());
+        set(path + "." + locationName + ".y", location.getY());
+        set(path + "." + locationName + ".z", location.getZ());
+        set(path + "." + locationName + ".yaw", location.getYaw());
+        set(path + "." + locationName + ".pitch", location.getPitch());
+    }
+
 
     /**
      * Remove Value by path

@@ -48,17 +48,16 @@ public interface RaspiTimes {
         }
 
         public static String getTimeUnit(long val) {
-            long now = System.currentTimeMillis();
-            val = now - val;
-            ArrayList<MilliSeconds> units = new ArrayList<>(List.of(MilliSeconds.values()));
-            Collections.reverse(units);
-            for (MilliSeconds unit : units) {
-                if (val / unit.getTime() >= 1) {
-                    return val / unit.getTime() + " " + unit.getLabel();
-                }
-            }
 
-            // Default-Fall: Wenn keine passende Einheit gefunden wurde
+            if (val / WEEK.getTime() >= 1) {
+                return val / DAY.getTime() + " " + DAY.getLabel();
+            }
+            if (val / HOUR.getTime() >= 1) {
+                return val / HOUR.getTime() + " " + HOUR.getLabel();
+            }
+            if (val / MINUTE.getTime() >= 1) {
+                return val / MINUTE.getTime() + " " + MINUTE.getLabel();
+            }
             return val / SECOND.getTime() + " " + SECOND.getLabel();
         }
 

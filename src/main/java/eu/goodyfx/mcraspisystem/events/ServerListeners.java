@@ -189,7 +189,6 @@ public class ServerListeners implements Listener {
     public void onLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
         userManager.update(player);
-
     }
 
     @EventHandler

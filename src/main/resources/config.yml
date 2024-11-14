@@ -1,3 +1,9 @@
+########------------------########
+# DATABASE
+########------------------########
+database:
+  resetTime: 00:00;
+
 #Settings to Enable Plugin
 prefix:
   length: 20 #Max Prefix length
