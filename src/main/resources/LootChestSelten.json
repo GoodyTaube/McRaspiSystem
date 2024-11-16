@@ -1,0 +1,48 @@
+{
+  "selten": [
+    {
+      "items": [
+        {
+          "itemDisplay": "<name>",
+          "type": "diamond_axe",
+          "modelID": "none",
+          "lore": [
+            {
+              "text1": "",
+              "text2": "",
+              "text3": ""
+            }
+          ]
+        },
+        {
+          "itemDisplay": "<name>",
+          "type": "diamond_axe",
+          "modelID": "none",
+          "lore": [
+            {
+              "text1": "",
+              "text2": "",
+              "text3": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "nichtSoSelten": [
+    {
+      "items": [
+        {
+          "itemDisplay": "<name>",
+          "type": "stick",
+          "modelID": "none",
+          "lore": [
+            {
+              "text1": "Some Example Text"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

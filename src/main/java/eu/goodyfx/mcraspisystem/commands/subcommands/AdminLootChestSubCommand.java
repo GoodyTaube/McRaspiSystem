@@ -3,6 +3,8 @@ package eu.goodyfx.mcraspisystem.commands.subcommands;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.SubCommand;
 import eu.goodyfx.mcraspisystem.tasks.AnimationBlockDisplay;
+import eu.goodyfx.mcraspisystem.utils.ItemBuilder;
+import eu.goodyfx.mcraspisystem.utils.LootChestMenuItems;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -14,6 +16,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Interaction;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Transformation;
 import org.joml.Vector3f;
 
@@ -43,12 +46,18 @@ public class AdminLootChestSubCommand extends SubCommand {
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         if (args.length == 2 && args[1].equalsIgnoreCase("open")) {
-            Inventory inv = Bukkit.createInventory(null, InventoryType.CHEST, MiniMessage.miniMessage().deserialize("<green>LootChest - Menu"));
+            Inventory inv = Bukkit.createInventory(null, 9, MiniMessage.miniMessage().deserialize("<green>LootChest - Menu"));
+            ItemStack selten = new ItemBuilder(LootChestMenuItems.SELTEN.getType()).displayName(LootChestMenuItems.SELTEN.getTitle()).build();
+            ItemStack nicht_so_selten = new ItemBuilder(LootChestMenuItems.NICHT_SO_SELTEN.getType()).displayName(LootChestMenuItems.NICHT_SO_SELTEN.getTitle()).build();
+            ItemStack immer = new ItemBuilder(LootChestMenuItems.IMMER.getType()).displayName(LootChestMenuItems.IMMER.getTitle()).build();
+            inv.setItem(2, selten);
+            inv.setItem(4, nicht_so_selten);
+            inv.setItem(6, immer);
             player.getPlayer().openInventory(inv);
         } else if (args.length == 2 && args[1].equalsIgnoreCase("generate")) {
             generate(player, args);
         }
-        return false;
+        return true;
     }
 
     private void generate(RaspiPlayer player, String[] args) {

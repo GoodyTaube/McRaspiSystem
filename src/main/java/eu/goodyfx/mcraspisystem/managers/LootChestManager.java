@@ -1,47 +1,90 @@
 package eu.goodyfx.mcraspisystem.managers;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
-import org.bukkit.Location;
+import eu.goodyfx.mcraspisystem.utils.ItemBuilder;
+import eu.goodyfx.mcraspisystem.utils.LootChestItemParser;
+import eu.goodyfx.mcraspisystem.utils.LootChestMenuItems;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.inventory.ItemStack;
 
-import java.util.Objects;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 
 public class LootChestManager {
 
-    private UtilityFileManager config;
+    private File file;
 
-    public LootChestManager(McRaspiSystem system) {
-        this.config = new UtilityFileManager(system, "lootChest.yml");
+    public McRaspiSystem plugin;
+
+
+    public LootChestManager(McRaspiSystem plugin) {
+        this.file = new File(plugin.getDataFolder(), "lootChest.json");
+        this.plugin = plugin;
+
     }
 
-    private final String CONFIG_PATH = "Chests";
-
-    public void set(Location location) {
-        config.setLocation(CONFIG_PATH, "chest-" + getChestNumber(), location);
+    private void reload() {
+        this.file = new File(plugin.getDataFolder(), "lootChest.json");
     }
 
-    /**
-     * Retrieves the next available chest number.
-     *
-     * This method checks if the loot chest configuration exists. If it does, it calculates
-     * the next chest number by counting the existing keys within a specific configuration
-     * section and adds one to this count. If the configuration does not exist, it returns 0.
-     *
-     * @return the next available chest number if the configuration exists, otherwise 0.
-     */
-    public Integer getChestNumber() {
-        if (Boolean.TRUE.equals(config.exist())) {
-            return Objects.requireNonNull(config.getConfig().getConfigurationSection(CONFIG_PATH)).getKeys(false).size() + 1;
-        } else {
-            return 0;
+    private List<LootChestItemParser> loadData(LootChestMenuItems itemsType) {
+        if (!file.exists()) {
+            return null;
+        }
+        reload();
+        List<LootChestItemParser> finalItems = new ArrayList<>();
+        try (Reader reader = new FileReader(file)) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<Map<String, Object>>() {
+            }.getType();
+            Map<String, Object> jsonData = gson.fromJson(reader, type);
+            List<Map<String, Object>> seltenList = jsonData.get(itemsType.getDatabaseName()) != null ? (List<Map<String, Object>>) jsonData.get(itemsType.getDatabaseName()) : null;
+            if (seltenList != null) {
+                for (Map<String, Object> seltenEntry : seltenList) {
+                    List<Map<String, Object>> items = (List<Map<String, Object>>) seltenEntry.get("items");
+                    for (Map<String, Object> item : items) {
+                        finalItems.add(new LootChestItemParser(item));
+                    }
+                }
+            }
+
+            return finalItems;
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Error while loading data", e);
+            return null;
         }
     }
 
-    public void remove(Location location) {
-
+    public List<ItemStack> getItems(LootChestMenuItems itemsType) {
+        List<LootChestItemParser> items = loadData(itemsType);
+        if (items != null) {
+            List<ItemStack> itemsToAdd = new ArrayList<>();
+            for (LootChestItemParser item : items) {
+                itemsToAdd.add(buildItem(item));
+            }
+            return itemsToAdd;
+        }
+        return null;
     }
 
-    public void openGUI() {
-
+    private ItemStack buildItem(LootChestItemParser itemData) {
+        ItemBuilder builder = new ItemBuilder(itemData.getType());
+        if (itemData.getModelID() != 0) {
+            builder.setModelID(itemData.getModelID());
+        }
+        if (!itemData.getItemDisplay().equalsIgnoreCase("none")) {
+            builder.displayName(MiniMessage.miniMessage().deserialize(itemData.getItemDisplay()));
+        }
+        return builder.build();
     }
 
 

@@ -10,18 +10,15 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import okhttp3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.logging.Level;
 
 public class PlayerChatListeners implements Listener {
 
@@ -41,15 +38,8 @@ public class PlayerChatListeners implements Listener {
     public String lastMessage = "";
 
 
-    private final OkHttpClient httpClient = new OkHttpClient();
-
-
-
-
-
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(AsyncChatEvent chatEvent) {
-
 
 
         chatEvent.setCancelled(true);//Disabled the core funktion of normal Minecraft Chat.

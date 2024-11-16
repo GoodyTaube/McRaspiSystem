@@ -7,6 +7,7 @@ import eu.goodyfx.mcraspisystem.managers.UserManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -110,5 +111,31 @@ public class RaspiPlayer {
     public McRaspiSystem getSystem() {
         return this.plugin;
     }
+
+
+    /**
+     * Plays a sound for the player at their current location with the specified volume and pitch.
+     *
+     * @param sound The sound to be played.
+     * @param volume The volume at which to play the sound. Must be a positive float value.
+     * @param pitch The pitch at which to play the sound. Must be a positive float value.
+     */
+    public void playSound(RaspiSounds sound, float volume, float pitch) {
+        player.playSound(player.getLocation(), sound.getSound(), volume, pitch);
+    }
+
+    /**
+     * Plays a sound for the player at their current location.
+     *
+     * @param sound The sound to be played, encapsulating the sound type, volume, and pitch.
+     */
+    public void playSound(RaspiSounds sound) {
+        player.playSound(player.getLocation(), sound.getSound(), sound.getVolume(), sound.getPitch());
+    }
+
+    public Location getLocation() {
+        return player.getLocation();
+    }
+
 
 }

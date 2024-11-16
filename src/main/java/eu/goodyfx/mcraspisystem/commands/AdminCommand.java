@@ -55,7 +55,6 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminAuaSubCommand());
         subCommands.add(new AdminSkullSubCommand());
         subCommands.add(new AdminTraderSubCommand(plugin));
-        subCommands.add(new AdminChatBotSubCommand(plugin));
         subCommands.add(new AdminLootChestSubCommand(plugin));
     }
 
