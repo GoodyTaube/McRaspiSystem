@@ -1,5 +1,6 @@
 package eu.goodyfx.mcraspisystem.events;
 
+import com.destroystokyo.paper.event.server.PaperServerListPingEvent;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PlayerBanManager;
@@ -76,11 +77,10 @@ public class ServerListeners implements Listener {
         Player player = breakEvent.getPlayer();
         Block block = breakEvent.getBlock();
 
-        if(RaspiMessages.isDefault(player)){
-             breakEvent.setCancelled(true);
+        if (RaspiMessages.isDefault(player)) {
+            breakEvent.setCancelled(true);
             return;
         }
-
 
 
         if (block.getType().equals(Material.PLAYER_HEAD) || block.getType().equals(Material.PLAYER_WALL_HEAD)) {
@@ -125,7 +125,6 @@ public class ServerListeners implements Listener {
     }
 
 
-
     @EventHandler
     public void onBlockPlaced(@NotNull BlockPlaceEvent placeEvent) {
 
@@ -133,7 +132,7 @@ public class ServerListeners implements Listener {
         Block block = placeEvent.getBlock();
         Location location = block.getLocation();
 
-        if(RaspiMessages.isDefault(player)){
+        if (RaspiMessages.isDefault(player)) {
             placeEvent.setCancelled(true);
             return;
         }
@@ -184,7 +183,6 @@ public class ServerListeners implements Listener {
         }
     }
 
-
     @EventHandler
     public void onLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
@@ -228,7 +226,7 @@ public class ServerListeners implements Listener {
             }
             if (stack.hasItemMeta()) {
                 ItemMeta meta = stack.getItemMeta();
-                String renameText = event.getInventory().getRenameText();
+                String renameText = event.getView().getRenameText();
 
                 if (renameText != null) {
                     renameText = OldColors.convert(renameText);
@@ -238,9 +236,15 @@ public class ServerListeners implements Listener {
                 //meta.setDisplayName(event.getInventory().getRenameText().replace("&", "§"));
                 stack.setItemMeta(meta);
                 event.setResult(stack);
-
-
             }
         }
     }
+
+    @EventHandler
+    public void onPing(PaperServerListPingEvent pingEvent) {
+        plugin.getModule().getMotdManager().set();
+        pingEvent.setVersion("ERROR(404)");
+
+    }
+
 }

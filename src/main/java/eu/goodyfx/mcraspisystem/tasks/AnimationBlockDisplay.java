@@ -56,6 +56,7 @@ public class AnimationBlockDisplay extends BukkitRunnable {
         super.cancel();
     }
 
+
     private void checkDead() {
         blockDisplayList.removeIf(Objects::isNull);
     }

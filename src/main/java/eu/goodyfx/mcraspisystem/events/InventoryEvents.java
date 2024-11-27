@@ -6,18 +6,20 @@ import eu.goodyfx.mcraspisystem.utils.LootChestMenuItems;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.RaspiSounds;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,25 +40,49 @@ public class InventoryEvents implements Listener {
     }
 
     @EventHandler
+    public void onInventoryOpen(InventoryOpenEvent openEvent) {
+        String title = PlainTextComponentSerializer.plainText().serialize(openEvent.getView().title());
+        if (title.equalsIgnoreCase("Loot")) {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+                if (plugin.getLootChestTimer().isLootChestReady()) {
+                    Bukkit.getScheduler().runTask(plugin, () -> openEvent.getPlayer().closeInventory());
+                    plugin.getLootChestTimer().resetTimer();
+                }
+            }, 20L * 60);
+        }
+    }
+
+    private void gettingLoot(InventoryCloseEvent closeEvent) {
+        if (PlainTextComponentSerializer.plainText().serialize(closeEvent.getView().title()).equalsIgnoreCase("Loot") && plugin.getLootChestTimer().isLootChestReady()) {
+            plugin.getLootChestTimer().resetTimer();
+        }
+    }
+
+    @EventHandler
     public void onInventoryClose(InventoryCloseEvent closeEvent) {
+        gettingLoot(closeEvent);
         if (isLootChest(closeEvent.getView()) && !isLootChestMenu(closeEvent.getView())) {
             Inventory inventory = closeEvent.getInventory();
             StringBuilder builder = new StringBuilder("Content:").append(" ");
             AtomicInteger sizer = new AtomicInteger();
-            for(ItemStack stack : inventory.getContents()){
-                if(stack != null && stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getType().equals(Material.SLIME_BALL)){
+            List<ItemStack> content = new ArrayList<>();
+            for (ItemStack stack : inventory.getContents()) {
+                if (stack != null && stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getType().equals(Material.SLIME_BALL)) {
                     continue;
                 }
-                if(stack != null){
+                if (stack != null) {
                     builder.append(stack.getType().name()).append(",");
                     sizer.getAndIncrement();
+                    content.add(stack);
                 }
             }
 
-            if(sizer.get() > 0){
-                builder.setLength(builder.length() - 1);
-                closeEvent.getPlayer().sendRichMessage(builder.toString());
-            }
+
+            closeEvent.getPlayer().sendRichMessage(builder.toString());
+            String catName = PlainTextComponentSerializer.plainText().serialize(closeEvent.getView().title()).replace("LootChest - ", "").replace(" ", "_").toUpperCase();
+            closeEvent.getPlayer().sendRichMessage(catName);
+            plugin.getModule().getLootChestManager().prepareWriting(content, LootChestMenuItems.valueOf(catName));
+
 
         }
     }

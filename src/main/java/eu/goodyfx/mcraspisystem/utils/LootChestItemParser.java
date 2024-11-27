@@ -1,7 +1,7 @@
 package eu.goodyfx.mcraspisystem.utils;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
@@ -10,26 +10,45 @@ import java.util.Map;
 
 public class LootChestItemParser {
 
-    private final String itemDisplay;
+    private final Object itemDisplay;
     private final String type;
     private final String modelID;
-    private List<Map<String, String>> lore = new ArrayList<>();
+    private final String lore;
 
     public LootChestItemParser(Map<String, Object> data) {
-        this.itemDisplay = data.get("itemDisplay").toString();
+        this.itemDisplay = data.get("itemDisplay");
         this.type = data.get("type").toString();
-        this.modelID = data.get("modelID").toString();
+        this.modelID = data.get("modelID") != null ? data.get("modelID").toString() : null;
+        this.lore = data.get("lore") != null ? data.get("lore").toString() : null;
+
     }
 
-    public String getItemDisplay() {
-        return itemDisplay;
+
+    public List<Component> getLore() {
+        List<Component> loreFinal = new ArrayList<>();
+        if (this.lore == null) {
+            return loreFinal;
+        }
+        String[] loreSplit = this.lore.split("@");
+        for (String line : loreSplit) {
+            loreFinal.add(GsonComponentSerializer.gson().deserialize(line));
+        }
+        return loreFinal;
+    }
+
+
+    public Component getItemDisplay() {
+        if (itemDisplay != null) {
+            return GsonComponentSerializer.gson().deserialize(String.valueOf(this.itemDisplay));
+        }
+        return null;
     }
 
     public int getModelID() {
-        if(this.modelID.equalsIgnoreCase("none")){
+        if (this.modelID == null) {
             return 0;
         }
-        return Integer.parseInt(this.modelID);
+        return Integer.parseInt(this.modelID.replace(".0", ""));
     }
 
     public Material getType() {

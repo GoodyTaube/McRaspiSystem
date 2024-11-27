@@ -3,6 +3,9 @@ package eu.goodyfx.mcraspisystem.events;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.utils.LootChestLoot;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
+import eu.goodyfx.mcraspisystem.utils.RaspiSounds;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -169,7 +172,13 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
             Interaction interaction = (Interaction) event.getRightClicked();
             if (interaction.getPersistentDataContainer().has(new NamespacedKey(plugin, "special"))) {
                 event.setCancelled(true);
-                event.getPlayer().performCommand("admin lootChest open");
+                RaspiPlayer player = plugin.getRaspiPlayer(event.getPlayer());
+                if (plugin.getLootChestTimer().isLootChestReady()) {
+                    new LootChestLoot(plugin).openLoot(player);
+                } else {
+                    player.playSound(RaspiSounds.ERROR);
+                    player.sendActionBar("<red>LootChest ist noch nicht Offen!");
+                }
             }
         }
     }

@@ -2,9 +2,9 @@ package eu.goodyfx.mcraspisystem.utils;
 
 public enum Powers {
 
-    HASTE(20 * 60 * 30, "haste", 1),
-    NIGHT_VISION(20 * 60 * 30, "night_vision", 2),
-    FLIGHT(30, "fly", 3);
+    HASTE(20 * 60 * 30L, "haste", 1),
+    NIGHT_VISION(20 * 60 * 30L, "night_vision", 2),
+    FLIGHT(30L, "fly", 3);
 
 
     private long time;

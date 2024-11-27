@@ -3,20 +3,3 @@ min-takt: 1
 item-add-min: 2
 item-add-max: 10
 random-faktor: 100
-#=============================#
-item-cats:
-  super-selten:
-    items:
-      DIAMOND_BLOCK:
-        name: Block der Heiligen Jesus
-        lore: leuchtet auch bei nacht$Nicht bestätigter Fakt
-        modelID: 1
-        amount: 1
-      GOLDEN_APPLE:
-        name: Iss Mich
-        modelID: 2
-  selten:
-
-  nicht-ganz-so-selten:
-
-  un-selten:

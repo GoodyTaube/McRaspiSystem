@@ -21,7 +21,7 @@ public class RaspiModuleManager {
     private final LootManager lootManager;
     private final TimeDBManager timeDBManager;
     private final LootChestManager lootChestManager;
-
+    private final MOTDManager motdManager;
 
     public RaspiModuleManager(McRaspiSystem system) {
         this.plugin = system;
@@ -40,6 +40,7 @@ public class RaspiModuleManager {
         this.lootManager = new LootManager(system);
         this.timeDBManager = new TimeDBManager(system);
         this.lootChestManager = new LootChestManager(system);
+        this.motdManager = new MOTDManager(system);
     }
 
     public JoinMessageManager getJoinMessageManager() {
@@ -100,5 +101,9 @@ public class RaspiModuleManager {
 
     public LootChestManager getLootChestManager() {
         return this.lootChestManager;
+    }
+
+    public MOTDManager getMotdManager() {
+        return this.motdManager;
     }
 }

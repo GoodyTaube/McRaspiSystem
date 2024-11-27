@@ -37,6 +37,8 @@ public class UtilityFileManager {
         this.system = system;
         if (Boolean.FALSE.equals(exist()) && system.getResource(fileName) != null) {
             system.saveResource(fileName, false);
+            String log = String.format("Created Missing: %s", fileName);
+            system.getLogger().info(log);
         }
     }
 

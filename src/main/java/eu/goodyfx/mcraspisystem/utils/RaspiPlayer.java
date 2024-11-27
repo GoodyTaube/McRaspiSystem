@@ -108,6 +108,11 @@ public class RaspiPlayer {
         getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
 
+    public void sendActionBar(String message){
+        getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize(message));
+    }
+
+
     public McRaspiSystem getSystem() {
         return this.plugin;
     }

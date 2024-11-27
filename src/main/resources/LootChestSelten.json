@@ -18,13 +18,7 @@
           "itemDisplay": "<name>",
           "type": "diamond_axe",
           "modelID": "none",
-          "lore": [
-            {
-              "text1": "",
-              "text2": "",
-              "text3": ""
-            }
-          ]
+          "lore":""
         }
       ]
     }

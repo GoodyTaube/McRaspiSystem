@@ -2,10 +2,7 @@ package eu.goodyfx.mcraspisystem;
 
 import eu.goodyfx.mcraspisystem.managers.RaspiHookManager;
 import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
-import eu.goodyfx.mcraspisystem.tasks.AnimationBlockDisplay;
-import eu.goodyfx.mcraspisystem.tasks.IdleTask;
-import eu.goodyfx.mcraspisystem.tasks.RaspiItemsTimer;
-import eu.goodyfx.mcraspisystem.tasks.WeeklyTimer;
+import eu.goodyfx.mcraspisystem.tasks.*;
 import eu.goodyfx.mcraspisystem.utils.Item;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.SystemStartUp;
@@ -33,6 +30,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable idleTask;
     private BukkitRunnable weeklyTimer;
     private BukkitRunnable animation;
+    private LootChestTimer lootChestTimer;
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
     private Item mapItem = null;
@@ -54,6 +52,8 @@ public final class McRaspiSystem extends JavaPlugin {
         this.idleTask = new IdleTask(this, this);
         this.weeklyTimer = new WeeklyTimer(this);
         this.animation = new AnimationBlockDisplay(this);
+        this.lootChestTimer = new LootChestTimer(this);
+        moduleManager.getMotdManager().set();
     }
 
 
@@ -129,6 +129,7 @@ public final class McRaspiSystem extends JavaPlugin {
         this.idleTask.cancel();
         this.weeklyTimer.cancel();
         this.animation.cancel();
+        lootChestTimer.cancel();
     }
 
     /**
@@ -175,5 +176,8 @@ public final class McRaspiSystem extends JavaPlugin {
         throw new NullPointerException("Item is Null!");
     }
 
+    public LootChestTimer getLootChestTimer() {
+        return this.lootChestTimer;
+    }
 
 }
