@@ -6,6 +6,7 @@ import eu.goodyfx.mcraspisystem.commands.SubCommand;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.Settings;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
 public class AdminDebugSubCommand extends SubCommand {
@@ -44,10 +45,11 @@ public class AdminDebugSubCommand extends SubCommand {
             for (Settings setting : Settings.values()) {
                 player.sendMessage(setting.getLabel() + ": " + plugin.getModule().getPlayerSettingsManager().contains(setting, target));
             }
-        }
-
+        } 
         return true;
     }
+
+
 
 
 }

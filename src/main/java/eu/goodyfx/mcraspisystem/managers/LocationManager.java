@@ -15,7 +15,7 @@ public class LocationManager {
 
 
     public LocationManager(McRaspiSystem system) {
-        this.manager = new UtilityFileManager(system, "location");
+        this.manager = new UtilityFileManager(system, "locations");
     }
 
     public void set(Player player, String name) {

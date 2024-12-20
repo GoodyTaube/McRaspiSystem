@@ -22,7 +22,7 @@ public class LootManager {
         this.plugin = plugin;
     }
 
-    private final File file = new File("plugins/" + McRaspiSystem.class.getSimpleName() + "/", "RaspiItems.yml");
+    private final File file = new File("plugins/" + McRaspiSystem.class.getSimpleName() + "/", "locations.yml");
     private FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
     private final Map<Location, Location> currentWarps = new HashMap<>();

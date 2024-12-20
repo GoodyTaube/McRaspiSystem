@@ -46,6 +46,7 @@ public class SystemStartUp {
         new PlayerInteractAtEntitiesListeners(plugin);
         new PlayerInteractListeners(plugin);
         new InventoryEvents(plugin);
+        new WarnListeners(plugin);
     }
 
 
