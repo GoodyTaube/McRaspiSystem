@@ -4,4 +4,4 @@
 
 
 
-[![Versopm](https://img.shields.io/badge/Version%20-0.0.DEVELOPE-8A2EED)]()
+[![Versopm](https://img.shields.io/badge/Version%20-0.7.DEVELOPE-8A2EED)]()
