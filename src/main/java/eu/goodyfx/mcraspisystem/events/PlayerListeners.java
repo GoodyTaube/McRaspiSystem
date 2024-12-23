@@ -1,38 +1,27 @@
 package eu.goodyfx.mcraspisystem.events;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
-import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
-import eu.goodyfx.mcraspisystem.commands.AFKCommand;
-import eu.goodyfx.mcraspisystem.commands.SitCommand;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
 import eu.goodyfx.mcraspisystem.utils.PlayerValues;
-import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.type.Slab;
-import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.sign.Side;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.*;
-import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -58,16 +47,12 @@ public class PlayerListeners implements Listener {
     }
 
 
-
-
-
     @EventHandler
-    public void onHunger(FoodLevelChangeEvent event){
-        if(event.getEntity() instanceof Player player && RaspiMessages.isDefault(player)){
-                event.setCancelled(true);
-            }
+    public void onHunger(FoodLevelChangeEvent event) {
+        if (event.getEntity() instanceof Player player && plugin.getRaspiPlayer(player).isDefault()) {
+            event.setCancelled(true);
+        }
     }
-
 
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

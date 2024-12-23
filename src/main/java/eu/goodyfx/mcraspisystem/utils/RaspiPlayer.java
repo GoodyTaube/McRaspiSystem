@@ -108,7 +108,7 @@ public class RaspiPlayer {
         getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
 
-    public void sendActionBar(String message){
+    public void sendActionBar(String message) {
         getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize(message));
     }
 
@@ -121,9 +121,9 @@ public class RaspiPlayer {
     /**
      * Plays a sound for the player at their current location with the specified volume and pitch.
      *
-     * @param sound The sound to be played.
+     * @param sound  The sound to be played.
      * @param volume The volume at which to play the sound. Must be a positive float value.
-     * @param pitch The pitch at which to play the sound. Must be a positive float value.
+     * @param pitch  The pitch at which to play the sound. Must be a positive float value.
      */
     public void playSound(RaspiSounds sound, float volume, float pitch) {
         player.playSound(player.getLocation(), sound.getSound(), volume, pitch);
@@ -140,6 +140,10 @@ public class RaspiPlayer {
 
     public Location getLocation() {
         return player.getLocation();
+    }
+
+    public boolean isDefault() {
+        return player.isPermissionSet("group.default") && !player.isPermissionSet("group." + plugin.getConfig().getString("Utilities.playerGroup"));
     }
 
 

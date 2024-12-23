@@ -7,6 +7,7 @@ import eu.goodyfx.mcraspisystem.managers.PlayerBanManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import eu.goodyfx.mcraspisystem.utils.OldColors;
 import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
+import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -75,10 +76,12 @@ public class ServerListeners implements Listener {
     public void onBreak(BlockBreakEvent breakEvent) {
         lastBreak.put(breakEvent.getPlayer().getUniqueId(), breakEvent.getBlock().getType());
         Player player = breakEvent.getPlayer();
+        RaspiPlayer raspiPlayer = plugin.getRaspiPlayer(player);
         Block block = breakEvent.getBlock();
 
-        if (RaspiMessages.isDefault(player)) {
+        if (raspiPlayer.isDefault()) {
             breakEvent.setCancelled(true);
+            player.sendRichMessage("Du bist nicht registriert.");
             return;
         }
 
@@ -132,8 +135,9 @@ public class ServerListeners implements Listener {
         Block block = placeEvent.getBlock();
         Location location = block.getLocation();
 
-        if (RaspiMessages.isDefault(player)) {
+        if (plugin.getRaspiPlayer(player).isDefault()) {
             placeEvent.setCancelled(true);
+            player.sendRichMessage("Du bist noch nicht registriert.");
             return;
         }
 
@@ -187,6 +191,9 @@ public class ServerListeners implements Listener {
     public void onLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
         userManager.update(player);
+        if(!player.isPermissionSet("system.team") && plugin.getConfig().contains("Utilities.wartung") && plugin.getConfig().getBoolean("Utilities.wartung")){
+                event.disallow(PlayerLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize("<gray>Wir befinden uns in Wartung.<br><aqua>Bitte um Verständnis."));
+            }
     }
 
     @EventHandler
@@ -198,7 +205,7 @@ public class ServerListeners implements Listener {
                 event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, Component.text("§cDu wurdest temporär gesperrt!").append(Component.newline()).append(Component.newline()).append(Component.text("§7Du wurdest von: §b" + playerBanManager.performer(player) + " §7für folgendes gesperrt: ")).append(Component.newline()).append(Component.text("' " + playerBanManager.reason(player) + " '").color(NamedTextColor.YELLOW)).append(Component.newline()).append(Component.newline()).append(Component.text("§7Du wirst am §d" + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(playerBanManager.expire(player)) + " §7entsperrt.")));
             } else {
                 playerBanManager.removeBan(player);
-                Bukkit.getLogger().info(plugin.getModule().getRaspiMessages().getPrefix() + " " + player.getName() + " wurde Entsperrt weil seine sperrzeit bagelaufen ist.");
+                plugin.getLogger().info(plugin.getModule().getRaspiMessages().getPrefix() + " " + player.getName() + " wurde Entsperrt weil seine sperrzeit abgelaufen ist.");
                 event.allow();
             }
         }
@@ -238,13 +245,6 @@ public class ServerListeners implements Listener {
                 event.setResult(stack);
             }
         }
-    }
-
-    @EventHandler
-    public void onPing(PaperServerListPingEvent pingEvent) {
-        plugin.getModule().getMotdManager().set();
-        pingEvent.setVersion("ERROR(404)");
-
     }
 
 }

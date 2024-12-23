@@ -30,6 +30,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable idleTask;
     private BukkitRunnable weeklyTimer;
     private BukkitRunnable animation;
+    private BukkitRunnable restoreInv;
     private LootChestTimer lootChestTimer;
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
@@ -53,6 +54,7 @@ public final class McRaspiSystem extends JavaPlugin {
         this.weeklyTimer = new WeeklyTimer(this);
         this.animation = new AnimationBlockDisplay(this);
         this.lootChestTimer = new LootChestTimer(this);
+        this.restoreInv = new InventoryBackup(this);
         moduleManager.getMotdManager().set();
     }
 
@@ -129,6 +131,7 @@ public final class McRaspiSystem extends JavaPlugin {
         this.idleTask.cancel();
         this.weeklyTimer.cancel();
         this.animation.cancel();
+        this.restoreInv.cancel();
         lootChestTimer.cancel();
     }
 

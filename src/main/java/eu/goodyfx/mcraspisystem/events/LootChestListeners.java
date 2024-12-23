@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class InventoryEvents implements Listener {
+public class LootChestListeners implements Listener {
 
     private final McRaspiSystem plugin;
 
-    public InventoryEvents(McRaspiSystem plugin) {
+    public LootChestListeners(McRaspiSystem plugin) {
         this.plugin = plugin;
         plugin.setListeners(this);
     }
@@ -98,7 +98,7 @@ public class InventoryEvents implements Listener {
 
     private void handleBackItem(InventoryClickEvent clickEvent, RaspiPlayer player) {
         if (checkNonNull(clickEvent) && Objects.requireNonNull(clickEvent.getCurrentItem()).getType().equals(Material.SLIME_BALL)) {
-            player.getPlayer().performCommand("admin lootChest open");
+            player.getPlayer().performCommand("admin lootChest menu");
             clickEvent.setCancelled(true);
         }
     }
@@ -138,7 +138,7 @@ public class InventoryEvents implements Listener {
 
 
     private void outsideCheck(InventoryClickEvent clickEvent) {
-        if (clickEvent.getSlotType().equals(InventoryType.SlotType.OUTSIDE)) {
+        if (isLootChest(clickEvent.getView()) &&clickEvent.getSlotType().equals(InventoryType.SlotType.OUTSIDE)) {
             clickEvent.setCancelled(true);
         }
     }

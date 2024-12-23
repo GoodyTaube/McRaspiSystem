@@ -1,9 +1,3 @@
-########------------------########
-# DATABASE
-########------------------########
-database:
-  resetTime: 00:00;
-
 #Settings to Enable Plugin
 prefix:
   length: 20 #Max Prefix length
@@ -14,6 +8,7 @@ prefix:
 #Utilities
 ########------------------########
 Utilities:
+  lootChest: true
   joinMessage: true
   leaveMessage: true
   dead-signs: true #Create Sign at Player Death Position

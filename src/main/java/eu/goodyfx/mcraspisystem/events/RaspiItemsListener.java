@@ -1,7 +1,6 @@
 package eu.goodyfx.mcraspisystem.events;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
-import eu.goodyfx.mcraspisystem.utils.ItemBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
@@ -15,12 +14,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Merchant;
-import org.bukkit.inventory.MerchantInventory;
-import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -28,11 +23,15 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 
-public record LootEvents(McRaspiSystem plugin) implements Listener {
+public class RaspiItemsListener implements Listener {
 
-    public LootEvents {
+    private final McRaspiSystem plugin;
+
+    public RaspiItemsListener(McRaspiSystem plugin) {
+        this.plugin = plugin;
         plugin.setListeners(this);
     }
+
 
     @EventHandler
     public void onHangingDestroy(HangingBreakEvent breakEvent) {
@@ -128,32 +127,6 @@ public record LootEvents(McRaspiSystem plugin) implements Listener {
             Player player = joinEvent.getPlayer();
             player.setAllowFlight(true);
             player.setFlying(true);
-        }
-    }
-
-    @EventHandler
-    public void onOpen(InventoryOpenEvent event) {
-        if (event.getInventory().getHolder() == null) {
-            return;
-        }
-        if (event.getInventory() instanceof MerchantInventory) {
-            MerchantInventory inventory = (MerchantInventory) event.getInventory();
-            Merchant merchant = inventory.getMerchant();
-            List<MerchantRecipe> recipes = new ArrayList<>();
-
-            ItemStack stack1_result = new ItemBuilder(Material.GOLDEN_APPLE).displayName("Raspi Apple").addLore("COOLER_RASPI_COIN").setAmount(1).build();
-
-            ItemStack voting = new ItemBuilder(Material.CLOCK).displayName("VOTING COIN").build();
-
-            MerchantRecipe merchantRecipe = new MerchantRecipe(stack1_result, 99999);
-            MerchantRecipe merchantRecipe2 = new MerchantRecipe(voting, 99999);
-
-
-            merchantRecipe.addIngredient(new ItemBuilder(Material.CLOCK).setAmount(25).displayName("VOTING COIN").build());
-            merchantRecipe2.addIngredient(new ItemStack(Material.COMPASS, 22));
-            recipes.add(merchantRecipe);
-            recipes.add(merchantRecipe2);
-            merchant.setRecipes(recipes);
         }
     }
 

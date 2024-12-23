@@ -72,7 +72,7 @@ public class LootManager {
 
 
     public Integer size() {
-        this.config = YamlConfiguration.loadConfiguration(new File("plugins/" + McRaspiSystem.class.getSimpleName() + "/", "RaspiItems.yml"));
+        this.config = YamlConfiguration.loadConfiguration(new File("plugins/" + McRaspiSystem.class.getSimpleName() + "/", "locations.yml"));
         return Objects.requireNonNull(config.getConfigurationSection("warps")).getKeys(false).size() / 2;
     }
 

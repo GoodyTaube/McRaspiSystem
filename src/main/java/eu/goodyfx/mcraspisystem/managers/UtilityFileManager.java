@@ -1,7 +1,6 @@
 package eu.goodyfx.mcraspisystem.managers;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
-import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -9,9 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -32,7 +28,7 @@ public class UtilityFileManager {
             fileName = String.format("%s.yml", fileName);
         }
         this.fileName = fileName;
-        this.file = new File(system.getDataFolder().getAbsolutePath(), fileName);
+        this.file = new File(system.getDataFolder(), fileName);
         this.config = YamlConfiguration.loadConfiguration(file);
         this.system = system;
         if (Boolean.FALSE.equals(exist()) && system.getResource(fileName) != null) {
@@ -61,11 +57,11 @@ public class UtilityFileManager {
     /**
      * Sets the location values in the configuration file.
      *
-     * @param path The base path in the configuration file where the location details should be stored.
+     * @param path         The base path in the configuration file where the location details should be stored.
      * @param locationName The name associated with the location, used as part of the path in the configuration file.
-     * @param location The Location object containing the world and coordinate details to be stored.
+     * @param location     The Location object containing the world and coordinate details to be stored.
      */
-    public void setLocation(String path, String locationName, Location location){
+    public void setLocation(String path, String locationName, Location location) {
         set(path + "." + locationName + ".world", location.getWorld().getName());
         set(path + "." + locationName + ".x", location.getX());
         set(path + "." + locationName + ".y", location.getY());
@@ -121,12 +117,8 @@ public class UtilityFileManager {
     }
 
     public void reload() {
-        Validate.notNull(this.fileName, "File not Exist!");
-        final InputStream stream = system.getResource(this.fileName);
-        if (stream == null) {
-            return;
-        }
-        this.config = YamlConfiguration.loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
+        File dummy = new File(system.getDataFolder(), fileName);
+        this.config = YamlConfiguration.loadConfiguration(dummy);
     }
 
     public List<String> getStringList(String path) {

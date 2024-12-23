@@ -160,8 +160,4 @@ public class RaspiMessages {
         return Objects.requireNonNull(OldColors.convert(plugin.getModule().getMessageManager().getString("messages." + subPath)));
     }
 
-    public static boolean isDefault(Player player){
-        return player.isPermissionSet("group.default");
-    }
-
 }
