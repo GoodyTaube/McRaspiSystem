@@ -1,0 +1,3 @@
+  randomTP:
+    center: "29 22 222"
+    radius: 10000
