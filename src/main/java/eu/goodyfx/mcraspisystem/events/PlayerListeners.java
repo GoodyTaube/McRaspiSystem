@@ -32,7 +32,6 @@ public class PlayerListeners implements Listener {
     private final McRaspiSystem plugin;
     private final WarteschlangenManager warteschlangenManager;
     private final UserManager userManager;
-    private final List<UUID> playerChangedWorld = new ArrayList<>();
 
     private final Random random = new Random();
 
@@ -54,12 +53,6 @@ public class PlayerListeners implements Listener {
         }
     }
 
-
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onChangeWorld(PlayerChangedWorldEvent event) {
-        Player player = event.getPlayer();
-        playerChangedWorld.add(event.getPlayer().getUniqueId());
-    }
 
 
     @EventHandler(priority = EventPriority.MONITOR)

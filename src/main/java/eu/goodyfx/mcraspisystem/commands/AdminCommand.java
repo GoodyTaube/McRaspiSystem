@@ -58,6 +58,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminLootChestSubCommand(plugin));
         subCommands.add(new AdminCombineFileSubCommand(plugin));
         subCommands.add(new AdminRestoreAdminSubCommand(plugin));
+        subCommands.add(new AdminResetDailyCommandSubCommand(plugin));
     }
 
 
@@ -133,7 +134,8 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             for (SubCommand subCommand : subCommands) {
                 if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                    player.sendMessage(subCommand.getSyntax());
+                    player.sendRichMessage("<gray><italic>" + subCommand.getDescription());
+                    player.sendRichMessage(plugin.getModule().getRaspiMessages().getUsage(subCommand.getSyntax()));
                 }
             }
         }

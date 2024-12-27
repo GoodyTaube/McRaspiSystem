@@ -35,13 +35,14 @@ public class AdminHelpCommand extends SubCommand {
     public boolean commandPerform(RaspiPlayer player, String[] args) {
 
         if (args.length == 1) {
-            StringBuilder builder = new StringBuilder("SubCommands:").append(" ");
+            player.sendMessage("<gray><italic>Um eine Detaillierte Beschreibung pro subCommand zu bekommen, nutze bitte: /admin <subCommand>");
+            StringBuilder builder = new StringBuilder("Alle subCommands:").append(" ");
             for (SubCommand subCommand : mainCommand.getSubCommands()) {
                 builder.append(subCommand.getLabel()).append(",").append(" ");
             }
 
             builder.setLength(builder.length() - 2);
-            player.sendMessage(data.getPrefix() + builder);
+            player.sendMessage(builder.toString());
         }
         return true;
     }

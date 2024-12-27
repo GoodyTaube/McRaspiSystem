@@ -24,17 +24,17 @@ public class AdminCombineFileSubCommand extends SubCommand {
 
     @Override
     public String getLabel() {
-        return "filecombine";
+        return "fileCombine";
     }
 
     @Override
     public String getDescription() {
-        return "";
+        return "Fügt mehrere Dateien zu einer gesammelten zusammen.";
     }
 
     @Override
     public String getSyntax() {
-        return "admin combinefile <filepath> <filename> -a";
+        return "admin combineFile <filepath> <filename> -a";
     }
 
     @Override

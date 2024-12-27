@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PlayerMoveListener implements Listener {
+public class   PlayerMoveListener implements Listener {
 
     private final McRaspiSystem plugin;
     private final WarteschlangenManager warteschlangenManager;
@@ -31,6 +32,11 @@ public class PlayerMoveListener implements Listener {
         this.userManager = plugin.getModule().getUserManager();
         this.plugin = plugin;
         plugin.setListeners(this);
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onChangeWorld(PlayerChangedWorldEvent event) {
+        playerChangedWorld.add(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -60,6 +66,7 @@ public class PlayerMoveListener implements Listener {
             if (!playerChangedWorld.contains(player.getUniqueId())) {
                 if (userManager.getAfkContainer().containsKey(player.getUniqueId()) && userManager.getAfkContainer().get(player.getUniqueId()).distance(event.getTo()) > 2 && !warteschlangenManager.playersQueue.contains(player.getUniqueId())) {
                     Bukkit.dispatchCommand(event.getPlayer(), "afk");
+
                 }
             } else {
                 userManager.getAfkContainer().put(player.getUniqueId(), player.getLocation());

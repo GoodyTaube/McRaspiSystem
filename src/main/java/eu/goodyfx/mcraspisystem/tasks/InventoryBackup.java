@@ -2,7 +2,6 @@ package eu.goodyfx.mcraspisystem.tasks;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -16,16 +15,15 @@ public class InventoryBackup extends BukkitRunnable {
 
     public InventoryBackup(McRaspiSystem mcRaspiSystem) {
         this.plugin = mcRaspiSystem;
-        this.runTaskTimerAsynchronously(plugin,  60 * 20L,  60 * 20L);
+        this.runTaskTimerAsynchronously(plugin, 5 * 60 * 20L, 10 * 60 * 20L);
     }
 
-    private static Map<UUID, ItemStack[]> inventoryContainer = new HashMap<>();
+    private final static Map<UUID, ItemStack[]> inventoryContainer = new HashMap<>();
 
     @Override
     public void run() {
         for (RaspiPlayer player : plugin.getRaspiPlayers()) {
             inventoryContainer.put(player.getUUID(), player.getPlayer().getInventory().getContents());
-            plugin.getLogger().info("Inventar von " + player.getName() + " Erfolgreich gespeichert.");
         }
     }
 

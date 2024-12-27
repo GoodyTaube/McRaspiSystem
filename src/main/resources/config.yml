@@ -9,6 +9,9 @@ prefix:
 ########------------------########
 Utilities:
   lootChest: true
+  randomTP:
+    center: "29 22 222"
+    radius: 10000
   joinMessage: true
   leaveMessage: true
   dead-signs: true #Create Sign at Player Death Position

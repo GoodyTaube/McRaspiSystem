@@ -4,6 +4,7 @@ import eu.goodyfx.mcraspisystem.managers.RaspiHookManager;
 import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
 import eu.goodyfx.mcraspisystem.tasks.*;
 import eu.goodyfx.mcraspisystem.utils.Item;
+import eu.goodyfx.mcraspisystem.utils.RaspiDebugger;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.SystemStartUp;
 import org.bukkit.Bukkit;
@@ -26,11 +27,14 @@ public final class McRaspiSystem extends JavaPlugin {
     private RaspiModuleManager moduleManager;
     private RaspiHookManager hookManager;
 
+    private RaspiDebugger debugger;
+
     private BukkitTask raspiItemsRunner;
     private BukkitRunnable idleTask;
     private BukkitRunnable weeklyTimer;
     private BukkitRunnable animation;
     private BukkitRunnable restoreInv;
+    private BukkitRunnable dailyCommand;
     private LootChestTimer lootChestTimer;
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
@@ -43,6 +47,7 @@ public final class McRaspiSystem extends JavaPlugin {
     }
 
     private void init() {
+        this.debugger = new RaspiDebugger("Raspi Debugger", getLogger().getResourceBundleName());
         getLogger().info("Welcome to McRaspiSystem");
         hookManager = new RaspiHookManager(this, this);
         setupConfigs();
@@ -55,6 +60,8 @@ public final class McRaspiSystem extends JavaPlugin {
         this.animation = new AnimationBlockDisplay(this);
         this.lootChestTimer = new LootChestTimer(this);
         this.restoreInv = new InventoryBackup(this);
+        this.dailyCommand = new CommandResetTask(this);
+
         moduleManager.getMotdManager().set();
     }
 
@@ -133,6 +140,7 @@ public final class McRaspiSystem extends JavaPlugin {
         this.animation.cancel();
         this.restoreInv.cancel();
         lootChestTimer.cancel();
+        this.dailyCommand.cancel();
     }
 
     /**
@@ -181,6 +189,10 @@ public final class McRaspiSystem extends JavaPlugin {
 
     public LootChestTimer getLootChestTimer() {
         return this.lootChestTimer;
+    }
+
+    public RaspiDebugger getDebugger() {
+        return this.debugger;
     }
 
 }

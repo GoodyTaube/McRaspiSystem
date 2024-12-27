@@ -14,12 +14,12 @@ public class AdminAuaSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return null;
+        return "Fügt kurzzeitig Schaden zu.";
     }
 
     @Override
     public String getSyntax() {
-        return null;
+        return "/admin aua [targetPlayer]";
     }
 
     @Override
@@ -32,9 +32,8 @@ public class AdminAuaSubCommand extends SubCommand {
             if (target != null) {
                 target.setFoodLevel(10);
                 target.damage(10f);
-                return true;
             }
         }
-        return false;
+        return true;
     }
 }
