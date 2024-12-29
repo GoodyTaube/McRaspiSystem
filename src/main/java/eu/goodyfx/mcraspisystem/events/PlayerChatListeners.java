@@ -35,7 +35,7 @@ public class PlayerChatListeners implements Listener {
         plugin.setListeners(this);
     }
 
-    public String lastMessage = "";
+    private String lastMessage = "";
 
 
     @EventHandler(priority = EventPriority.HIGHEST)

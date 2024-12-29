@@ -105,7 +105,7 @@ public class RaspiPlayer {
             player.sendMessage(Component.empty());
             return;
         }
-        getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(message));
+        getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + message));
     }
 
     public void sendActionBar(String message) {

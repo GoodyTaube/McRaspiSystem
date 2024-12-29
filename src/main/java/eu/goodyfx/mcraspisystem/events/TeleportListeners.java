@@ -1,6 +1,7 @@
 package eu.goodyfx.mcraspisystem.events;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.commands.BackCommand;
 import eu.goodyfx.mcraspisystem.commands.SitCommand;
 import org.bukkit.Location;
 import org.bukkit.entity.Animals;
@@ -49,6 +50,7 @@ public record TeleportListeners(McRaspiSystem plugin) implements Listener {
     public void onPlayerTeleport(PlayerTeleportEvent teleportEvent) {
         Player player = teleportEvent.getPlayer();
         Location to = teleportEvent.getTo();
+        BackCommand.getLocationMap().put(player.getUniqueId(), teleportEvent.getFrom());
         player.getNearbyEntities(8, 8, 8).forEach(entity -> {
             if (entity instanceof Animals animal) {
                 if (animal.isLeashed()) {

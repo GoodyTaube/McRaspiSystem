@@ -21,10 +21,10 @@ public class RandomTeleportCommand implements CommandExecutor {
 
     public RandomTeleportCommand(McRaspiSystem plugin) {
         this.plugin = plugin;
-        plugin.setCommand("randomtp", this);
+        plugin.setCommand("randomTP", this);
     }
 
-    private static Map<UUID, Location> playerContainer = new HashMap<>();
+    private final static Map<UUID, Location> playerContainer = new HashMap<>();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {

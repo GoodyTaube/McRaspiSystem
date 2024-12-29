@@ -55,5 +55,9 @@ commands:
     description: Teleport to RB Port
   rbsuche:
     description: Search and Mark RB Port
-  randomtp:
-    description: random teleport
+  randomTP:
+    description: Teleportiert einen Spieler einmal am Tag zufällig.
+    usage: /randomTP
+  back:
+    description: Teleport an die letzte Location
+    usage: /back [player]
