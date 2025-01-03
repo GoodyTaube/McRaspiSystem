@@ -105,7 +105,25 @@ public class RaspiPlayer {
             player.sendMessage(Component.empty());
             return;
         }
-        getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + message));
+        getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(message));
+    }
+
+    /**
+     * Send player a Message with Component API
+     *
+     * @param message The Plain Text Message
+     */
+    public void sendMessage(@Nullable String message, boolean prefix) {
+        if (message == null) {
+            player.sendMessage(Component.empty());
+            return;
+        }
+        StringBuilder builder = new StringBuilder();
+        if (prefix) {
+            builder.append(plugin.getModule().getRaspiMessages().getPrefix());
+        }
+        builder.append(message);
+        getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(builder.toString()));
     }
 
     public void sendActionBar(String message) {

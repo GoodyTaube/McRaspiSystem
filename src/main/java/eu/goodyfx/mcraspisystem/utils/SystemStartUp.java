@@ -48,6 +48,8 @@ public class SystemStartUp {
         new ReiseSucheCommand(plugin);
         new ReisePortCommand(plugin);
         new RandomTeleportCommand(plugin);
+        new BackCommand(plugin);
+        new VoteCommand(plugin);
     }
 
 

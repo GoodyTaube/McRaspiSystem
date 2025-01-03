@@ -42,7 +42,9 @@ public class BackCommand implements CommandExecutor {
             Location location = getLocation(player);
             if (location != null) {
                 player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
-            } else raspiPlayer.sendMessage("<red>Du hast bisher noch keine Location verlassen.");
+            } else {
+                raspiPlayer.sendMessage("<red>Du hast bisher noch keine Location verlassen.");
+            }
             return true;
         }
 
@@ -65,7 +67,9 @@ public class BackCommand implements CommandExecutor {
                 if (location != null) {
                     target.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
                 } else sender.sendRichMessage(target.getName() + "<red> hat bisher noch keine Location verlassen.");
-            } else sender.sendRichMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[0]));
+            } else{
+                sender.sendRichMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[0]));
+            }
         }
         return false;
     }

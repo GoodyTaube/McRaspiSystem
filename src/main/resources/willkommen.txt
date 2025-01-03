@@ -1,0 +1,4 @@
+                <green>Willkommen zurück, {player}
+              <green>Herzlich Willkommen mein Lieber!
+<gray><italic>Hast du daran gedacht dein Fenster nach dem Duschen aufzumachen
+                 [Vote] [Spieler] [Mails]

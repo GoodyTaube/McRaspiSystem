@@ -29,11 +29,11 @@ public class WarteschlangenManager {
      * @return The max online Players
      */
     public int getMaxPlayers() {
-        return plugin.getConfig().getInt("Warteschlange.MAX_PLAYERS");
+        return plugin.getConfig().getInt("warteschlange.maxPlayer");
     }
 
     public List<String> activeWorlds() {
-        return plugin.getConfig().getStringList("Warteschlange.ACTIVE_WORLDS");
+        return plugin.getConfig().getStringList("warteschlange.activeWorlds");
     }
 
 
@@ -61,14 +61,12 @@ public class WarteschlangenManager {
         // If max player
         if (getAffectedPlayers().size() - this.playersQueue.size() > getMaxPlayers()) {
             //FINISH
-            if (!this.playersQueue.isEmpty()) {
-                if (!userManager.hasPersistantValue(player, PlayerValues.AFK)) {
-                    for (Player all : Bukkit.getOnlinePlayers()) {
-                        if (userManager.hasPersistantValue(all, PlayerValues.AFK)) {
-                            addToQueue(all.getUniqueId(), all.getLocation());
-                            setHeader();
-                            break;
-                        }
+            if (!this.playersQueue.isEmpty() && !userManager.hasPersistantValue(player, PlayerValues.AFK)) {
+                for (Player all : Bukkit.getOnlinePlayers()) {
+                    if (userManager.hasPersistantValue(all, PlayerValues.AFK)) {
+                        addToQueue(all.getUniqueId(), all.getLocation());
+                        setHeader();
+                        break;
                     }
                 }
             }

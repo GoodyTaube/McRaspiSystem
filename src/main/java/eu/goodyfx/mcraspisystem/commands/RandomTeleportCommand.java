@@ -16,7 +16,7 @@ import java.util.*;
 
 public class RandomTeleportCommand implements CommandExecutor {
 
-    private Random random = new Random();
+    private final Random random = new Random();
     private final McRaspiSystem plugin;
 
     public RandomTeleportCommand(McRaspiSystem plugin) {

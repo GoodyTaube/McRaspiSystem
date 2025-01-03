@@ -8,6 +8,7 @@ prefix:
 #Utilities
 ########------------------########
 Utilities:
+  vote: "https://www.YourLink.eu"
   lootChest: true
   randomTP:
     center: "29 22 222"

@@ -19,10 +19,16 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class WarteschlangeListeners implements Listener {
 
@@ -131,6 +137,21 @@ public class WarteschlangeListeners implements Listener {
         }
         plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
         timeContainer.put(player.getUniqueId(), new PlayerTime(player));
+        welcomeMessage(plugin.getRaspiPlayer(player));
+    }
+
+    private void welcomeMessage(RaspiPlayer player) {
+        if (plugin.getConfig().contains("Utilities.welcome") && plugin.getConfig().getBoolean("Utilities.welcome")) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(new File(plugin.getDataFolder(), "willkommen.txt"), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    line = line.replace("{player}",player.getName());
+                    player.sendMessage(line);
+                }
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "willkommen.txt konnte nicht gefunden werden.");
+            }
+        }
     }
 
 
