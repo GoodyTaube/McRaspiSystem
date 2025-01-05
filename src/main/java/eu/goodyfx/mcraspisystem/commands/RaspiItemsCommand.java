@@ -30,7 +30,7 @@ public class RaspiItemsCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            if (args.length == 2 && args[0].equalsIgnoreCase("get") && args[1].equalsIgnoreCase("all")) {
+            if (args.length == 2 && args[0].equalsIgnoreCase("give") && args[1].equalsIgnoreCase("all")) {
                 Inventory inventory = Bukkit.createInventory(null, InventoryType.CHEST, MiniMessage.miniMessage().deserialize("Raspi-Items"));
 
                 AtomicInteger sizer = new AtomicInteger();
@@ -51,7 +51,7 @@ public class RaspiItemsCommand implements CommandExecutor {
                 player.openInventory(inventory);
 
             } else {
-                player.sendRichMessage(messages.getUsage("/loot get all"));
+                player.sendRichMessage(messages.getUsage("/loot give all"));
             }
         }
         return false;

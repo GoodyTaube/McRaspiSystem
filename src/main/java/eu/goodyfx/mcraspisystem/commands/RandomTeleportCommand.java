@@ -41,7 +41,7 @@ public class RandomTeleportCommand implements CommandExecutor {
             double highestBlockYAt = player.getWorld().getHighestBlockYAt(location.getBlockX(), location.getBlockZ());
             location.setY(highestBlockYAt);
 
-            if (!location.getBlock().getType().equals(Material.WATER)) {
+            if (!location.getBlock().getType().equals(Material.WATER) || !location.getBlock().getType().equals(Material.LAVA)) {
                 playerContainer.put(player.getUniqueId(), location);
                 player.teleport(location.add(0, 1, 0), PlayerTeleportEvent.TeleportCause.PLUGIN);
             } else {

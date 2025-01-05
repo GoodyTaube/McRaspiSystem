@@ -48,7 +48,7 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
             if (args.length == 1) {
                 result.add("deny");
                 result.add("accept");
-                result.add("update");
+                result.add("kick");
                 return result;
             } else if (args.length == 3) {
                 for (String reason : requestManager.getReasons()) {

@@ -59,7 +59,7 @@ public class PrefixCommand implements CommandExecutor {
 
 
             String messageConverted = message.toString();
-            messageConverted = messageConverted.replaceAll("<obf", "");
+            messageConverted = messageConverted.replace("<obf", "");
             messageConverted = OldColors.convert(messageConverted);
             prefixManager.set(player, messageConverted);
             playerNameController.setPlayerList(player);

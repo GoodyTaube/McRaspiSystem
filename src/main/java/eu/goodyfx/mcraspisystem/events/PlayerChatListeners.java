@@ -2,11 +2,9 @@ package eu.goodyfx.mcraspisystem.events;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
-import eu.goodyfx.mcraspisystem.utils.OldColors;
-import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
-import eu.goodyfx.mcraspisystem.utils.RaspiTimes;
-import eu.goodyfx.mcraspisystem.utils.Settings;
+import eu.goodyfx.mcraspisystem.utils.*;
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -113,10 +111,10 @@ public class PlayerChatListeners implements Listener {
         for (String arg : args) {
 
             if (arg.startsWith("www")) {
-                arg = arg.replace(arg, "<blue><underlined><click:open_url:'http://" + arg + "'>" + arg + "<reset>");
+                arg = arg.replace(arg, "<aqua><underlined><click:open_url:'http://" + arg + "'>" + arg + "<reset>");
 
             } else if (arg.startsWith("http")) {
-                arg = arg.replace(arg, "<blue><underlined><click:open_url:'" + arg + "'>" + arg + "<reset>");
+                arg = arg.replace(arg, "<aqua><underlined><click:open_url:'" + arg + "'>" + arg + "<reset>");
 
             }
 
@@ -193,6 +191,7 @@ public class PlayerChatListeners implements Listener {
     private String hoverText(String text) {
         return "<hover:show_text:'" + text + "'>";
     }
+
 
 
 }
