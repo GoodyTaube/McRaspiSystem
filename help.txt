@@ -10,11 +10,28 @@
         menü                                       öffnet das lootchest itemmenü
     resetRandomtp (playername)                     resettet den täglichen random tp für den angegebenen spieler
     restoreinv (playername)                        restored das inventar des angegebenen spielers (das vor 10 minuten)
-    skull (spielername)                            generiert den kopf des angegebenen spielers
-    sudo (spielername) (command)                   führt einen command über einen anderen spieler aus
+    skull (playername)                             generiert den kopf des angegebenen spielers
+    sudo (playername) (command)                    führt einen command über einen anderen spieler aus
     trader                                         generiert einen trader
-
+/back                                              teleport mich nach einem teleport zur letzten position (sprung ist sprung)
 
 /reise
     list                                           listet alle eingetragenen Ids
-    
+    remove (ID)                                    entfernt angegebene ID aus der liste
+    reset                                          leert die ID
+    setup 
+        setup (ID)                                 platziert die ID auf die aktuelle position
+        setup (playername) (ID)                    schreibt den user in die entsprechende ID
+
+/mute (playername) (grund)                         mutet den spieler für immer (nur default gruppe möglich)
+
+/request
+    accept (playername)                            schaltet den spieler frei
+    deny (playername)                              lehnt den spieler ab / entfernt die spielerrechte wie
+    kick                                           kickt spiler im notfall
+
+/playerinfo (playername)                           Zeigt die Playerinfos im chat
+
+/prefix                                            Setzt einen prefix für den spieler der ihn ausführt
+
+/randomTP                                          Teleportiert den spieler in eine random location. (radius und center in config.yml)
