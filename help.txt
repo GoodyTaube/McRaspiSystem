@@ -1,4 +1,20 @@
 ##################################################################### commands ##############################################################################
-randomTP:
-    center: "29 22 222"
-    radius: 10000
+/admin
+    aua (playername)                               Fügt spieler schaden hinzu!
+    debug                                          
+    filecombine                                    kombiniert alte mit neuen ymls
+    help                                           zeigt liste der subdomains
+    lootChest                                      
+        open                                       zeigt den theoretischen inhalt der lootchests
+        genererte                                  generiert die lootchest auf meiner aktuellen position
+        menü                                       öffnet das lootchest itemmenü
+    resetRandomtp (playername)                     resettet den täglichen random tp für den angegebenen spieler
+    restoreinv (playername)                        restored das inventar des angegebenen spielers (das vor 10 minuten)
+    skull (spielername)                            generiert den kopf des angegebenen spielers
+    sudo (spielername) (command)                   führt einen command über einen anderen spieler aus
+    trader                                         generiert einen trader
+
+
+/reise
+    list                                           listet alle eingetragenen Ids
+    
