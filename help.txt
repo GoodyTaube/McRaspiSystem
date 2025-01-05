@@ -15,6 +15,8 @@
     trader                                         generiert einen trader
 /back                                              teleport mich nach einem teleport zur letzten position (sprung ist sprung)
 
+/loot give all                                     Zeigt 
+
 /reise
     list                                           listet alle eingetragenen Ids
     remove (ID)                                    entfernt angegebene ID aus der liste
@@ -22,12 +24,16 @@
     setup 
         setup (ID)                                 platziert die ID auf die aktuelle position
         setup (playername) (ID)                    schreibt den user in die entsprechende ID
+/rbsuche (playername)                              makiert den Spieler-Teleport im Reisebüro
 
 /mute (playername) (grund)                         mutet den spieler für immer (nur default gruppe möglich)
 
+/tempban (playername) (zeit) (grund)               Sperrt einen spieler für die festgelegte zeit mit grund. zb:/temban Mistergoody 1h besoffen (1s/1h/1d/1w/1m/1y)
+/unban (playername)                                Entsperrt den gebannten spieler wieder.
+
 /request
     accept (playername)                            schaltet den spieler frei
-    deny (playername)                              lehnt den spieler ab / entfernt die spielerrechte wie
+    deny (playername) (grund)                      lehnt den spieler ab / entfernt die spielerrechte wie
     kick                                           kickt spiler im notfall
 
 /playerinfo (playername)                           Zeigt die Playerinfos im chat
