@@ -17,6 +17,8 @@ public abstract class SubCommand {
 
     public abstract String getSyntax();
 
+    public abstract int length();
+
     public abstract boolean commandPerform(RaspiPlayer player, String[] args);
 
 }

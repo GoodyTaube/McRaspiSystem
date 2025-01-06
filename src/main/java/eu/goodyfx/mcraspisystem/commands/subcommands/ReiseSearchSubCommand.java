@@ -30,6 +30,11 @@ public class ReiseSearchSubCommand extends SubCommand {
     }
 
     @Override
+    public int length() {
+        return 1;
+    }
+
+    @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         if ( args.length == 2) {
             ReiseLocationManager.checkUser(player, args[1], plugin);

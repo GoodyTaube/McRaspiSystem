@@ -24,12 +24,17 @@ public class AdminLootChestSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Options to Generate or Open a LootChest Menu";
+        return "Ein Command um die LootChest auf dem Server zu steuern.";
     }
 
     @Override
     public String getSyntax() {
-        return "/admin lootChest <open|generate>";
+        return "/admin lootChest <open|generate|menu>";
+    }
+
+    @Override
+    public int length() {
+        return 1;
     }
 
     @Override

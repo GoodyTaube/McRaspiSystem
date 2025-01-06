@@ -4,27 +4,27 @@ import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.SubCommand;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 
-public class WarteschlangeCommandReload extends SubCommand {
+public class AdminReloadSubCommand extends SubCommand {
 
-    private final McRaspiSystem system;
+    private final McRaspiSystem plugin;
 
-    public WarteschlangeCommandReload(McRaspiSystem system) {
-        this.system = system;
+    public AdminReloadSubCommand(McRaspiSystem plugin) {
+        this.plugin = plugin;
     }
 
     @Override
     public String getLabel() {
-        return "reload";
+        return "reloadConfig";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Läd die config.yml neu.";
     }
 
     @Override
     public String getSyntax() {
-        return null;
+        return "/admin reload";
     }
 
     @Override
@@ -35,11 +35,10 @@ public class WarteschlangeCommandReload extends SubCommand {
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         if (args.length == 1) {
-            system.reloadConfig();
-            system.getModule().getWarteschlangenManager().setHeader();
-            player.getPlayer().sendRichMessage(system.getModule().getRaspiMessages().getPrefix() + "<green>Die Config Datei wurde neu Geladen!");
-            return true;
+            plugin.reloadConfig();
+            player.sendMessage("Die config.yml wurde neu geladen.", true);
+            plugin.getDebugger().info(plugin.getConfig().getString("Utilities.vote"));
         }
-        return false;
+        return true;
     }
 }

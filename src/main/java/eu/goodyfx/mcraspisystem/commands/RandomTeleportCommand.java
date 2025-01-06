@@ -24,7 +24,7 @@ public class RandomTeleportCommand implements CommandExecutor {
         plugin.setCommand("randomTP", this);
     }
 
-    private final static Map<UUID, Location> playerContainer = new HashMap<>();
+    private static final Map<UUID, Location> playerContainer = new HashMap<>();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -41,12 +41,13 @@ public class RandomTeleportCommand implements CommandExecutor {
             double highestBlockYAt = player.getWorld().getHighestBlockYAt(location.getBlockX(), location.getBlockZ());
             location.setY(highestBlockYAt);
 
-            if (!location.getBlock().getType().equals(Material.WATER) || !location.getBlock().getType().equals(Material.LAVA)) {
+            if (!location.clone().subtract(0, 1, 0).getBlock().getType().equals(Material.WATER) || !location.clone().subtract(0, 1, 0).getBlock().getType().equals(Material.LAVA)) {
                 playerContainer.put(player.getUniqueId(), location);
                 player.teleport(location.add(0, 1, 0), PlayerTeleportEvent.TeleportCause.PLUGIN);
             } else {
                 player.performCommand("randomtp");
             }
+            return true;
         }
         return false;
     }

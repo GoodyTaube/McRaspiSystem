@@ -29,6 +29,10 @@ public class AdminRestoreAdminSubCommand extends SubCommand {
     public String getSyntax() {
         return "/admin " + getLabel() + " <player>";
     }
+    @Override
+    public int length() {
+        return 1;
+    }
 
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {

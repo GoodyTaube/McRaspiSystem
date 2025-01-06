@@ -23,12 +23,17 @@ public class AdminSkullSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return null;
+        return "Gibt dir einen SpielerKopf den du per <playerName> festlegst.";
     }
 
     @Override
     public String getSyntax() {
-        return null;
+        return "/admin skull <playerName:UUID:TEXTURELink>";
+    }
+
+    @Override
+    public int length() {
+        return 1;
     }
 
     @Override

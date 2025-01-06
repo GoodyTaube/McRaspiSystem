@@ -27,6 +27,11 @@ public class AdminWartungCommand extends SubCommand {
     }
 
     @Override
+    public int length() {
+        return 0;
+    }
+
+    @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         if(args.length == 1){
 

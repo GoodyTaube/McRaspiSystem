@@ -50,7 +50,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 
     public void addSubCommands() {
         subCommands.add(new AdminHelpCommand(data, this));
-        subCommands.add(new AdminSudoCommand());
+        subCommands.add(new AdminSudoCommand(plugin));
         subCommands.add(new AdminDebugSubCommand(plugin));
         subCommands.add(new AdminSkullSubCommand());
         subCommands.add(new AdminTraderSubCommand(plugin));
@@ -58,6 +58,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminCombineFileSubCommand(plugin));
         subCommands.add(new AdminRestoreAdminSubCommand(plugin));
         subCommands.add(new AdminResetDailyCommandSubCommand(plugin));
+        subCommands.add(new AdminReloadSubCommand(plugin));
     }
 
 
@@ -130,12 +131,11 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 
 
     private void syntaxCheck(Player player, String[] args) {
-        if (args.length == 1) {
-            for (SubCommand subCommand : subCommands) {
-                if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                    player.sendRichMessage("<gray><italic>" + subCommand.getDescription());
-                    player.sendRichMessage(plugin.getModule().getRaspiMessages().getUsage(subCommand.getSyntax()));
-                }
+        for (SubCommand subCommand : subCommands) {
+
+            if (args.length < subCommand.length() &&args[0].equalsIgnoreCase(subCommand.getLabel())) {
+                player.sendRichMessage("<gray><italic>" + subCommand.getDescription());
+                player.sendRichMessage(plugin.getModule().getRaspiMessages().getUsage(subCommand.getSyntax()));
             }
         }
     }

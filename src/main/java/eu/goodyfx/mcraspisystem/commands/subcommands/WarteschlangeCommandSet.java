@@ -38,6 +38,11 @@ public class WarteschlangeCommandSet extends SubCommand {
     }
 
     @Override
+    public int length() {
+        return 1;
+    }
+
+    @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         Player player1 = player.getPlayer();
 

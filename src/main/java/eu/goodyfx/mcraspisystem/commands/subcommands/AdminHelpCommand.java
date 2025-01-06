@@ -23,12 +23,17 @@ public class AdminHelpCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Command to get List of Help.";
+        return "Ein Command um eine Liste von Allen Commands zu bekommen.";
     }
 
     @Override
     public String getSyntax() {
         return "/admin help";
+    }
+
+    @Override
+    public int length() {
+        return 0;
     }
 
     @Override

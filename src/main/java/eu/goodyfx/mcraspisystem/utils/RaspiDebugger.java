@@ -1,28 +1,34 @@
 package eu.goodyfx.mcraspisystem.utils;
 
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.MissingResourceException;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public class RaspiDebugger extends Logger {
 
+    private String pluginName;
+
     /**
-     * Protected method to construct a logger for a named subsystem.
-     * <p>
-     * The logger will be initially configured with a null Level
-     * and with useParentHandlers set to true.
+     * Creates a new PluginLogger that extracts the name from a plugin.
      *
-     * @param name               A name for the logger.  This should
-     *                           be a dot-separated name and should normally
-     *                           be based on the package name or class name
-     *                           of the subsystem, such as java.net
-     *                           or javax.swing.  It may be null for anonymous Loggers.
-     * @param resourceBundleName name of ResourceBundle to be used for localizing
-     *                           messages for this logger.  May be null if none
-     *                           of the messages require localization.
-     * @throws MissingResourceException if the resourceBundleName is non-null and
-     *                                  no corresponding resource can be found.
+     * @param context A reference to the plugin
      */
-    public RaspiDebugger(String name, String resourceBundleName) {
-        super(name, resourceBundleName);
+    public RaspiDebugger(@NotNull Plugin context) {
+        super(context.getClass().getCanonicalName(), null);
+        String prefix = context.getDescription().getPrefix();
+        pluginName = prefix != null ? new StringBuilder().append("[").append(prefix).append("] ").toString() : "[" + context.getDescription().getName() + "] ";
+        setParent(context.getServer().getLogger());
+        setLevel(Level.ALL);
     }
+
+    @Override
+    public void log(@NotNull LogRecord logRecord) {
+        logRecord.setMessage(pluginName + " // DEBUGG //" + logRecord.getMessage());
+        super.log(logRecord);
+    }
+
 }

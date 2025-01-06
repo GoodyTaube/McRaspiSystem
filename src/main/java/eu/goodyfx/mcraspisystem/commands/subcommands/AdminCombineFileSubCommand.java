@@ -34,7 +34,12 @@ public class AdminCombineFileSubCommand extends SubCommand {
 
     @Override
     public String getSyntax() {
-        return "admin combineFile <filepath> <filename> -a";
+        return "/admin combineFile <filepath> <filename> -a";
+    }
+
+    @Override
+    public int length() {
+        return 3;
     }
 
     @Override
@@ -44,8 +49,6 @@ public class AdminCombineFileSubCommand extends SubCommand {
         } else if (args.length == 3 && args[2].equalsIgnoreCase("-a")) {
             convertFiles(player, plugin.getDataFolder().getAbsolutePath(), args[1]);
 
-        } else {
-            player.sendMessage(getSyntax());
         }
         return true;
     }

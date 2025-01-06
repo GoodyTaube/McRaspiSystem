@@ -30,6 +30,10 @@ public class AdminResetDailyCommandSubCommand extends SubCommand {
     public String getSyntax() {
         return "/admin resetCommand <player>";
     }
+    @Override
+    public int length() {
+        return 1;
+    }
 
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {

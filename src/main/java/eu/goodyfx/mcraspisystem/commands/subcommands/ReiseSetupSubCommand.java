@@ -23,6 +23,11 @@ public class ReiseSetupSubCommand extends SubCommand {
     }
 
     @Override
+    public int length() {
+        return 2;
+    }
+
+    @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         if ( args.length >= 2) {
             try {

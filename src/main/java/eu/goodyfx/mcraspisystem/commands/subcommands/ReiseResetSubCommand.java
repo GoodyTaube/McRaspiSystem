@@ -24,6 +24,11 @@ public class ReiseResetSubCommand extends SubCommand {
     }
 
     @Override
+    public int length() {
+        return 1;
+    }
+
+    @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         if (args.length == 2) {
             int id = 0;

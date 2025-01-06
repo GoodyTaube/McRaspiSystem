@@ -47,7 +47,7 @@ public final class McRaspiSystem extends JavaPlugin {
     }
 
     private void init() {
-        this.debugger = new RaspiDebugger("Raspi Debugger", getLogger().getResourceBundleName());
+        this.debugger = new RaspiDebugger(this);
         getLogger().info("Welcome to McRaspiSystem");
         hookManager = new RaspiHookManager(this, this);
         setupConfigs();

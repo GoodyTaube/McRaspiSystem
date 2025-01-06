@@ -26,6 +26,11 @@ public class ReiseListSubCommand extends SubCommand {
     }
 
     @Override
+    public int length() {
+        return 1;
+    }
+
+    @Override
     public boolean commandPerform(RaspiPlayer sender, String[] args) {
         if (args.length == 1) {
             sender.sendMessage(getIDsByRange(0, 10));

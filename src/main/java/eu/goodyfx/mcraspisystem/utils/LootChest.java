@@ -2,7 +2,6 @@ package eu.goodyfx.mcraspisystem.utils;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.tasks.AnimationBlockDisplay;
-import eu.goodyfx.mcraspisystem.tasks.LootChestTimer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -42,12 +41,15 @@ public class LootChest {
         transformation.getTranslation().set(new Vector3f(-.25f, 1, -.25f));
         this.chestAnimation.setTransformation(transformation);
         AnimationBlockDisplay.getBlockDisplayList().add(this.chestAnimation);
+        this.chestAnimation.setPersistent(true);
+
     }
 
     private void display() {
         this.timeDisplay = (TextDisplay) world.spawnEntity(chestLocation.clone().add(0, 2, 0), EntityType.TEXT_DISPLAY);
         this.timeDisplay.text(MiniMessage.miniMessage().deserialize("<green>LootChest"));
         this.timeDisplay.setBillboard(Display.Billboard.CENTER);
+        this.timeDisplay.setPersistent(true);
     }
 
     private void interaction() {
@@ -55,6 +57,7 @@ public class LootChest {
         this.lootInteraction.getPersistentDataContainer().set(new NamespacedKey(plugin, "special"), org.bukkit.persistence.PersistentDataType.INTEGER, 1);
         this.lootInteraction.setInteractionWidth(1f);
         this.lootInteraction.setInteractionHeight(2f);
+        this.lootInteraction.setPersistent(true);
     }
 
     public TextDisplay getTimeDisplay() {

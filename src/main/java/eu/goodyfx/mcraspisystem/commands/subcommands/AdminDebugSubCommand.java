@@ -6,7 +6,6 @@ import eu.goodyfx.mcraspisystem.commands.SubCommand;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.Settings;
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
 public class AdminDebugSubCommand extends SubCommand {
@@ -25,12 +24,17 @@ public class AdminDebugSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Debug Command for Utilities";
+        return "Ein Debug Command für Mistergoody zum Testen.";
     }
 
     @Override
     public String getSyntax() {
-        return "/admin debug <ACTION>";
+        return "/admin debug <DEBUG_FUNCTION>";
+    }
+
+    @Override
+    public int length() {
+        return 1;
     }
 
     @Override
@@ -45,11 +49,9 @@ public class AdminDebugSubCommand extends SubCommand {
             for (Settings setting : Settings.values()) {
                 player.sendMessage(setting.getLabel() + ": " + plugin.getModule().getPlayerSettingsManager().contains(setting, target));
             }
-        } 
+        }
         return true;
     }
-
-
 
 
 }
