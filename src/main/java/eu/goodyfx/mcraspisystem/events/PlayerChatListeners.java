@@ -2,9 +2,11 @@ package eu.goodyfx.mcraspisystem.events;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
-import eu.goodyfx.mcraspisystem.utils.*;
+import eu.goodyfx.mcraspisystem.utils.OldColors;
+import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
+import eu.goodyfx.mcraspisystem.utils.RaspiTimes;
+import eu.goodyfx.mcraspisystem.utils.Settings;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -38,7 +40,6 @@ public class PlayerChatListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(AsyncChatEvent chatEvent) {
-
 
         chatEvent.setCancelled(true);//Disabled the core funktion of normal Minecraft Chat.
         String[] legacy = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()).split(" ");
@@ -191,7 +192,6 @@ public class PlayerChatListeners implements Listener {
     private String hoverText(String text) {
         return "<hover:show_text:'" + text + "'>";
     }
-
 
 
 }
