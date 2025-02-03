@@ -60,7 +60,7 @@ public class WarteschlangeCommand implements CommandExecutor, TabCompleter {
             if (args.length > 0) {
                 for (SubCommand subCommand : subCommands) {
                     if (args[0].startsWith(subCommand.getLabel())) {
-                        return subCommand.commandPerform(new RaspiPlayer(plugin, player), args);
+                        return subCommand.commandPerform(new RaspiPlayer(player), args);
                     }
                 }
             } else {

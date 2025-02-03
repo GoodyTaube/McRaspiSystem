@@ -66,7 +66,7 @@ public class AFKCommand implements CommandExecutor {
                 playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Du bist nun AFK"));
                 player.nameController().setPlayerList(playerD);
 
-                PlayerAFKEvent afkEvent = new PlayerAFKEvent(new RaspiPlayer(plugin, playerD));
+                PlayerAFKEvent afkEvent = new PlayerAFKEvent(new RaspiPlayer(playerD));
                 Bukkit.getPluginManager().callEvent(afkEvent);
                 return true;
             }

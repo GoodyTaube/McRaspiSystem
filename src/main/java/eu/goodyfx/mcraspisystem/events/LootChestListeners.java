@@ -89,7 +89,7 @@ public class LootChestListeners implements Listener {
 
     private void lootChest(InventoryClickEvent clickEvent) {
         Player player = (Player) clickEvent.getWhoClicked();
-        RaspiPlayer raspiPlayer = new RaspiPlayer(plugin, player);
+        RaspiPlayer raspiPlayer = new RaspiPlayer(player);
         if (isLootChest(clickEvent.getView())) {
             handleLootChestMenuClick(clickEvent, raspiPlayer);
             handleBackItem(clickEvent, raspiPlayer);
@@ -138,7 +138,7 @@ public class LootChestListeners implements Listener {
 
 
     private void outsideCheck(InventoryClickEvent clickEvent) {
-        if (isLootChest(clickEvent.getView()) &&clickEvent.getSlotType().equals(InventoryType.SlotType.OUTSIDE)) {
+        if (isLootChest(clickEvent.getView()) && clickEvent.getSlotType().equals(InventoryType.SlotType.OUTSIDE)) {
             clickEvent.setCancelled(true);
         }
     }

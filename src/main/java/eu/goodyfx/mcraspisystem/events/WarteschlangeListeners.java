@@ -39,7 +39,7 @@ public class WarteschlangeListeners implements Listener {
     private final UserManager userManager;
     private final RaspiMessages data;
 
-    private final Map<InetAddress, String> IP_CONTAINER = new HashMap<>();
+    private static final Map<InetAddress, String> IP_CONTAINER = new HashMap<>();
     private final Map<UUID, PlayerTime> timeContainer = new HashMap<>();
 
     public WarteschlangeListeners(McRaspiSystem plugin) {

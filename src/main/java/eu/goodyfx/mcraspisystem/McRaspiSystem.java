@@ -151,7 +151,7 @@ public final class McRaspiSystem extends JavaPlugin {
     public Set<RaspiPlayer> getRaspiPlayers() {
         Set<RaspiPlayer> playerSet = new HashSet<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            playerSet.add(new RaspiPlayer(this, player));
+            playerSet.add(new RaspiPlayer(player));
         }
         return playerSet;
     }
@@ -163,7 +163,7 @@ public final class McRaspiSystem extends JavaPlugin {
      * @return Converted Raspi PLayer
      */
     public RaspiPlayer getRaspiPlayer(Player player) {
-        return new RaspiPlayer(this, player);
+        return new RaspiPlayer(player);
     }
 
     /**

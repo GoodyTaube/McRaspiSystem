@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -17,16 +18,14 @@ import java.util.UUID;
 @SuppressWarnings("unused")
 public class RaspiPlayer {
 
-    private final McRaspiSystem plugin;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private final Player player;
 
-    public RaspiPlayer(McRaspiSystem plugin, Player player) {
-        this.plugin = plugin;
+    public RaspiPlayer(Player player) {
         this.player = player;
     }
 
     public RaspiPlayer(McRaspiSystem plugin, UUID uuid) {
-        this.plugin = plugin;
         this.player = Bukkit.getPlayer(uuid);
     }
 

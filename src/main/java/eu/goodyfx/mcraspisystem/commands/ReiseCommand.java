@@ -55,7 +55,7 @@ public class ReiseCommand implements CommandExecutor, TabCompleter {
         if (sender instanceof Player player) {
             for (SubCommand subCommand : subCommands) {
                 if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                    if (subCommand.commandPerform(new RaspiPlayer(system, player), args)) {
+                    if (subCommand.commandPerform(new RaspiPlayer(player), args)) {
                         return true;
                     } else {
                         if (subCommand.getDescription() != null && subCommand.getSyntax() != null) {

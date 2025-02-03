@@ -110,7 +110,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 syntaxCheck(player, args);
                 for (SubCommand subCommand : subCommands) {
                     if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                        return subCommand.commandPerform(new RaspiPlayer(plugin, player), args);
+                        return subCommand.commandPerform(new RaspiPlayer(player), args);
                     }
                 }
             } else {
@@ -216,7 +216,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             return false;
         }
 
-        RaspiPlayer raspiPlayer = new RaspiPlayer(plugin, player);
+        RaspiPlayer raspiPlayer = new RaspiPlayer(player);
 
         plugin.getRaspiPlayers().forEach(all -> {
             if (all.hasSetting(Settings.MESSAGES)) {

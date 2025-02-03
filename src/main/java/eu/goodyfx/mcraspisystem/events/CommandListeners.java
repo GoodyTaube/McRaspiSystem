@@ -50,7 +50,7 @@ public class CommandListeners implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCommand(PlayerCommandPreprocessEvent commandEvent) {
         String[] command = commandEvent.getMessage().split(" ");
-        RaspiPlayer player = new RaspiPlayer(plugin, commandEvent.getPlayer());
+        RaspiPlayer player = new RaspiPlayer(commandEvent.getPlayer());
         checkMuted(commandEvent, command); //Wichtig
         reloadServer(commandEvent, command, player);
     }
