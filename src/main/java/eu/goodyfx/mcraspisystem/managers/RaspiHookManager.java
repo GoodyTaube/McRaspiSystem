@@ -31,7 +31,7 @@ public class RaspiHookManager {
         boolean hook = false;
         hook = luckPermsHook();
         hook = protocolManager();
-        discordIntegration = new DiscordIntegration(system);
+        discordIntegration = new DiscordIntegration();
         if (!hook) {
             plugin.getLogger().log(Level.SEVERE, "Hooking Failed!");
             Bukkit.getPluginManager().disablePlugin(plugin);

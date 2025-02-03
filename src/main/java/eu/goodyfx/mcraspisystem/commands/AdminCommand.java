@@ -117,11 +117,6 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 player.sendRichMessage(data.getUsage("/admin help"));
             }
         } else {
-            //CONSOLE
-            if (args[0].equalsIgnoreCase("skull")) {
-                return skull(sender, args);
-            }
-
             if (args.length == 2) {
                 return teleportController(sender, args);
             }
@@ -133,7 +128,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
     private void syntaxCheck(Player player, String[] args) {
         for (SubCommand subCommand : subCommands) {
 
-            if (args.length < subCommand.length() &&args[0].equalsIgnoreCase(subCommand.getLabel())) {
+            if (args.length < subCommand.length() && args[0].equalsIgnoreCase(subCommand.getLabel())) {
                 player.sendRichMessage("<gray><italic>" + subCommand.getDescription());
                 player.sendRichMessage(plugin.getModule().getRaspiMessages().getUsage(subCommand.getSyntax()));
             }
@@ -169,7 +164,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 }
                 return true;
             } catch (MalformedURLException e) {
-                Bukkit.getLogger().log(Level.SEVERE, "Error while Getting HEAD!", e);
+                plugin.getLogger().log(Level.SEVERE, "Error while Getting HEAD!", e);
             }
         }
         return false;
@@ -230,7 +225,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             }
         });
         String log = String.format("Raspi-Teleport: %s hat Teleport %s benutzt", player.getName(), location);
-        Bukkit.getLogger().info(log);
+        plugin.getLogger().info(log);
         return true;
     }
 
