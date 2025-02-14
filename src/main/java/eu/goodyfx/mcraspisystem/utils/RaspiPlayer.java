@@ -4,18 +4,22 @@ package eu.goodyfx.mcraspisystem.utils;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PlayerSettingsManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
 @SuppressWarnings("unused")
+@Getter
 public class RaspiPlayer {
 
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
@@ -25,12 +29,17 @@ public class RaspiPlayer {
         this.player = player;
     }
 
-    public RaspiPlayer(McRaspiSystem plugin, UUID uuid) {
+    public RaspiPlayer(UUID uuid) {
         this.player = Bukkit.getPlayer(uuid);
     }
 
-    public Player getPlayer() {
-        return this.player;
+
+    public void openInventory(Inventory inventory) {
+        getPlayer().openInventory(inventory);
+    }
+
+    public void openInventory(InventoryView view){
+        getPlayer().openInventory(view);
     }
 
     public String getPrefix() {

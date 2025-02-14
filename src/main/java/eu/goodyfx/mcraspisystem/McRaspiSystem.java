@@ -7,6 +7,7 @@ import eu.goodyfx.mcraspisystem.utils.Item;
 import eu.goodyfx.mcraspisystem.utils.RaspiDebugger;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.SystemStartUp;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+@Getter
 public final class McRaspiSystem extends JavaPlugin {
 
     private RaspiModuleManager moduleManager;
@@ -101,14 +103,6 @@ public final class McRaspiSystem extends JavaPlugin {
         return moduleManager;
     }
 
-    /**
-     * Get all third Party Plugins to Run System
-     *
-     * @return A Manager with all NEEDED API'S
-     */
-    public RaspiHookManager getHookManager() {
-        return hookManager;
-    }
 
     /**
      * Setup Command Class and load.
@@ -176,10 +170,6 @@ public final class McRaspiSystem extends JavaPlugin {
         return new NamespacedKey(this, key);
     }
 
-    public NamespacedKey getRaspiItemKey() {
-        return this.raspiItemKey;
-    }
-
     public Item getMapItem() throws NullPointerException {
         if (mapItem != null) {
             return this.mapItem;
@@ -187,12 +177,5 @@ public final class McRaspiSystem extends JavaPlugin {
         throw new NullPointerException("Item is Null!");
     }
 
-    public LootChestTimer getLootChestTimer() {
-        return this.lootChestTimer;
-    }
-
-    public RaspiDebugger getDebugger() {
-        return this.debugger;
-    }
 
 }

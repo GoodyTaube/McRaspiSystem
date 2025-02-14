@@ -67,17 +67,17 @@ public class RaspiQuee {
         for (UUID per : playerContainer.keySet()) {
             int oldPos = playerContainer.get(per).getQueuePosition();
             playerContainer.get(per).setPosition(queue);
-            if(playerContainer.get(per).getQueuePosition() == oldPos){
+            if (playerContainer.get(per).getQueuePosition() == oldPos) {
                 return;
             }
-            sendQueuePosition(new RaspiPlayer(plugin, per));
+            sendQueuePosition(new RaspiPlayer(per));
         }
     }
 
-    public List<Player> getAllowedPlayers(){
+    public List<Player> getAllowedPlayers() {
         List<Player> players = new ArrayList<>();
-        Bukkit.getOnlinePlayers().forEach(all ->{
-            if(!queue.contains(all.getUniqueId())){
+        Bukkit.getOnlinePlayers().forEach(all -> {
+            if (!queue.contains(all.getUniqueId())) {
                 players.add(all);
             }
         });

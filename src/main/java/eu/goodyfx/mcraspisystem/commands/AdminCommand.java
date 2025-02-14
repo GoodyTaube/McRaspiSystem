@@ -6,6 +6,7 @@ import eu.goodyfx.mcraspisystem.commands.subcommands.*;
 import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.Settings;
+import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,21 +30,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-/**
- * Represents a command executor and tab completer for admin commands in the McRaspiSystem plugin.
- * This class handles the registration and execution of subcommands associated with administrative operations.
- * Utilizes the McRaspiSystem and RaspiMessages for command handling and messaging.
- */
+@Getter
 public class AdminCommand implements CommandExecutor, TabCompleter {
 
-    private final McRaspiSystem plugin;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private final RaspiMessages data;
 
     private final List<SubCommand> subCommands = new ArrayList<>();
 
-    public AdminCommand(@NotNull McRaspiSystem plugin) {
+    public AdminCommand() {
         plugin.setCommand("admin", this, this);
-        this.plugin = plugin;
         this.data = plugin.getModule().getRaspiMessages();
         addSubCommands();
 
@@ -53,7 +50,6 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminSudoCommand(plugin));
         subCommands.add(new AdminDebugSubCommand(plugin));
         subCommands.add(new AdminSkullSubCommand());
-        subCommands.add(new AdminTraderSubCommand(plugin));
         subCommands.add(new AdminLootChestSubCommand(plugin));
         subCommands.add(new AdminCombineFileSubCommand(plugin));
         subCommands.add(new AdminRestoreAdminSubCommand(plugin));
@@ -227,10 +223,6 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         String log = String.format("Raspi-Teleport: %s hat Teleport %s benutzt", player.getName(), location);
         plugin.getLogger().info(log);
         return true;
-    }
-
-    public List<SubCommand> getSubCommands() {
-        return this.subCommands;
     }
 
 }

@@ -31,7 +31,7 @@ public class SystemStartUp {
     private void addCommands(McRaspiSystem plugin) {
         systemTemplates.forEach(SystemTemplate::commands);
         //Main System
-        new AdminCommand(plugin);
+        new AdminCommand();
         new AFKCommand(plugin);
         new ChatColorCommand(plugin);
         new InfoCommand(plugin);
@@ -50,6 +50,7 @@ public class SystemStartUp {
         new RandomTeleportCommand(plugin);
         new BackCommand(plugin);
         new VoteCommand(plugin);
+        new TraderCommand();
     }
 
 
@@ -68,6 +69,7 @@ public class SystemStartUp {
         new PlayerInteractListeners(plugin);
         new LootChestListeners(plugin);
         //new WarnListeners(plugin);
+        new TraderListeners();
     }
 
     public void addToLists(SystemTemplate system) {

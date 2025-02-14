@@ -64,3 +64,5 @@ commands:
   vote:
     description: Kommando um den Vote link aufzurufen.
     usage: /vote
+  trader:
+    description: handles Raspi Trader

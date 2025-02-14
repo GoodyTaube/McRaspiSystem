@@ -3,7 +3,9 @@ package eu.goodyfx.mcraspisystem.managers;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
 import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
+import lombok.Getter;
 
+@Getter
 public class RaspiModuleManager {
 
     private final JoinMessageManager joinMessageManager;
@@ -22,6 +24,7 @@ public class RaspiModuleManager {
     private final TimeDBManager timeDBManager;
     private final LootChestManager lootChestManager;
     private final MOTDManager motdManager;
+    private final TraderDB traderDB = new TraderDB();
 
     public RaspiModuleManager(McRaspiSystem system) {
         this.plugin = system;
