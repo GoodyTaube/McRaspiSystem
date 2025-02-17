@@ -23,6 +23,9 @@ public class TraderDB {
     private static final String DB_TRADER_SPECIAL_KEY = "trader.%s.special";
     private static final String DB_TRADER_NAME = "trader.%s.name";
     private static final String DB_TRADER_SHOP = "trader.%s.shop";
+    public static final String DB_SHOP_ITEM_1 = "trader.%s.shop.%s.buy1";
+    public static final String DB_SHOP_ITEM_2 = "trader.%s.shop.%s.buy2";
+    public static final String DB_SHOP_RES = "trader.%s.shop.%s.result";
 
 
     private final File file = new File(plugin.getDataFolder(), DATABASE_PATH);
@@ -51,6 +54,40 @@ public class TraderDB {
             throw new AllReadyExistException(String.format("Trader: %s existiert bereits.", name));
         }
     }
+
+    public void addItemToShop(String traderName, ItemStack result, ItemStack... buyItems) {
+        int id = 0;
+        if (configuration.contains(getDatabasePath(DB_TRADER_SHOP, traderName))) {
+            id = Objects.requireNonNull(configuration.getConfigurationSection(getDatabasePath(DB_TRADER_SHOP, traderName))).getKeys(false).size();
+        }
+        configuration.set(String.format(DB_SHOP_RES, traderName, id), result);
+        configuration.set(String.format(DB_SHOP_ITEM_1, traderName, id), buyItems[0]);
+        if (buyItems.length == 2) {
+            configuration.set(String.format(DB_SHOP_ITEM_2, traderName, id), buyItems[1]);
+        }
+        save();
+    }
+
+    public void setItemToShop(String traderName, Integer id, ItemStack result, ItemStack... buyItems) {
+        configuration.set(String.format(DB_SHOP_RES, traderName, id), result);
+        configuration.set(String.format(DB_SHOP_ITEM_1, traderName, id), buyItems[0]);
+        if (buyItems.length == 2) {
+            configuration.set(String.format(DB_SHOP_ITEM_2, traderName, id), buyItems[1]);
+        }
+        save();
+    }
+
+    public ItemStack getItemStack(String traderName, String path, int id) {
+        return configuration.getItemStack(String.format(path, traderName, id));
+    }
+
+    public List<String> getShopIds(String trader) {
+        if (configuration.contains(getDatabasePath(DB_TRADER_SHOP, trader))) {
+            return Objects.requireNonNull(configuration.getConfigurationSection(getDatabasePath(DB_TRADER_SHOP, trader))).getKeys(false).stream().toList();
+        }
+        return List.of();
+    }
+
 
     public void remove(String traderName) {
         traderName = traderName.toLowerCase();
@@ -104,8 +141,21 @@ public class TraderDB {
         configuration.set(getDatabasePath(DB_TRADER_SHOP, traderName), "");
     }
 
-    public boolean shopExist(String trader){
+    public boolean shopExist(String trader) {
         return configuration.contains(getDatabasePath(DB_TRADER_SHOP, trader));
+    }
+
+
+    public boolean shopItemExist(String trader, String id, String path) {
+        return configuration.contains(String.format(path, trader, id));
+    }
+
+    public void removeRecipe(String trader, Integer id) {
+        configuration.set(String.format(DB_SHOP_ITEM_1, trader, id), null);
+        configuration.set(String.format(DB_SHOP_ITEM_2, trader, id), null);
+        configuration.set(String.format(DB_SHOP_RES, trader, id), null);
+        configuration.set(String.format(DB_TRADER_SHOP + ".%s", trader, id), null);
+        save();
     }
 
 

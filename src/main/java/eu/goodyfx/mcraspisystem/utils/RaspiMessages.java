@@ -159,5 +159,4 @@ public class RaspiMessages {
     public String get(String subPath) {
         return Objects.requireNonNull(OldColors.convert(plugin.getModule().getMessageManager().getString("messages." + subPath)));
     }
-
 }

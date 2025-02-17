@@ -38,7 +38,7 @@ public class RaspiPlayer {
         getPlayer().openInventory(inventory);
     }
 
-    public void openInventory(InventoryView view){
+    public void openInventory(InventoryView view) {
         getPlayer().openInventory(view);
     }
 
@@ -164,12 +164,31 @@ public class RaspiPlayer {
         player.playSound(player.getLocation(), sound.getSound(), sound.getVolume(), sound.getPitch());
     }
 
+    /**
+     * Get Player current Location
+     *
+     * @return The Player Location
+     */
     public Location getLocation() {
         return player.getLocation();
     }
 
+    /**
+     * Check if player is Default
+     *
+     * @return TRUE if player is NEWBIE
+     */
     public boolean isDefault() {
         return player.isPermissionSet("group.default") && !player.isPermissionSet("group." + plugin.getConfig().getString("Utilities.playerGroup"));
+    }
+
+    /**
+     * Sends a formatted Debug Message with "DEBUG://" PREFIX
+     *
+     * @param message The Debug Message
+     */
+    public void sendDebugMessage(String message) {
+        player.sendRichMessage(String.format("<dark_red>DEBUG:// <gray>%s", message));
     }
 
 
