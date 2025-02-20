@@ -86,7 +86,7 @@ public class TraderListeners implements Listener {
     }
 
     public void addItem(RaspiPlayer player, InventoryClickEvent clickEvent) {
-        if (clickEvent.getCurrentItem() != null && clickEvent.getCurrentItem().hasItemMeta() && clickEvent.getCurrentItem().getItemMeta().hasCustomModelData() && clickEvent.getCurrentItem().getItemMeta().getCustomModelData() == 100) {
+        if (clickEvent.getCurrentItem() != null && clickEvent.getCurrentItem().hasItemMeta() && clickEvent.getCurrentItem().getItemMeta().hasCustomModelData() && clickEvent.getCurrentItem().getItemMeta().getCustomModelData() == -1) {
             player.getPlayer().closeInventory();
             player.openInventory(TraderCommand.getEditInventory());
         }

@@ -143,7 +143,7 @@ public class TraderCommand implements CommandExecutor, TabCompleter {
         }
 
         //Rezept Hinzufügen Item
-        ItemStack stack = new ItemBuilder(Material.GOLD_INGOT).setModelID(100).displayName("<green><b>Rezept Hinzufügen").build();
+        ItemStack stack = new ItemBuilder(Material.GOLD_INGOT).setModelID(-1).displayName("<green><b>Rezept Hinzufügen").build();
         for (String id : traderDB.getShopIds(trader)) {
             //Rezepte Anzeigen im Inventar
             ItemStack result = traderDB.getItemStack(trader, TraderDB.DB_SHOP_RES, Integer.parseInt(id));
