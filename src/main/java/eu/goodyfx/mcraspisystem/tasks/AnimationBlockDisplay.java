@@ -18,7 +18,7 @@ public class AnimationBlockDisplay extends BukkitRunnable {
         this.runTaskTimerAsynchronously(plugin, 0, 1L); // Läuft alle 1 Ticks für eine flüssige Animation
     }
 
-    private static List<BlockDisplay> blockDisplayList = new ArrayList<>();
+    private final static List<BlockDisplay> blockDisplayList = new ArrayList<>();
 
     private double tickCount = 0; // Zähler für die Sinuswellen-Berechnung
     private final double amplitude = 0.1; // Amplitude der Bewegung (maximale Höhe)

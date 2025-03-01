@@ -23,9 +23,11 @@ public class TraderDB {
     private static final String DB_TRADER_SPECIAL_KEY = "trader.%s.special";
     private static final String DB_TRADER_NAME = "trader.%s.name";
     private static final String DB_TRADER_SHOP = "trader.%s.shop";
+    public static final String DB_TRADER_RANDOM = "trader.%s.random";
     public static final String DB_SHOP_ITEM_1 = "trader.%s.shop.%s.buy1";
     public static final String DB_SHOP_ITEM_2 = "trader.%s.shop.%s.buy2";
     public static final String DB_SHOP_RES = "trader.%s.shop.%s.result";
+
 
 
     private final File file = new File(plugin.getDataFolder(), DATABASE_PATH);
@@ -74,6 +76,16 @@ public class TraderDB {
         if (buyItems.length == 2) {
             configuration.set(String.format(DB_SHOP_ITEM_2, traderName, id), buyItems[1]);
         }
+        save();
+    }
+
+    public void setRandom(String trader, boolean value) {
+        if (!value) {
+            configuration.set(getDatabasePath(DB_TRADER_RANDOM, trader), null);
+            save();
+            return;
+        }
+        configuration.set(getDatabasePath(DB_TRADER_RANDOM, trader), true);
         save();
     }
 
@@ -145,6 +157,9 @@ public class TraderDB {
         return configuration.contains(getDatabasePath(DB_TRADER_SHOP, trader));
     }
 
+    public boolean isRandom(String trader) {
+        return configuration.contains(getDatabasePath(DB_TRADER_RANDOM, trader));
+    }
 
     public boolean shopItemExist(String trader, String id, String path) {
         return configuration.contains(String.format(path, trader, id));

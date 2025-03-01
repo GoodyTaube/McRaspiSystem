@@ -59,7 +59,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (command.getName().equalsIgnoreCase("admin")) {
             List<String> results = new ArrayList<>();
             if (args.length == 1) {
@@ -99,7 +99,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
      * @return true if the command was successful, false otherwise.
      */
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (sender instanceof Player player) {
             //ARGS
             if (args.length > 0) {

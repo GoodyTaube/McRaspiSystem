@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 
 @Getter
@@ -30,6 +31,9 @@ public final class McRaspiSystem extends JavaPlugin {
     private RaspiHookManager hookManager;
 
     private RaspiDebugger debugger;
+
+    private Random random = new Random();
+
 
     private BukkitTask raspiItemsRunner;
     private BukkitRunnable idleTask;

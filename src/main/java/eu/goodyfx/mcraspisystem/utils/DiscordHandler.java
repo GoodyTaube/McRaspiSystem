@@ -18,6 +18,7 @@ public class DiscordHandler {
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private URL webHookURL = null;
 
+
     public DiscordHandler(String webHookURL) {
         try {
             this.webHookURL = new URI(webHookURL).toURL();
@@ -31,6 +32,18 @@ public class DiscordHandler {
         if (this.webHookURL != null) {
             try {
                 final HttpsURLConnection connection = (HttpsURLConnection) webHookURL.openConnection();
+
+                if (connection.getResponseCode() == 522) {
+                    plugin.getLogger().info("====================================");
+                    plugin.getLogger().info("Discord hat Massive Server Probleme!");
+                    String mess = String.format("Chat-Nachicht: %s konnte nicht Gesendet werden", message);
+                    plugin.getLogger().info(mess);
+                    plugin.getLogger().info(connection.getResponseMessage());
+                    plugin.getLogger().info("====================================");
+                    return;
+                }
+
+
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11");

@@ -6,6 +6,7 @@ import eu.goodyfx.mcraspisystem.managers.LocationManager;
 import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
 import eu.goodyfx.mcraspisystem.utils.PlayerValues;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
+import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -33,6 +34,7 @@ public class AFKCommand implements CommandExecutor {
         plugin.setCommand("afk", this);
     }
 
+    @Getter
     private static final Map<UUID, Integer> playerIDLE = new HashMap<>();
 
 
@@ -73,10 +75,6 @@ public class AFKCommand implements CommandExecutor {
 
         }
         return false;
-    }
-
-    public static Map<UUID, Integer> getPlayerIDLE() {
-        return playerIDLE;
     }
 
 }

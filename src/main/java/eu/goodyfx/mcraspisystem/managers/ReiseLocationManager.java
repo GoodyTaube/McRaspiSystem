@@ -9,7 +9,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -164,7 +163,10 @@ public class ReiseLocationManager {
     }
 
     private static Set<String> getKeys() {
-        return Objects.requireNonNull(config.getConfigurationSection("reise")).getKeys(false);
+        if (config.contains("reise")) {
+            return Objects.requireNonNull(config.getConfigurationSection("reise")).getKeys(false);
+        }
+        return Set.of();
     }
 
     public static String getIDSArray() {

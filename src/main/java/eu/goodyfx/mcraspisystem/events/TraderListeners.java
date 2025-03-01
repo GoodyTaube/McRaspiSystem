@@ -4,9 +4,11 @@ import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.TraderCommand;
 import eu.goodyfx.mcraspisystem.managers.TraderDB;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
+import io.papermc.paper.event.player.PlayerNameEntityEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -28,10 +30,25 @@ public class TraderListeners implements Listener {
 
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private final TraderDB traderDB = plugin.getModuleManager().getTraderDB();
+    private static final String TRADER_NAME = "trader";
 
     public TraderListeners() {
         plugin.setListeners(this);
     }
+
+    @EventHandler
+    public void onNameChange(PlayerNameEntityEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof Villager villager) {
+            PersistentDataContainer container = villager.getPersistentDataContainer();
+            if (container.has(plugin.getNameSpaced(TRADER_NAME))) {
+                event.setCancelled(true);
+                event.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<red>\"Ah ah ah, you didn't say the magic word\""));
+            }
+        }
+
+    }
+
 
     @EventHandler
     public void onTraderClick(PlayerInteractAtEntityEvent entityEvent) {
@@ -40,8 +57,15 @@ public class TraderListeners implements Listener {
             Villager villager = (Villager) entity;
             RaspiPlayer player = plugin.getRaspiPlayer(entityEvent.getPlayer());
             PersistentDataContainer container = villager.getPersistentDataContainer();
-            if (container.has(plugin.getNameSpaced("trader"))) {
-                String traderUID = container.get(plugin.getNameSpaced("trader"), PersistentDataType.STRING);
+
+            if (player.getPlayer().getGameMode().equals(GameMode.CREATIVE) && player.getPlayer().isSneaking()) {
+                String name = container.get(plugin.getNameSpaced("trader"), PersistentDataType.STRING);
+                player.getPlayer().performCommand(String.format("trader edit %s", traderDB.getTraderByID(name)));
+                return;
+            }
+
+            if (container.has(plugin.getNameSpaced(TRADER_NAME))) {
+                String traderUID = container.get(plugin.getNameSpaced(TRADER_NAME), PersistentDataType.STRING);
                 String traderName = String.format("<green>%s", traderDB.getTraderName(traderDB.getTraderByID(traderUID)));
                 //Generate Merchant and OPEN by Type
                 entityEvent.setCancelled(true);
@@ -66,13 +90,18 @@ public class TraderListeners implements Listener {
         if (title.equalsIgnoreCase("Trader Rezepte")) {
             clickEvent.setCancelled(true);
             addItem(player, clickEvent);
+            clickedRandom(player, clickEvent);
             clickedRecipe(player, clickEvent);
         }
     }
 
     private void clickedRecipe(RaspiPlayer player, InventoryClickEvent clickEvent) {
+        ItemStack current = clickEvent.getCurrentItem();
+        if (current == null || !current.hasItemMeta() || !current.getItemMeta().hasCustomModelData()) {
+            return;
+        }
 
-        if (clickEvent.getCurrentItem() != null && clickEvent.getCurrentItem().hasItemMeta() && clickEvent.getCurrentItem().getItemMeta().hasCustomModelData()) {
+        if (!isItem(current, -1) && !isItem(current, -21) && !isItem(current, -20)) {
             int id = clickEvent.getCurrentItem().getItemMeta().getCustomModelData();
             String trader = TraderCommand.traderEditContainer.get(player.getUUID());
             TraderCommand.traderSAVEContainer.put(player.getUUID(), id);
@@ -86,10 +115,33 @@ public class TraderListeners implements Listener {
     }
 
     public void addItem(RaspiPlayer player, InventoryClickEvent clickEvent) {
-        if (clickEvent.getCurrentItem() != null && clickEvent.getCurrentItem().hasItemMeta() && clickEvent.getCurrentItem().getItemMeta().hasCustomModelData() && clickEvent.getCurrentItem().getItemMeta().getCustomModelData() == -1) {
+
+        if (isItem(clickEvent.getCurrentItem(), -1)) {
             player.getPlayer().closeInventory();
             player.openInventory(TraderCommand.getEditInventory());
         }
+    }
+
+    public void clickedRandom(RaspiPlayer player, InventoryClickEvent clickEvent) {
+        if (isItem(clickEvent.getCurrentItem(), -21)) {
+            //RANDOM MACHEN
+            traderDB.setRandom(TraderCommand.traderEditContainer.get(player.getUUID()), true);
+            player.getPlayer().closeInventory();
+            player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt Random.");
+            TraderCommand.traderEditContainer.remove(player.getUUID());
+        }
+
+        if (isItem(clickEvent.getCurrentItem(), -20)) {
+            //RANDOM REVOKE
+            traderDB.setRandom(TraderCommand.traderEditContainer.get(player.getUUID()), false);
+            player.getPlayer().closeInventory();
+            player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt nicht mehr Random.");
+            TraderCommand.traderEditContainer.remove(player.getUUID());
+        }
+    }
+
+    private boolean isItem(ItemStack stack, int modelID) {
+        return stack != null && stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == modelID;
     }
 
 
@@ -131,6 +183,25 @@ public class TraderListeners implements Listener {
     private Merchant generateMerchant(String traderType) {
         Merchant merchant = Bukkit.createMerchant();
         List<MerchantRecipe> recipes = new ArrayList<>();
+
+        //RANDOM
+        if (traderDB.isRandom(traderType)) {
+            List<String> shopID = traderDB.getShopIds(traderType);
+            int size = shopID.size();
+
+            int id = plugin.getRandom().nextInt(size);
+
+            MerchantRecipe merchantRecipe = new MerchantRecipe(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_RES, Integer.parseInt(shopID.get(id))), 999);
+            merchantRecipe.addIngredient(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_ITEM_1, Integer.parseInt(shopID.get(id))));
+            if (traderDB.shopItemExist(traderType, shopID.get(id), TraderDB.DB_SHOP_ITEM_2)) {
+                merchantRecipe.addIngredient(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_ITEM_2, Integer.parseInt(shopID.get(id))));
+            }
+            recipes.add(merchantRecipe);
+            merchant.setRecipes(recipes);
+            return merchant;
+        }
+
+
         for (String ids : traderDB.getShopIds(traderType)) {
             MerchantRecipe merchantRecipe = new MerchantRecipe(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_RES, Integer.parseInt(ids)), 999);
             merchantRecipe.addIngredient(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_ITEM_1, Integer.parseInt(ids)));
