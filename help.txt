@@ -13,7 +13,7 @@
     skull (playername)                             generiert den kopf des angegebenen spielers
     sudo (playername) (command)                    führt einen command über einen anderen spieler aus
     trader                                         generiert einen trader
-    reloadConfig                                   Bernd ist zu faul um das hinzu zu fügen.
+    reloadConfig                                   Bernd ist zu faul um das hinzu zu fügen. #eyyy :O
 /back                                              teleport mich nach einem teleport zur letzten position (sprung ist sprung)
 
 /loot give all                                     Zeigt 
