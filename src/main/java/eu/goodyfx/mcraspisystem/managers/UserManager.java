@@ -303,11 +303,17 @@ public class UserManager {
      *
      * @param subPath The value to get
      * @param player  The current Player
-     * @return The value
+     * @return The value1
      */
     public Object get(String subPath, OfflinePlayer player) {
         return config.get("User." + getUUID(player) + "." + subPath);
     }
+
+
+    public @Nullable<T> T get(String subPath, OfflinePlayer player, Class<T> clazz) {
+        return clazz.cast(config.get(String.format("User.%s.%s", player.getUniqueId(), subPath)));
+    }
+
 
     public List<?> getList(String subPath, OfflinePlayer player) {
         return config.getList("User." + getUUID(player) + "." + subPath);

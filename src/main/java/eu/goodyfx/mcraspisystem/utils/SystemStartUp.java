@@ -36,7 +36,7 @@ public class SystemStartUp {
         new ChatColorCommand(plugin);
         new InfoCommand(plugin);
         new MessageCommand(plugin);
-        new PrefixCommand(plugin);
+        new PrefixCommand();
         new RequestCommand(plugin);
         new SettingsCommand(plugin);
         new SitCommand(plugin);
@@ -51,6 +51,8 @@ public class SystemStartUp {
         new BackCommand(plugin);
         new VoteCommand(plugin);
         new TraderCommand();
+        new MuteCommand();
+        new InHeadCommand();
     }
 
 
@@ -68,6 +70,7 @@ public class SystemStartUp {
         new PlayerInteractAtEntitiesListeners(plugin);
         new PlayerInteractListeners(plugin);
         new LootChestListeners(plugin);
+        new InHeadListeners();
         //new WarnListeners(plugin);
         new TraderListeners();
     }

@@ -3,10 +3,7 @@ package eu.goodyfx.mcraspisystem;
 import eu.goodyfx.mcraspisystem.managers.RaspiHookManager;
 import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
 import eu.goodyfx.mcraspisystem.tasks.*;
-import eu.goodyfx.mcraspisystem.utils.Item;
-import eu.goodyfx.mcraspisystem.utils.RaspiDebugger;
-import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
-import eu.goodyfx.mcraspisystem.utils.SystemStartUp;
+import eu.goodyfx.mcraspisystem.utils.*;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -32,7 +29,7 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private RaspiDebugger debugger;
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
 
     private BukkitTask raspiItemsRunner;
@@ -41,7 +38,9 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable animation;
     private BukkitRunnable restoreInv;
     private BukkitRunnable dailyCommand;
+    private BukkitRunnable inheadTask;
     private LootChestTimer lootChestTimer;
+
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
     private Item mapItem = null;
@@ -67,8 +66,9 @@ public final class McRaspiSystem extends JavaPlugin {
         this.lootChestTimer = new LootChestTimer(this);
         this.restoreInv = new InventoryBackup(this);
         this.dailyCommand = new CommandResetTask(this);
-
+        this.inheadTask = new InHeadTask();
         moduleManager.getMotdManager().set();
+        new InHeadSpectator();
     }
 
 
@@ -139,6 +139,7 @@ public final class McRaspiSystem extends JavaPlugin {
         this.restoreInv.cancel();
         lootChestTimer.cancel();
         this.dailyCommand.cancel();
+        this.inheadTask.cancel();
     }
 
     /**
@@ -152,6 +153,18 @@ public final class McRaspiSystem extends JavaPlugin {
             playerSet.add(new RaspiPlayer(player));
         }
         return playerSet;
+    }
+
+    public Set<RaspiPlayer> getRaspiTeamPlayers() {
+        Set<RaspiPlayer> all_players = getRaspiPlayers();
+        Set<RaspiPlayer> team_players = new HashSet<>();
+
+        all_players.forEach(player -> {
+            if (player.getPlayer().isPermissionSet("system.team")) {
+                team_players.add(player);
+            }
+        });
+        return team_players;
     }
 
     /**

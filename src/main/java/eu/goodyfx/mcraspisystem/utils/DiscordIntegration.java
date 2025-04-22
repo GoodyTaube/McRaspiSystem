@@ -23,6 +23,7 @@ public class DiscordIntegration {
         if (config.contains("discord") && config.getBoolean(ENABLED_DEFAULT) && Objects.requireNonNull(config.getString(DISCORD_URL)).length() >= 6) {
             this.defaultHandler = new DiscordHandler(config.getString(DISCORD_URL));
             plugin.getLogger().info("ENABLED DISCORD HOOK");
+            this.defaultHandler.send(String.format("```Welcome to RaspiChat // Protocol version:%s```", plugin.getRandom().nextInt(100000)));
         }
         if (config.contains("discord") && config.getBoolean(ENABLED_ERROR) && Objects.requireNonNull(config.getString(DISCORD_ERROR_URL)).length() >= 6) {
             this.errorHandler = new DiscordHandler(config.getString(DISCORD_ERROR_URL));

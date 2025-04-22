@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -31,19 +32,7 @@ public class DiscordHandler {
     public void send(String message) {
         if (this.webHookURL != null) {
             try {
-                final HttpsURLConnection connection = (HttpsURLConnection) webHookURL.openConnection();
-
-                if (connection.getResponseCode() == 522) {
-                    plugin.getLogger().info("====================================");
-                    plugin.getLogger().info("Discord hat Massive Server Probleme!");
-                    String mess = String.format("Chat-Nachicht: %s konnte nicht Gesendet werden", message);
-                    plugin.getLogger().info(mess);
-                    plugin.getLogger().info(connection.getResponseMessage());
-                    plugin.getLogger().info("====================================");
-                    return;
-                }
-
-
+                HttpsURLConnection connection = (HttpsURLConnection) webHookURL.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11");
@@ -56,7 +45,8 @@ public class DiscordHandler {
 
                     outputStream.write(("{\"content\":\"" + preparedMessage + "\"}").getBytes(StandardCharsets.UTF_8));
                 }
-                connection.getInputStream();
+                InputStream inputStream = connection.getInputStream();
+                inputStream.close();
 
             } catch (final IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "Error while Handle Discord WebHook", e);

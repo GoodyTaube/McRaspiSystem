@@ -73,8 +73,6 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
     private void lootItemSticks(PlayerInteractAtEntityEvent event) {
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
-
-
         if (event.getHand().equals(EquipmentSlot.HAND) && (player.getInventory().getItemInMainHand().getType().equals(Material.STICK))) {
             ItemStack stack = player.getInventory().getItemInMainHand();
             if (stack.hasItemMeta() && (stack.getItemMeta().hasCustomModelData()) && entity instanceof Animals animal) {

@@ -5,6 +5,7 @@ import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PrefixManager;
 import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
+import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
+@Getter
 public class PlayerNameController {
 
     private final Map<UUID, String> colorMap = new HashMap<>();
@@ -85,6 +87,7 @@ public class PlayerNameController {
         }
     }
 
+
     public String getName(Player player) {
         return getColorString(player) + player.getName() + "<reset>";
     }
@@ -103,10 +106,6 @@ public class PlayerNameController {
 
     public void resetRandom(Player player) {
         randomContainer.remove(player.getUniqueId());
-    }
-
-    public Map<UUID, String> getColorMap() {
-        return colorMap;
     }
 
 }

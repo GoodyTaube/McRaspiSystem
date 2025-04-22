@@ -18,6 +18,9 @@ public enum LootItems {
 
     Baby_Stick(Material.STICK, "<green>Baby Stick", 3, null, null),
 
+    CREEPER_CHARGE(Material.STICK, "<green>Creeper Charge", 4, null, "Gibt einen Creeper [Charge]", "<red>!Noch in Arbeit!"),
+
+
     TELEPORTER(Material.POLISHED_BLACKSTONE_BUTTON, "<green>Teleporter", 1, null, "Setze deinen eigenen Teleport"),
 
     MAP_BLOCK(Material.STONE, "<green>Map label Set", 1, null, null), EXP_MEET(Material.COOKED_BEEF, "Level Fleisch v2", 1, null, "Speicher deine Level und Iss es bei bedarf!");

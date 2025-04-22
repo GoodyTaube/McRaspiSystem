@@ -1,11 +1,11 @@
 package eu.goodyfx.mcraspisystem.managers;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -188,7 +188,7 @@ public class ExtraInfos {
             }
             configuration.save(file);
         } catch (IOException e) {
-            Bukkit.getLogger().log(Level.SEVERE, "", e);
+            JavaPlugin.getPlugin(McRaspiSystem.class).getLogger().log(Level.SEVERE, "Failed to save Extra Infos.", e);
         }
     }
 

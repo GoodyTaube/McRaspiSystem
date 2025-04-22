@@ -126,8 +126,6 @@ public class WarteschlangeListeners implements Listener {
         settings.setHeader();
         //REQUEST
         suitRequest(player);
-
-        plugin.getModule().getPrefixManager().checkOld(player);
         playerNameController.setPlayerList(player);
         playerJoinEvent.joinMessage(MiniMessage.miniMessage().deserialize(OldColors.convert(plugin.getModule().getJoinMessageManager().get(player))));
 

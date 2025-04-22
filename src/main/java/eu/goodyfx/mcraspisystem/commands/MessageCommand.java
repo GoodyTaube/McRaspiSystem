@@ -7,18 +7,35 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class MessageCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MessageCommand implements CommandExecutor, TabCompleter {
 
     private final RaspiMessages data;
     private final PlayerNameController playerNameController;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
     public MessageCommand(McRaspiSystem plugin) {
         this.data = plugin.getModule().getRaspiMessages();
         this.playerNameController = plugin.getModule().getPlayerNameController();
-        plugin.setCommand("message", this);
+        plugin.setCommand("message", this, this);
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
+        if (command.getName().equalsIgnoreCase("message")) {
+            if (args.length == 1) {
+                return null;
+            }
+        }
+        return List.of();
     }
 
     @Override

@@ -14,8 +14,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
@@ -43,7 +46,16 @@ public class RaspiPlayer {
     }
 
     public String getPrefix() {
-        return plugin.getModule().getPrefixManager().get(player);
+        return plugin.getModuleManager().getPrefixManager().get(this.getPlayer());
+    }
+
+    public void setPrefix(@NotNull String db_prefix) {
+        plugin.getModuleManager().getPlayerNameController().setPlayerList(this.getPlayer());
+        plugin.getModuleManager().getPrefixManager().set(this.getPlayer(), db_prefix);
+    }
+
+    public void removePrefix(){
+        plugin.getModuleManager().getPrefixManager().remove(this.getPlayer());
     }
 
     public boolean hasSetting(Settings setting) {

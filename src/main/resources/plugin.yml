@@ -66,3 +66,5 @@ commands:
     usage: /vote
   trader:
     description: handles Raspi Trader
+  inHead:
+    description: "ADMIN STAFF"
