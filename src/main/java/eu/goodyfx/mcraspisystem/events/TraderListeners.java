@@ -9,6 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -170,7 +171,7 @@ public class TraderListeners implements Listener {
     }
 
     private void clickedDelete(InventoryClickEvent clickEvent, RaspiPlayer player, ItemStack stack) {
-        if (stack != null && stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == 1) {
+        if (stack != null && stack.getType().equals(Material.BARRIER)&&stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == 1) {
             String trader = TraderCommand.traderEditContainer.get(player.getUUID());
             Integer id = TraderCommand.traderSAVEContainer.get(player.getUUID());
             traderDB.removeRecipe(trader, id);

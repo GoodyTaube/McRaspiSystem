@@ -40,6 +40,9 @@ public class PlayerChatListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(AsyncChatEvent chatEvent) {
+        if(chatEvent.isCancelled()){
+            return;
+        }
 
         chatEvent.setCancelled(true);//Disabled the core funktion of normal Minecraft Chat.
         String[] legacy = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()).split(" ");

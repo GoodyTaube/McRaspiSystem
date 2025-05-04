@@ -93,9 +93,9 @@ public class LootConsumeEvents implements Listener {
             ItemMeta meta = stack.getItemMeta();
             PersistentDataContainer container = meta.getPersistentDataContainer();
             if (container.has(new NamespacedKey(plugin, "level"), PersistentDataType.STRING)) {
-                Integer level = Integer.valueOf(container.get(new NamespacedKey(plugin, "level"), PersistentDataType.STRING));
-                level = (level + player.getLevel());
-                player.setLevel(level);
+                float level = Integer.valueOf(container.get(new NamespacedKey(plugin, "level"), PersistentDataType.STRING));
+                level = (level + player.getExp());
+                player.setExp(level);
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
             } else {
                 consumeEvent.setCancelled(true);

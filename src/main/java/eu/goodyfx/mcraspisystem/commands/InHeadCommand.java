@@ -51,14 +51,22 @@ public class InHeadCommand implements CommandExecutor {
                             raspiPlayer.sendMessage("<red>Du kannst dich nicht selber prüfen.", true);
                             return true;
                         }
-                        /**
-                         if (!plugin.getModule().getUserManager().hasTimePlayed(target, 10)) {
-                         raspiPlayer.sendMessage("<red>Der Spieler ist nicht NEU und kann nicht geprüft werden.");
-                         return true;
-                         }**/
-
-                        performInhead(raspiPlayer, target);
-
+                        if (inHeadContainer.containsKey(dummy.getUniqueId())) {
+                            raspiPlayer.sendActionBar("<green>Player Switch...");
+                            dummy.performCommand("inhead");
+                            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+                                @Override
+                                public void run() {
+                                    dummy.performCommand(String.format("inhead %s", target.getName()));
+                                }
+                            }, 2 * 20L);
+                            return true;
+                        }
+                        if (!raspiPlayer.getPlayer().isPermissionSet("system.allow") || !plugin.getModule().getUserManager().hasTimePlayed(target, plugin.getConfig().getInt("Utilities.inHead"))) {
+                            raspiPlayer.sendMessage("<red>Der Spieler ist nicht NEU und kann nicht geprüft werden.", true);
+                            return true;
+                        }
+                        performInHead(raspiPlayer, target);
                     } else raspiPlayer.sendMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[0]));
                 }
             }
@@ -67,7 +75,7 @@ public class InHeadCommand implements CommandExecutor {
         return false;
     }
 
-    private void performInhead(RaspiPlayer player, Player target) {
+    private void performInHead(RaspiPlayer player, Player target) {
         inHeadContainer.put(player.getUUID(), target.getUniqueId());
         inHeadLocation.put(player.getUUID(), player.getLocation());
         inHeadGamemode.put(player.getUUID(), player.getPlayer().getGameMode());
@@ -77,6 +85,7 @@ public class InHeadCommand implements CommandExecutor {
         plugin.getHookManager().getDiscordIntegration().send(String.format("`Raspi-InHead:: %s ----> %s`", player.getPlayer().getName(), target.getName()));
 
     }
+
 
     private void removeInHead(RaspiPlayer player) {
         Location location = inHeadLocation.get(player.getUUID());

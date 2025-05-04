@@ -76,14 +76,14 @@ public class PlayerInteractListeners implements Listener {
 
     private void lootItemLevelMeet(PlayerInteractEvent interactEvent) {
         Player player = interactEvent.getPlayer();
-        if (player.getInventory().getItemInMainHand().getType().equals(Material.COOKED_BEEF) && Objects.equals(interactEvent.getHand(), EquipmentSlot.HAND) && player.getLevel() != 0) {
+        if (player.getInventory().getItemInMainHand().getType().equals(Material.COOKED_BEEF) && Objects.equals(interactEvent.getHand(), EquipmentSlot.HAND) && player.getExp() != 0f) {
             ItemStack stack = player.getInventory().getItemInMainHand().clone();
             if (stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == 1) {
                 ItemMeta meta = stack.getItemMeta();
                 PersistentDataContainer container = meta.getPersistentDataContainer();
-                int amount = player.getLevel();
+                float amount = player.getExp();
                 container.set(new NamespacedKey(plugin, "level"), PersistentDataType.STRING, String.valueOf(amount));
-                player.setLevel(0);
+                player.setExp(0f);
                 player.setTotalExperience(0);
                 List<Component> lore = new ArrayList<>();
                 lore.add(MiniMessage.miniMessage().deserialize("<aqua>Iss mich um die EXP zu Bekommen."));
