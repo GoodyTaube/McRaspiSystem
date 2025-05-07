@@ -67,8 +67,9 @@ public class UserManager {
      */
     public boolean hasTimePlayed(Player player, int amount) {
         long timePlayed = player.getStatistic(Statistic.PLAY_ONE_MINUTE); //ticks Played 20 Ticks = 1 Second
-        return timePlayed / 60 / 60 / 20 >= amount;
-
+        long timeHours = timePlayed / 20 / 60 / 60;
+        plugin.getDebugger().info(String.format("TIME_REQUEST:: %s Spielzeit: %s. Soll-Mindestens: %s.", player.getName(), timeHours, amount));
+        return timePlayed / 20 / 60 / 60 > amount;
     }
 
     private UUID getUUID(OfflinePlayer player) {
@@ -310,7 +311,7 @@ public class UserManager {
     }
 
 
-    public @Nullable<T> T get(String subPath, OfflinePlayer player, Class<T> clazz) {
+    public @Nullable <T> T get(String subPath, OfflinePlayer player, Class<T> clazz) {
         return clazz.cast(config.get(String.format("User.%s.%s", player.getUniqueId(), subPath)));
     }
 

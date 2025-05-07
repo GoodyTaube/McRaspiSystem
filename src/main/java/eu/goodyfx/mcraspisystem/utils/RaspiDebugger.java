@@ -1,6 +1,8 @@
 package eu.goodyfx.mcraspisystem.utils;
 
+import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.MissingResourceException;
@@ -18,7 +20,8 @@ public class RaspiDebugger extends Logger {
      * @param context A reference to the plugin
      */
     public RaspiDebugger(@NotNull Plugin context) {
-        super(context.getClass().getCanonicalName(), null);
+        super(context.getClass().getSimpleName(), null);
+
         String prefix = context.getDescription().getPrefix();
         pluginName = prefix != null ? new StringBuilder().append("[").append(prefix).append("] ").toString() : "[" + context.getDescription().getName() + "] ";
         setParent(context.getServer().getLogger());
@@ -27,8 +30,10 @@ public class RaspiDebugger extends Logger {
 
     @Override
     public void log(@NotNull LogRecord logRecord) {
-        logRecord.setMessage(pluginName + " // DEBUGG //" + logRecord.getMessage());
-        super.log(logRecord);
+        if (JavaPlugin.getPlugin(McRaspiSystem.class).getConfig().contains("debug")) {
+            logRecord.setMessage("DEBUGGER //" + logRecord.getMessage());
+            super.log(logRecord);
+        }
     }
 
 }

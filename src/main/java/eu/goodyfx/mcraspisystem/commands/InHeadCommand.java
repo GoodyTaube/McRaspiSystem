@@ -62,9 +62,11 @@ public class InHeadCommand implements CommandExecutor {
                             }, 2 * 20L);
                             return true;
                         }
-                        if (!raspiPlayer.getPlayer().isPermissionSet("system.allow") || !plugin.getModule().getUserManager().hasTimePlayed(target, plugin.getConfig().getInt("Utilities.inHead"))) {
-                            raspiPlayer.sendMessage("<red>Der Spieler ist nicht NEU und kann nicht geprüft werden.", true);
-                            return true;
+                        if (!raspiPlayer.getPlayer().isPermissionSet("system.allow")) {
+                            if (plugin.getModule().getUserManager().hasTimePlayed(target, plugin.getConfig().getInt("Utilities.inHead"))) {
+                                raspiPlayer.sendMessage("<red>Der Spieler ist nicht NEU und kann nicht geprüft werden.", true);
+                                return true;
+                            }
                         }
                         performInHead(raspiPlayer, target);
                     } else raspiPlayer.sendMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[0]));
