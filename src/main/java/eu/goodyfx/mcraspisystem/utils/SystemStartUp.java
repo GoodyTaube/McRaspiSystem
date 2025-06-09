@@ -5,16 +5,16 @@ import eu.goodyfx.mcraspisystem.commands.*;
 import eu.goodyfx.mcraspisystem.events.*;
 import eu.goodyfx.mcraspisystem.systems.LootChest;
 import eu.goodyfx.mcraspisystem.systems.RaspiItems;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SystemStartUp {
 
-    public final McRaspiSystem plugin;
+    public final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
-    public SystemStartUp(McRaspiSystem plugin) {
-        this.plugin = plugin;
+    public SystemStartUp() {
         systeme();
         addCommands(plugin);
         addEvents(plugin);
@@ -25,7 +25,7 @@ public class SystemStartUp {
         new LootChest(this);
     }
 
-    private List<SystemTemplate> systemTemplates = new ArrayList<>();
+    private final List<SystemTemplate> systemTemplates = new ArrayList<>();
 
 
     private void addCommands(McRaspiSystem plugin) {
@@ -58,17 +58,18 @@ public class SystemStartUp {
 
     private void addEvents(McRaspiSystem plugin) {
         systemTemplates.forEach(SystemTemplate::events);
-        new CommandListeners(plugin);
+        new CommandListeners();
         new PlayerChatListeners(plugin);
         new PlayerListeners(plugin);
         new ServerListeners(plugin);
         new TeleportListeners(plugin);
-        new WarteschlangeListeners(plugin);
+        //new WarteschlangeListeners(plugin);
         new LootConsumeEvents(plugin);
         new LootSpongeEvents(plugin);
         new PlayerMoveListener(plugin);
         new PlayerInteractAtEntitiesListeners(plugin);
         new PlayerInteractListeners(plugin);
+        new RaspiPlayerConnectionEvents();
         new LootChestListeners(plugin);
         new InHeadListeners();
         //new WarnListeners(plugin);

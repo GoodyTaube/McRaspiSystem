@@ -4,8 +4,7 @@ import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.RequestManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.node.Node;
@@ -16,6 +15,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -111,18 +111,11 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
 
 
                         player.sendRichMessage(data.getPrefix() + "<gray>Du hast <yellow><italic>" + target.getName() + " <red>Abgelehnt!");
-                        Bukkit.getOnlinePlayers().forEach(all -> {
-                            if (all.isPermissionSet("system.moderator")) {
-                                if (all.getName().equalsIgnoreCase(player.getName())) {
-                                    return;
-                                }
 
-
-                                all.sendRichMessage(data.getPrefix() + "<aqua><italic>" + target.getName() + " <gray><italic>wurde von " + player.getName() + " <red>Abgelehnt!");
-                            }
+                        plugin.getRaspiTeamPlayers().forEach(team -> {
+                            if (!team.getPlayer().getName().equalsIgnoreCase(player.getName()))
+                                team.sendMessage(String.format("<aqua><italic>%s <gray><italic>wurde von %s <red>Abgelehnt.", target.getName(), player.getName()), true);
                         });
-
-
                         if (args.length >= 2) {
                             StringBuilder builder = new StringBuilder();
                             for (int i = 2; i < args.length; i++) {
@@ -155,7 +148,7 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
 
                             luckPerms.getUserManager().modifyUser(target.getUniqueId(), user1 -> user1.data().remove(Node.builder("group.default").build()));
 
-                            Bukkit.getLogger().info("LuckPerms value Changed for " + target.getName());
+                            plugin.getLogger().info("LuckPerms value Changed for " + target.getName());
 
                         }
 
@@ -195,7 +188,7 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
                             }
 
                             if (targetPlayer.isPermissionSet("group.default")) {
-                                targetPlayer.kick(Component.text("MCRaspi - Disconnect").color(NamedTextColor.GOLD).append(Component.newline()).append(Component.newline()).append(Component.text(data.getKickMessage())));
+                                targetPlayer.kick(MiniMessage.miniMessage().deserialize(String.format("<gold>McRaspi.com <gray><b>-</b> <red>Disconnect<br><br><red><b>Du wurdest gekickt.</b><br><gray>Grund: <yellow>'%s<yellow>'", data.getKickMessage())));
                             } else {
                                 player.sendRichMessage(data.getPrefix() + "<red>Der Spieler ist nicht als Abgelehnt Deklariert.");
                             }

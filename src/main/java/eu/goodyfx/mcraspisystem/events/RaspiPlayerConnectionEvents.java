@@ -1,6 +1,5 @@
 package eu.goodyfx.mcraspisystem.events;
 
-
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.RequestCommand;
 import eu.goodyfx.mcraspisystem.commands.SitCommand;
@@ -17,106 +16,59 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class WarteschlangeListeners implements Listener {
+public class RaspiPlayerConnectionEvents implements Listener {
 
-    private final McRaspiSystem plugin;
-    private final WarteschlangenManager settings;
-    private final PlayerNameController playerNameController;
-    private final RequestManager requestManager;
-    private final UserManager userManager;
-    private final RaspiMessages data;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
+    private final RaspiMessages data = plugin.getModule().getRaspiMessages();
+    private final WarteschlangenManager settings = plugin.getModule().getWarteschlangenManager();
+    private final PlayerNameController playerNameController = plugin.getModule().getPlayerNameController();
+    private final RequestManager requestManager = plugin.getModule().getRequestManager();
+    private final UserManager userManager = plugin.getModuleManager().getUserManager();
 
-    private static final Map<InetAddress, String> IP_CONTAINER = new HashMap<>();
     private final Map<UUID, PlayerTime> timeContainer = new HashMap<>();
 
-    public WarteschlangeListeners(McRaspiSystem plugin) {
-        this.plugin = plugin;
-        this.playerNameController = plugin.getModule().getPlayerNameController();
-        this.requestManager = plugin.getModule().getRequestManager();
-        this.userManager = plugin.getModule().getUserManager();
-        this.settings = plugin.getModule().getWarteschlangenManager();
-        this.data = plugin.getModule().getRaspiMessages();
+    public RaspiPlayerConnectionEvents() {
         plugin.setListeners(this);
     }
 
-    private void checkSystemLocations(Player player, LocationManager manager) {
-        //Check if Locations Exist
-        if (player.isOp()) {
-            if (!manager.exist("warteraum")) {
-                player.sendRichMessage(data.noSpawnPoint(2));
-            }
-            if (!manager.exist("spawn")) {
-                player.sendRichMessage(data.noSpawnPoint(1));
-            }
-        }
-    }
-
-    private void checkNewbie(Player player) {
-        if (!player.isPermissionSet("group.spieler") && (!requestManager.isBlocked(player))) {
-            Bukkit.getOnlinePlayers().forEach(all -> {
-                if (all.isPermissionSet("system.moderator") || all.isOp()) {
-                    all.sendRichMessage(data.getPrefix() + "<gray><italic>" + player.getName() + "  ist noch nicht registriert!");
-                    all.sendRichMessage(data.getPrefix() + "<white>[<green><click:run_command:'/request accept " + player.getName() + "'>Annehmen<reset><white>] <white>[<red><click:run_command:'/request deny " + player.getName() + " -request_start'>Ablehnen<reset> <gray>(<green><click:suggest_command:'/request deny " + player.getName() + " '>+<reset><gray>)<white>] ");
-                }
-            });
-
-        }
-    }
-
-
-    private void suitRequest(Player player) {
-        checkNewbie(player);
-        if (requestManager.isBlocked(player)) {
-            Bukkit.getOnlinePlayers().forEach(all -> {
-                all.sendRichMessage(data.getPrefix() + "<gray><italic>" + player.getName() + " wurde bereits von " + requestManager.getDeny(player) + " Abgelehnt!");
-
-                if (all.isPermissionSet("system.moderator") || all.isOp()) {
-
-                    if (requestManager.isBlocked("reason", player)) {
-                        all.sendRichMessage(data.getPrefix() + "<gray><italic>Grund: <yellow>" + requestManager.getReason(player).replace("@", " "));
-                    }
-                    if (RequestCommand.freeToBan(player.getUniqueId())) {
-                        all.sendRichMessage(data.getPrefix() + "<white>[<red><click:run_command:'/request kick " + player.getName() + "'>Kick<reset><white>] [<light_purple><click:run_command:'/request accept " + player.getName() + "'>Erlauben<reset><white>] // <white>[<gold><click:run_command:'/tempban " + player.getName() + " Überdenk dein Leben --MOD'>Ban<reset><white>]");
-                    } else {
-                        all.sendRichMessage(data.getPrefix() + "<white>[<red><click:run_command:'/request kick " + player.getName() + "'>Kick<reset><white>] [<light_purple><click:run_command:'/request accept " + player.getName() + "'>Erlauben<reset><white>]");
-
-                    }
-                }
-            });
-        }
-    }
-
+    @EventHandler(priority = EventPriority.HIGH)
     public void onJoined(PlayerJoinEvent playerJoinEvent) {
         Player player = playerJoinEvent.getPlayer();
+        RaspiPlayer raspiPlayer = plugin.getRaspiPlayer(player);
         LocationManager manager = plugin.getModule().getLocationManager();
-        checkSystemLocations(player, manager);
+
+        checkSystemLocationsExists(player, manager);
+
         //Check if joining Player joins in Active World
         settings.join(player);
         settings.setHeader();
         //REQUEST
-        suitRequest(player);
+        raspiRequest(raspiPlayer);
+
         playerNameController.setPlayerList(player);
         playerJoinEvent.joinMessage(MiniMessage.miniMessage().deserialize(OldColors.convert(plugin.getModule().getJoinMessageManager().get(player))));
 
-        if (userManager.hasTimePlayed(player, 100) && (!player.isPermissionSet("system.bypass"))) {
+        if ((!player.isPermissionSet("system.bypass") && (userManager.hasTimePlayed(player, 100)))) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + player.getName() + " permission set system.bypass");
-
         }
+
         plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
+
         timeContainer.put(player.getUniqueId(), new PlayerTime(player));
+
         welcomeMessage(plugin.getRaspiPlayer(player));
     }
 
@@ -134,7 +86,57 @@ public class WarteschlangeListeners implements Listener {
         }
     }
 
+    private void raspiRequest(RaspiPlayer raspiPlayer) {
+        Player player = raspiPlayer.getPlayer();
+        //Checkt ob der Spieler bereits angenommen wurde
+        handleNewbie(player);
+        //Was passiert mit einem Spieler, welcher abgelehnt wurde
+        handleBlocked(raspiPlayer);
+    }
 
+    private void handleBlocked(RaspiPlayer raspiPlayer) {
+        Player player = raspiPlayer.getPlayer();
+        if (requestManager.isBlocked(player)) {
+            plugin.getRaspiTeamPlayers().forEach(team -> {
+                team.sendMessage(String.format("<gray><italic>%s wurde bereits von %s <gray><italic>Abgelehnt!", player.getName(), requestManager.getDeny(player)), true);
+                if (requestManager.isBlocked("reason", player)) {
+                    team.sendMessage(String.format("<gray><italic>Grund: <yellow>%s", requestManager.getReason(player).replace("@", " ")), true);
+                }
+                String message = String.format("<white>[<red>%s<white>] [<green>%s<white>]", String.format("<click:run_command:'/request kick %s'>Kicken<reset>", player.getName()), String.format("<click:run_command:'/request accept %s'>Erlauben<reset>", player.getName()));
+                String banMessage = String.format("// <white>[<gold><click:run_command:'/tempban %s RSP:6723 Überdenk Dein Leben --MOD'>Ban<reset><white>]", player.getName());
+                if (RequestCommand.freeToBan(player.getUniqueId())) {
+                    team.sendMessage(message + banMessage, true);
+                } else {
+                    team.sendMessage(message, true);
+                }
+            });
+        }
+    }
+
+    private void handleNewbie(Player player) {
+        if (!player.isPermissionSet("group.spieler") && (!requestManager.isBlocked(player))) {
+            plugin.getRaspiPlayers().stream()
+                    .filter(all -> all.hasPermission(RaspiPermission.TEAM))
+                    .toList().forEach(team -> {
+                        team.sendMessage(String.format("<gray><italic>%s ist noch nicht Registriert!", player.getName()), true);
+                        team.sendMessage(String.format("<white>[<green>%s<white>] [<red>%s<white>]", String.format("<click:run_command:'/request accept %s'>Annehmen<reset>", player.getName()), String.format("<click:run_command:'request deny %1$2s -request_start'>Ablehnen <gray>(<green><click:suggest_command:'/request deny %1$2s'>+<reset><gray>)", player.getName())), true);
+                    });
+        }
+    }
+
+    private void checkSystemLocationsExists(Player player, LocationManager manager) {
+        //Check if Locations Exist
+        if (player.isOp()) {
+            if (!manager.exist("warteraum")) {
+                player.sendRichMessage(data.noSpawnPoint(2));
+            }
+            if (!manager.exist("spawn")) {
+                player.sendRichMessage(data.noSpawnPoint(1));
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
     public void onQuit(PlayerQuitEvent playerQuitEvent) {
         //Quit Player
         Player player = playerQuitEvent.getPlayer();

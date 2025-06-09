@@ -17,8 +17,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
@@ -54,7 +52,7 @@ public class RaspiPlayer {
         plugin.getModuleManager().getPrefixManager().set(this.getPlayer(), db_prefix);
     }
 
-    public void removePrefix(){
+    public void removePrefix() {
         plugin.getModuleManager().getPrefixManager().remove(this.getPlayer());
     }
 
@@ -127,6 +125,26 @@ public class RaspiPlayer {
         }
         getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
+
+    /**
+     * Checks if player has raspiPermission
+     * @param raspiPermission The User Permission
+     * @return true if Player has permission
+     */
+    public boolean hasPermission(RaspiPermission raspiPermission) {
+        return player.isPermissionSet(raspiPermission.getPermissionValue());
+    }
+
+    /**
+     * Checks if this object contains an override for the specified
+     * permission, by fully qualified name
+     * @param permission Name of the permission
+     * @return true if the permission is set, otherwise false
+     */
+    public boolean hasPermission(String permission) {
+        return player.isPermissionSet(permission);
+    }
+
 
     /**
      * Send player a Message with Component API

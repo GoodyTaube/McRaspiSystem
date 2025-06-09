@@ -2,7 +2,6 @@ package eu.goodyfx.mcraspisystem.tasks;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.InHeadCommand;
-import eu.goodyfx.mcraspisystem.events.InHeadEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -30,7 +29,7 @@ public class InHeadTask extends BukkitRunnable {
             Player player = Bukkit.getPlayer(uuid);
             if (target != null && player != null) {
 
-                if(player.getSpectatorTarget() == null){
+                if (player.getSpectatorTarget() == null) {
                     new BukkitRunnable() {
                         @Override
                         public void run() {

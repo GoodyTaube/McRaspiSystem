@@ -2,6 +2,7 @@ package eu.goodyfx.mcraspisystem.managers;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import org.apache.commons.lang3.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -95,7 +96,11 @@ public class RequestManager {
 
 
     public String getDeny(Player player) {
-        return (String) userManager.get("denyPerson", player);
+        String name = (String) userManager.get("denyPerson", player);
+        if (Bukkit.getPlayer(name) != null) {
+            return plugin.getRaspiPlayer(Bukkit.getPlayer(name)).getName();
+        }
+        return name;
     }
 
     public String getReason(OfflinePlayer player) throws NullPointerException {

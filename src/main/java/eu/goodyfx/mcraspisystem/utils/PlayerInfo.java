@@ -59,9 +59,9 @@ public class PlayerInfo {
     }
 
     private void registration() {
-        Boolean state = userManager.contains("allowed-since", player);
+        boolean state = userManager.contains("allowed-since", player);
         String val;
-        if (Boolean.TRUE.equals(state)) {
+        if (state) {
             val = "<green>Erfolgte";
             parseValueToInfo(PlayerInfosValues.REGISTRATION, val);
         }
@@ -133,8 +133,8 @@ public class PlayerInfo {
         parseValueToInfo(PlayerInfosValues.TIME_PLAYED, RaspiTimes.Ticks.getTimeUnit(time));
     }
 
-    private void timePlayedWeekly(){
-        long time = plugin.getModule().getTimeDBManager().get( Bukkit.getOfflinePlayer(player.getUniqueId()));
+    private void timePlayedWeekly() {
+        long time = plugin.getModule().getTimeDBManager().get(Bukkit.getOfflinePlayer(player.getUniqueId()));
         parseValueToInfo(PlayerInfosValues.TIME_PLAYED_WEEKLY, RaspiTimes.MilliSeconds.getTimeUnit(time));
     }
 
@@ -151,8 +151,6 @@ public class PlayerInfo {
             parseValueToInfo(PlayerInfosValues.LAST_SEEN, RaspiTimes.MilliSeconds.getTimeUnit(player.getLastSeen()));
         }
     }
-
-
 
 
     public void playerXP() {

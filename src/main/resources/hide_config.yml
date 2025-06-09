@@ -1,5 +1,6 @@
 groups:
   default:
+    tabImplementCommands: true
     commands:
       - "me"
       - "msg"

@@ -1,15 +1,11 @@
 package eu.goodyfx.mcraspisystem.events;
 
-import com.destroystokyo.paper.event.server.PaperServerListPingEvent;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.PlayerBanManager;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
 import eu.goodyfx.mcraspisystem.utils.OldColors;
-import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
@@ -191,9 +187,9 @@ public class ServerListeners implements Listener {
     public void onLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
         userManager.update(player);
-        if(!player.isPermissionSet("system.team") && plugin.getConfig().contains("Utilities.wartung") && plugin.getConfig().getBoolean("Utilities.wartung")){
-                event.disallow(PlayerLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize("<gray>Wir befinden uns in Wartung.<br><aqua>Bitte um Verständnis."));
-            }
+        if (!player.isPermissionSet("system.team") && plugin.getConfig().contains("Utilities.wartung") && plugin.getConfig().getBoolean("Utilities.wartung")) {
+            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize("<gray>Wir befinden uns in Wartung.<br><aqua>Bitte um Verständnis."));
+        }
     }
 
     @EventHandler
@@ -202,7 +198,11 @@ public class ServerListeners implements Listener {
 
         if (playerBanManager.contains(player)) {
             if (System.currentTimeMillis() < playerBanManager.expire(player)) {
-                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, Component.text("§cDu wurdest temporär gesperrt!").append(Component.newline()).append(Component.newline()).append(Component.text("§7Du wurdest von: §b" + playerBanManager.performer(player) + " §7für folgendes gesperrt: ")).append(Component.newline()).append(Component.text("' " + playerBanManager.reason(player) + " '").color(NamedTextColor.YELLOW)).append(Component.newline()).append(Component.newline()).append(Component.text("§7Du wirst am §d" + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(playerBanManager.expire(player)) + " §7entsperrt.")));
+                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, MiniMessage.miniMessage().deserialize(String.format("<gold>McRaspi.com <gray><b>-</b> <red>Disconnect<br><br><red><b>Du wurdest temporär gesperrt!</b><br>" +
+                                "<gray>Du wurdest von: <aqua>%s <gray>für folgendes gesperrt:<br>" +
+                                "<yellow>'%s'<br><br>" +
+                                "<gray>Du wirst am <aqua>%s <gray>entsperrt.",
+                        playerBanManager.performer(player), playerBanManager.reason(player), new SimpleDateFormat("dd-MM-yyyy HH:mm").format(playerBanManager.expire(player)))));
             } else {
                 playerBanManager.removeBan(player);
                 plugin.getLogger().info(plugin.getModule().getRaspiMessages().getPrefix() + " " + player.getName() + " wurde Entsperrt weil seine sperrzeit abgelaufen ist.");
@@ -216,7 +216,7 @@ public class ServerListeners implements Listener {
 
 
         if (plugin.getConfig().getBoolean("Utilities.kickNewbies")) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Component.text("MCRaspi Kick").color(NamedTextColor.YELLOW).append(Component.newline()).append(Component.newline()).append(Component.text(plugin.getModule().getRaspiMessages().getDisallowNewbie()[0])).append(Component.newline()).append(Component.text(plugin.getModule().getRaspiMessages().getDisallowNewbie()[1])));
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize(String.format("McRaspi.com<br><br>%s<br><br><aqua>%s", "<gray>Du wurdest gekickt.", plugin.getModule().getRaspiMessages().getDisallowNewbie()[0])));
         }
     }
 

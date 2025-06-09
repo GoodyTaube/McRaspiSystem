@@ -1,19 +1,18 @@
 package eu.goodyfx.mcraspisystem.events;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.managers.CommandManager;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The CommandListeners class serves as an event listener for various player command and inventory events.
@@ -21,39 +20,78 @@ import java.util.UUID;
  */
 public class CommandListeners implements Listener {
 
-    private final McRaspiSystem plugin;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
+    private final Map<UUID, List<String>> commandContainer = new HashMap<>();
 
-
-    public CommandListeners(McRaspiSystem plugin) {
-        this.plugin = plugin;
+    public CommandListeners() {
         plugin.setListeners(this);
     }
 
     private final Map<UUID, Integer> playerContainer = new HashMap<>();
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onCommandSend(PlayerCommandSendEvent playerCommandSendEvent) {
-        Player player = playerCommandSendEvent.getPlayer();
-        Collection<String> commandCollections = playerCommandSendEvent.getCommands();
-        if (player.isPermissionSet("group.default") && !player.isPermissionSet("group.spieler")) {
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onCommandSend(PlayerCommandSendEvent event) {
+        RaspiPlayer raspiPlayer = plugin.getRaspiPlayer(event.getPlayer());
+        Collection<String> commandCollections = event.getCommands(); //die liste der commands auf dem server
+        commandHide(event);
+        if (raspiPlayer.hasPermission("group.default") && !raspiPlayer.hasPermission("group.spieler")) { // Checken ob der Spieler schon registriert ist
+            plugin.getDebugger().info("CLEARING ALL COMMANDS");
             commandCollections.clear();
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onDefault(InventoryOpenEvent event) {
-        if (event.getPlayer().isPermissionSet("group.default") && !event.getPlayer().isPermissionSet("group.spieler")) {
-            event.setCancelled(true);
+
+    private void commandHide(PlayerCommandSendEvent event) {
+        RaspiPlayer player = plugin.getRaspiPlayer(event.getPlayer());
+        if (player.hasPermission("*")) {
+            return;
         }
+        Set<String> command = new HashSet<>();
+        CommandManager manager = plugin.getModuleManager().getCommandManager();
+        plugin.getModule().getCommandManager().getAllGroups().forEach(group -> {
+            if (player.hasPermission(String.format("group.%s", group))) {
+                command.addAll(manager.getList(group, CommandManager.CommandManagerPaths.TAB_COMPLETE_COMMANDS));
+                if (manager.get(group, CommandManager.CommandManagerPaths.TAB_COMPLETE_IMPLEMENT, Boolean.class)) {
+                    plugin.getDebugger().info("IMPLEMENT ALL COMMANDS");
+                    command.addAll(manager.getList(group, CommandManager.CommandManagerPaths.COMMANDS));
+                }
+            }
+        });
+        event.getCommands().removeIf(cmd -> !command.contains(cmd));
+
+
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onCommand(PlayerCommandPreprocessEvent commandEvent) {
         String[] command = commandEvent.getMessage().split(" ");
         RaspiPlayer player = new RaspiPlayer(commandEvent.getPlayer());
+        commandControlUnit(commandEvent);
         checkMuted(commandEvent, command); //Wichtig
-        reloadServer(commandEvent, command, player);
+
     }
+
+
+    public void commandControlUnit(PlayerCommandPreprocessEvent event) {
+        RaspiPlayer player = plugin.getRaspiPlayer(event.getPlayer());
+        if ((player.hasPermission("*")) || (player.getPlayer().isOp())) {
+            return;
+        }
+
+        String[] command = event.getMessage().split(" ");
+        String commandStarter = command[0].replace("/", "");
+        CommandManager commandManager = plugin.getModule().getCommandManager();
+        Set<String> availableCommands = new HashSet<>();
+        commandManager.getPlayerGroups(player).forEach(group -> {
+            availableCommands.addAll(commandManager.getList(group, CommandManager.CommandManagerPaths.COMMANDS));
+        });
+
+        if (!availableCommands.contains(commandStarter)) {
+            event.setCancelled(true);
+            player.sendMessage("Der Command Existiert nicht", true);
+        }
+    }
+
 
     /**
      * Check if PLayer is Muted and Tried to use forbidden Commands.
@@ -64,28 +102,4 @@ public class CommandListeners implements Listener {
             commandEvent.setCancelled(true);
         }
     }
-
-    /**
-     * Checks if Bernd want to use "reload" to reload the Server unSave
-     */
-    private void reloadServer(PlayerCommandPreprocessEvent commandEvent, String[] command, RaspiPlayer player) {
-        if (commandEvent.getPlayer().isOp() && command[0].equalsIgnoreCase("/rl") || command[0].equalsIgnoreCase("/reload") || command[0].startsWith("/bukkit")) {
-            commandEvent.setCancelled(true);
-            if (playerContainer.containsKey(player.getUUID())) {
-                Integer amount = playerContainer.get(player.getUUID());
-                if (amount == 3) {
-                    player.sendMessage("[Server] <red>Reicht doch jetzt...<br><gray><italic>Schreib Goody an!");
-                    return;
-
-                } else {
-                    amount = amount + 1;
-                    playerContainer.put(player.getUUID(), amount);
-                }
-            } else {
-                playerContainer.put(player.getUUID(), 1);
-            }
-            player.sendMessage("<red>Dieser Command wurde von einen System Administrator Blockiert.<br><gray><italic>Bitte Kontaktiere Goody für weitere Infos!");
-        }
-    }
-
 }

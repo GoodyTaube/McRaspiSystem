@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 public final class McRaspiSystem extends JavaPlugin {
@@ -38,7 +39,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable animation;
     private BukkitRunnable restoreInv;
     private BukkitRunnable dailyCommand;
-    private BukkitRunnable inheadTask;
+    private BukkitRunnable inHeadTask;
     private LootChestTimer lootChestTimer;
 
 
@@ -57,7 +58,7 @@ public final class McRaspiSystem extends JavaPlugin {
         hookManager = new RaspiHookManager(this, this);
         setupConfigs();
         moduleManager = new RaspiModuleManager(this);
-        new SystemStartUp(this);
+        new SystemStartUp();
 
         this.raspiItemsRunner = new RaspiItemsTimer(this).runTaskTimerAsynchronously(this, 0L, 20L);
         this.idleTask = new IdleTask(this, this);
@@ -66,7 +67,7 @@ public final class McRaspiSystem extends JavaPlugin {
         this.lootChestTimer = new LootChestTimer(this);
         this.restoreInv = new InventoryBackup(this);
         this.dailyCommand = new CommandResetTask(this);
-        this.inheadTask = new InHeadTask();
+        this.inHeadTask = new InHeadTask();
         moduleManager.getMotdManager().set();
         new InHeadSpectator();
     }
@@ -139,7 +140,7 @@ public final class McRaspiSystem extends JavaPlugin {
         this.restoreInv.cancel();
         lootChestTimer.cancel();
         this.dailyCommand.cancel();
-        this.inheadTask.cancel();
+        this.inHeadTask.cancel();
     }
 
     /**
@@ -156,15 +157,9 @@ public final class McRaspiSystem extends JavaPlugin {
     }
 
     public Set<RaspiPlayer> getRaspiTeamPlayers() {
-        Set<RaspiPlayer> all_players = getRaspiPlayers();
-        Set<RaspiPlayer> team_players = new HashSet<>();
-
-        all_players.forEach(player -> {
-            if (player.getPlayer().isPermissionSet("system.team")) {
-                team_players.add(player);
-            }
-        });
-        return team_players;
+        return getRaspiPlayers().stream()
+                .filter(all -> all.hasPermission(RaspiPermission.TEAM))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -176,6 +171,7 @@ public final class McRaspiSystem extends JavaPlugin {
     public RaspiPlayer getRaspiPlayer(Player player) {
         return new RaspiPlayer(player);
     }
+
 
     /**
      * Get a NameSpacedKey for Different actions.     *

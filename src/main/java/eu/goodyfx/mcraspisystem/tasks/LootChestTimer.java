@@ -3,6 +3,7 @@ package eu.goodyfx.mcraspisystem.tasks;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.utils.LootChest;
 import eu.goodyfx.mcraspisystem.utils.RaspiTimes;
+import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -10,8 +11,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
+@Getter
 public class LootChestTimer extends BukkitRunnable {
 
     private static final int TIMER_MAX_MINUTES = 5; // Maximale Zeit in Minuten
@@ -21,7 +22,7 @@ public class LootChestTimer extends BukkitRunnable {
     private final McRaspiSystem plugin;
     private final Random random = new Random();
 
-    private List<LootChest> lootChestDisplay = new ArrayList<>();
+    private final List<LootChest> lootChestDisplay = new ArrayList<>();
 
     private long remainingTicks = 0;
     private boolean isInitialized = false;
@@ -67,7 +68,7 @@ public class LootChestTimer extends BukkitRunnable {
     }
 
     private void initializeTimer() {
-        plugin.getLogger().info("Initialisiere LootChest-Timer.");
+        plugin.getDebugger().info("Initialisiere LootChest-Timer.");
         resetTimer();
         isInitialized = true;
     }
@@ -80,7 +81,7 @@ public class LootChestTimer extends BukkitRunnable {
     }
 
     private void triggerLootChestReady() {
-        plugin.getLogger().info("LootChest ist bereit zum Öffnen.");
+        plugin.getDebugger().info("LootChest ist bereit zum Öffnen.");
         for (LootChest lootChest : lootChestDisplay) {
             lootChest.getTimeDisplay().text(MiniMessage.miniMessage().deserialize("<green>Öffne Mich!"));
         }
@@ -94,7 +95,7 @@ public class LootChestTimer extends BukkitRunnable {
     private void logNextChestTime(long ticks) {
         String timeMessage = String.format("DEBUGGER: Nächste LootChest in %s.",
                 RaspiTimes.Ticks.getTimeUnit(ticks * 20));
-        plugin.getLogger().info(timeMessage);
+        plugin.getDebugger().info(timeMessage);
     }
 
     private void notifyPlayers(long ticks) {
@@ -104,13 +105,4 @@ public class LootChestTimer extends BukkitRunnable {
             player.sendRichMessage("<gray>Nächste LootChest in " + timeMessage + ".");
         });
     }
-
-    public boolean isLootChestReady() {
-        return this.lootChestReady;
-    }
-
-    public List<LootChest> getLootChestDisplay() {
-        return this.lootChestDisplay;
-    }
-
 }

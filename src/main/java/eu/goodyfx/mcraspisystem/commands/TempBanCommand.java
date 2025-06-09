@@ -51,7 +51,7 @@ public class TempBanCommand implements CommandExecutor {
                 OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
 
                 if (args.length == 5 && (args[4].equals("--MOD"))) {
-                    playerBanManager.tempBanPlayerStandard(target, new StringBuilder("Überdenk@Dein@Leben"), (plugin.getConfig().getInt("Utilities.tempban.time") * RaspiTimes.MilliSeconds.HOUR.getTime()), player.getName());
+                    playerBanManager.tempBanPlayerStandard(target, new StringBuilder("RSP:6723@Überdenk@Dein@Leben"), (plugin.getConfig().getInt("Utilities.tempban.time") * RaspiTimes.MilliSeconds.HOUR.getTime()), player.getName());
                     String output = String.format("%1$s<red>%2$s <gray>wurde von: <red>%3$s <gray>für: <yellow>%4$s <gray>3 Stunde(n) gesperrt.", data.getPrefix(), target.getName(), player.getName(), playerBanManager.reason(target));
                     Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(output));
                     kickPlayer(target);

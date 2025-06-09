@@ -25,6 +25,7 @@ public class RaspiModuleManager {
     private final LootChestManager lootChestManager;
     private final MOTDManager motdManager;
     private final TraderDB traderDB = new TraderDB();
+    private final CommandManager commandManager = new CommandManager();
 
     public RaspiModuleManager(McRaspiSystem system) {
         this.plugin = system;
@@ -44,69 +45,6 @@ public class RaspiModuleManager {
         this.timeDBManager = new TimeDBManager(system);
         this.lootChestManager = new LootChestManager(system);
         this.motdManager = new MOTDManager(system);
-    }
 
-    public JoinMessageManager getJoinMessageManager() {
-        return joinMessageManager;
-    }
-
-    public LocationManager getLocationManager() {
-        return locationManager;
-    }
-
-    public MessageManager getMessageManager() {
-        return messageManager;
-    }
-
-    public PlayerBanManager getPlayerBanManager() {
-        return playerBanManager;
-    }
-
-    public PlayerSettingsManager getPlayerSettingsManager() {
-        return playerSettingsManager;
-    }
-
-    public RequestManager getRequestManager() {
-        return requestManager;
-    }
-
-    public UserManager getUserManager() {
-        return userManager;
-    }
-
-    public RaspiMessages getRaspiMessages() {
-        return raspiMessages;
-    }
-
-    public WarteschlangenManager getWarteschlangenManager() {
-        return warteschlangenManager;
-    }
-
-    public PlayerNameController getPlayerNameController() {
-        return playerNameController;
-    }
-
-    public PrefixManager getPrefixManager() {
-        return prefixManager;
-    }
-
-    public McRaspiSystem getPlugin() {
-        return this.plugin;
-    }
-
-    public LootManager getLootManager() {
-        return lootManager;
-    }
-
-    public TimeDBManager getTimeDBManager() {
-        return this.timeDBManager;
-    }
-
-    public LootChestManager getLootChestManager() {
-        return this.lootChestManager;
-    }
-
-    public MOTDManager getMotdManager() {
-        return this.motdManager;
     }
 }

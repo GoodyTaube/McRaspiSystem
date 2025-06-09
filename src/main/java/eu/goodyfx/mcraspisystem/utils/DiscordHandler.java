@@ -1,5 +1,6 @@
 package eu.goodyfx.mcraspisystem.utils;
 
+import com.google.gson.JsonObject;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -29,7 +30,7 @@ public class DiscordHandler {
         }
     }
 
-    public void send(String message) {
+    public void sendOLD(String message) {
         if (this.webHookURL != null) {
             try {
                 HttpsURLConnection connection = (HttpsURLConnection) webHookURL.openConnection();
@@ -53,5 +54,38 @@ public class DiscordHandler {
             }
         }
     }
+
+    public void send(String message) {
+        if (this.webHookURL != null) {
+            try {
+                HttpsURLConnection connection = (HttpsURLConnection) webHookURL.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("User-Agent", "Java-DiscordWebhook");
+                connection.setDoOutput(true);
+
+                //JSON
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("content", message);
+                try(OutputStream stream = connection.getOutputStream()){
+                    stream.write(jsonObject.toString().getBytes(StandardCharsets.UTF_8));
+                }
+                int response = connection.getResponseCode();
+                if (response != 204) {
+                    plugin.getLogger().warning("Webhook Antwortcode: " + response);
+                    try (InputStream error = connection.getErrorStream()) {
+                        if (error != null) {
+                            String responseMessage = new String(error.readAllBytes(), StandardCharsets.UTF_8);
+                            plugin.getLogger().warning("Fehlermeldung: " + responseMessage);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                String exMessage = String.format("Error while sending %s", message);
+                plugin.getLogger().log(Level.SEVERE, exMessage, e);
+            }
+        }
+    }
+
 
 }

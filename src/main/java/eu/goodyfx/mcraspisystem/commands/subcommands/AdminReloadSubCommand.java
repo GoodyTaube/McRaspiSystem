@@ -38,6 +38,7 @@ public class AdminReloadSubCommand extends SubCommand {
             plugin.reloadConfig();
             player.sendMessage("Die config.yml wurde neu geladen.", true);
             plugin.getDebugger().info(plugin.getConfig().getString("Utilities.vote"));
+            plugin.getRaspiPlayers().forEach(player1 -> player.getPlayer().updateCommands());
         }
         return true;
     }

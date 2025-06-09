@@ -1,5 +1,8 @@
 package eu.goodyfx.mcraspisystem.utils;
 
+import lombok.Getter;
+
+@Getter
 public enum Powers {
 
     HASTE(20 * 60 * 30L, "haste", 1),
@@ -7,8 +10,8 @@ public enum Powers {
     FLIGHT(30L, "fly", 3);
 
 
-    private long time;
-    private int id;
+    private final long time;
+    private final int id;
 
     private final String label;
 
@@ -17,25 +20,4 @@ public enum Powers {
         this.id = id;
         this.label = powerLabel;
     }
-
-    public int getId() {
-        return this.id;
-    }
-
-    public String getLabel() {
-        return this.label;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public long getTime() {
-        return this.time;
-    }
-
-    public void setTime(long minutes) {
-        this.time = minutes;
-    }
-
 }

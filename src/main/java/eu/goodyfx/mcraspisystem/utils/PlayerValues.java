@@ -1,7 +1,9 @@
 package eu.goodyfx.mcraspisystem.utils;
 
+import lombok.Getter;
 import org.bukkit.persistence.PersistentDataType;
 
+@Getter
 public enum PlayerValues {
 
     DEATH("death", PersistentDataType.LONG),
@@ -16,13 +18,5 @@ public enum PlayerValues {
     PlayerValues(String label, PersistentDataType<?, ?> type) {
         this.label = label;
         this.persistentDataType = type;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public PersistentDataType getPersistentDataType() {
-        return persistentDataType;
     }
 }
