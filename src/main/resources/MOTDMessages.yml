@@ -1,4 +1,4 @@
-upperText: "<gold>McRaspi.com <b><white>|</b> <green>Vanilla Minecraft Server <aqua>1.21.4!"
+upperText: "<gold>McRaspi.com <b><white>|</b> <green>Vanilla Minecraft Server <aqua>%version%!"
 randomText:
   - "Ich liebe es zu Trollen."
   - "Eisberge leben wegen dem Klimawandel"

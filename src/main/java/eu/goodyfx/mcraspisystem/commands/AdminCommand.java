@@ -1,6 +1,7 @@
 package eu.goodyfx.mcraspisystem.commands;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.mojang.brigadier.tree.CommandNode;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.subcommands.*;
 import eu.goodyfx.mcraspisystem.utils.RaspiMessages;
@@ -36,6 +37,8 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private final RaspiMessages data;
 
+    private AdminDebugSubCommand debugSubCommand;
+
     private final List<SubCommand> subCommands = new ArrayList<>();
 
     public AdminCommand() {
@@ -46,9 +49,10 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
     }
 
     public void addSubCommands() {
+        debugSubCommand = new AdminDebugSubCommand(plugin);
         subCommands.add(new AdminHelpCommand(data, this));
         subCommands.add(new AdminSudoCommand(plugin));
-        subCommands.add(new AdminDebugSubCommand(plugin));
+        subCommands.add(debugSubCommand);
         subCommands.add(new AdminSkullSubCommand());
         subCommands.add(new AdminLootChestSubCommand(plugin));
         subCommands.add(new AdminCombineFileSubCommand(plugin));
@@ -69,8 +73,11 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 Collections.sort(results);
                 return results;
             }
-
+            if (args.length == 2&& args[0].equalsIgnoreCase("debug")) {
+                return debugSubCommand.getActions().keySet().stream().toList();
+            }
             if ((args.length > 2 && args.length < 6) && args[0].equalsIgnoreCase("skull")) {
+
 
                 if (sender instanceof Player player) {
                     if (args.length == 3) {

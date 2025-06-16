@@ -21,6 +21,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.text.SimpleDateFormat;
@@ -52,7 +53,6 @@ public class PlayerListeners implements Listener {
             event.setCancelled(true);
         }
     }
-
 
 
     @EventHandler(priority = EventPriority.MONITOR)

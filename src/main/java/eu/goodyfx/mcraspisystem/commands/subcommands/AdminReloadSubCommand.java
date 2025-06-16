@@ -36,9 +36,12 @@ public class AdminReloadSubCommand extends SubCommand {
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         if (args.length == 1) {
             plugin.reloadConfig();
-            player.sendMessage("Die config.yml wurde neu geladen.", true);
+            plugin.getModule().getMotdManager().reload();
+            player.sendMessage("Die RaspiConfigs wurden neu Geladen.", true);
             plugin.getDebugger().info(plugin.getConfig().getString("Utilities.vote"));
             plugin.getRaspiPlayers().forEach(player1 -> player.getPlayer().updateCommands());
+            player.sendMessage("Die RaspiConfigs wurden neu Geladen.", true);
+
         }
         return true;
     }

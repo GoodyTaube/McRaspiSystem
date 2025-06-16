@@ -4,6 +4,7 @@ import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.SubCommand;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -14,7 +15,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AdminCombineFileSubCommand extends SubCommand {
+public class AdminCombineFileSubCommand extends SubCommand{
 
     private final McRaspiSystem plugin;
 
@@ -41,6 +42,8 @@ public class AdminCombineFileSubCommand extends SubCommand {
     public int length() {
         return 3;
     }
+
+
 
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {

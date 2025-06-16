@@ -5,8 +5,18 @@ import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.SubCommand;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.Settings;
+import io.papermc.paper.datapack.Datapack;
+import io.papermc.paper.datapack.DatapackManager;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 public class AdminDebugSubCommand extends SubCommand {
 
@@ -15,6 +25,7 @@ public class AdminDebugSubCommand extends SubCommand {
 
     public AdminDebugSubCommand(McRaspiSystem utilities) {
         this.plugin = utilities;
+        register("settings", this::settings);
     }
 
     @Override
@@ -39,18 +50,22 @@ public class AdminDebugSubCommand extends SubCommand {
 
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
+        invoke("settings", player, args);
+        return true;
+    }
+
+    public void settings(RaspiPlayer player, String[] args) {
         if (args.length == 3 && args[1].equalsIgnoreCase("settings")) {
             Player target = Bukkit.getPlayer(args[2]);
             if (target == null) {
                 player.sendMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[2]));
-                return true;
+                return;
             }
             player.sendMessage(target.getName() + " Settings:");
             for (Settings setting : Settings.values()) {
                 player.sendMessage(setting.getLabel() + ": " + plugin.getModule().getPlayerSettingsManager().contains(setting, target));
             }
         }
-        return true;
     }
 
 

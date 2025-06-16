@@ -158,7 +158,13 @@ public final class McRaspiSystem extends JavaPlugin {
 
     public Set<RaspiPlayer> getRaspiTeamPlayers() {
         return getRaspiPlayers().stream()
-                .filter(all -> all.hasPermission(RaspiPermission.TEAM))
+                .filter(raspiPlayer -> raspiPlayer.hasPermission(RaspiPermission.TEAM))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<RaspiPlayer> getRaspiPlayersPerPermission(RaspiPermission permission) {
+        return getRaspiPlayers().stream()
+                .filter(raspiPlayer -> raspiPlayer.hasPermission(permission))
                 .collect(Collectors.toSet());
     }
 

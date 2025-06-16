@@ -16,6 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -97,7 +98,7 @@ public class RaspiPlayerConnectionEvents implements Listener {
     private void handleBlocked(RaspiPlayer raspiPlayer) {
         Player player = raspiPlayer.getPlayer();
         if (requestManager.isBlocked(player)) {
-            plugin.getRaspiTeamPlayers().forEach(team -> {
+            plugin.getRaspiPlayersPerPermission(RaspiPermission.MOD).forEach(team -> {
                 team.sendMessage(String.format("<gray><italic>%s wurde bereits von %s <gray><italic>Abgelehnt!", player.getName(), requestManager.getDeny(player)), true);
                 if (requestManager.isBlocked("reason", player)) {
                     team.sendMessage(String.format("<gray><italic>Grund: <yellow>%s", requestManager.getReason(player).replace("@", " ")), true);
@@ -115,12 +116,10 @@ public class RaspiPlayerConnectionEvents implements Listener {
 
     private void handleNewbie(Player player) {
         if (!player.isPermissionSet("group.spieler") && (!requestManager.isBlocked(player))) {
-            plugin.getRaspiPlayers().stream()
-                    .filter(all -> all.hasPermission(RaspiPermission.TEAM))
-                    .toList().forEach(team -> {
-                        team.sendMessage(String.format("<gray><italic>%s ist noch nicht Registriert!", player.getName()), true);
-                        team.sendMessage(String.format("<white>[<green>%s<white>] [<red>%s<white>]", String.format("<click:run_command:'/request accept %s'>Annehmen<reset>", player.getName()), String.format("<click:run_command:'request deny %1$2s -request_start'>Ablehnen <gray>(<green><click:suggest_command:'/request deny %1$2s'>+<reset><gray>)", player.getName())), true);
-                    });
+            plugin.getRaspiPlayersPerPermission(RaspiPermission.MOD).forEach(moderator -> {
+                moderator.sendMessage(String.format("<gray><italic>%s ist noch nicht Registriert!", player.getName()), true);
+                moderator.sendMessage(String.format("<white>[<green>%s<white>] [<red>%s<white>]", String.format("<click:run_command:'/request accept %s'>Annehmen<reset>", player.getName()), String.format("<click:run_command:'request deny %1$2s -request_start'>Ablehnen <gray>(<green><click:suggest_command:'/request deny %1$2s'>+<reset><gray>)", player.getName())), true);
+            });
         }
     }
 
@@ -184,5 +183,11 @@ public class RaspiPlayerConnectionEvents implements Listener {
         }
     }
 
+
+    @EventHandler
+    public void onServerPing(ServerListPingEvent event) {
+        event.motd(plugin.getModule().getMotdManager().getMessage());
+
+    }
 
 }
