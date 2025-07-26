@@ -1,6 +1,6 @@
 name: McRaspiSystem
 version: '${project.version}'
-main: eu.goodyfx.mcraspisystem.McRaspiSystem
+main: eu.goodyfx.system.McRaspiSystem
 api-version: '1.21'
 depend:
   - LuckPerms
