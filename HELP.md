@@ -103,13 +103,3 @@
 - Weitere Systeme werden modular über die Konfiguration geladen.
 
 ---
-
-## 📎 Verwendung
-
-Du kannst diese Datei speichern als:  
-📄 `HELP.md`  
-und in deiner `README.md` so verlinken:
-
-```markdown
-👉 Befehlsübersicht: [HELP.md](HELP.md)
-```
