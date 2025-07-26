@@ -8,6 +8,7 @@ import eu.goodyfx.mcraspisystem.managers.UserManager;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.security.SecureRandom;
@@ -41,7 +42,9 @@ public class PlayerNameController {
         if (colorString.equalsIgnoreCase("<MINE_COIN_GOLD>")) {
             colorString = OldColors.MINE_COIN_GOLD.getMinniString();
         }
-        userManager.setPersistantValue(player, PlayerValues.COLOR, colorString);
+        userManager.set(player, "playerColor", colorString);
+        setPlayerList(player);
+
     }
 
 
@@ -51,7 +54,7 @@ public class PlayerNameController {
             setPlayerColor("<random>", player);
         }
 
-        String colorString = userManager.getPersistantValue(player, PlayerValues.COLOR, String.class);
+        String colorString = userManager.get("playerColor", player, String.class);
         assert colorString != null; //Wir setzen den ja default auf Random
 
         if (colorString.equalsIgnoreCase("<random>")) {
@@ -101,10 +104,11 @@ public class PlayerNameController {
     }
 
     private boolean playerHasColor(Player player) {
-        return userManager.hasPersistantValue(player, PlayerValues.COLOR);
+        return userManager.contains("playerColor", player);
     }
 
     public void resetRandom(Player player) {
+        JavaPlugin.getPlugin(McRaspiSystem.class).getLogger().info("REMOVED");
         randomContainer.remove(player.getUniqueId());
     }
 

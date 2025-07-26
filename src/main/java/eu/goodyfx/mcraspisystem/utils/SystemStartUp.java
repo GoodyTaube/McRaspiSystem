@@ -2,9 +2,11 @@ package eu.goodyfx.mcraspisystem.utils;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.*;
+import eu.goodyfx.mcraspisystem.commands.subcommands.RaspiGiveCommand;
 import eu.goodyfx.mcraspisystem.events.*;
 import eu.goodyfx.mcraspisystem.systems.LootChest;
 import eu.goodyfx.mcraspisystem.systems.RaspiItems;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -15,9 +17,21 @@ public class SystemStartUp {
     public final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
     public SystemStartUp() {
+        welcome();
         systeme();
         addCommands(plugin);
         addEvents(plugin);
+    }
+
+    private void welcome(){
+        Bukkit.getConsoleSender().sendRichMessage("<br><br><rainbow>" +
+                "███╗   ███╗ ██████╗██████╗  █████╗ ███████╗██████╗ ██╗      ███████╗██╗   ██╗███████╗████████╗███████╗███╗   ███╗<br>" +
+                "████╗ ████║██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██║      ██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝██╔════╝████╗ ████║<br>" +
+                "██╔████╔██║██║     ██████╔╝███████║███████╗██████╔╝██║█████╗███████╗ ╚████╔╝ ███████╗   ██║   █████╗  ██╔████╔██║<br>" +
+                "██║╚██╔╝██║██║     ██╔══██╗██╔══██║╚════██║██╔═══╝ ██║╚════╝╚════██║  ╚██╔╝  ╚════██║   ██║   ██╔══╝  ██║╚██╔╝██║<br>" +
+                "██║ ╚═╝ ██║╚██████╗██║  ██║██║  ██║███████║██║     ██║      ███████║   ██║   ███████║   ██║   ███████╗██║ ╚═╝ ██║<br>" +
+                "╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝      ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝<br>" +
+                "                                                                                                                 <br>");
     }
 
     private void systeme() {
@@ -49,7 +63,6 @@ public class SystemStartUp {
         new ReisePortCommand(plugin);
         new RandomTeleportCommand(plugin);
         new BackCommand(plugin);
-        new VoteCommand(plugin);
         new TraderCommand();
         new MuteCommand();
         new InHeadCommand();
@@ -74,6 +87,10 @@ public class SystemStartUp {
         new InHeadListeners();
         //new WarnListeners(plugin);
         new TraderListeners();
+        new CompassEvents();
+        new CraftingEventListeners();
+        new InventoryListeners();
+
     }
 
     public void addToLists(SystemTemplate system) {

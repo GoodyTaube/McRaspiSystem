@@ -1,0 +1,5 @@
+daily-spawn-max: 10
+min-takt: 1
+item-add-min: 2
+item-add-max: 10
+random-faktor: 100

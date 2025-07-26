@@ -3,6 +3,7 @@ package eu.goodyfx.mcraspisystem.managers;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.utils.PlayerValues;
+import lombok.Getter;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,10 +27,12 @@ import java.util.*;
 import java.util.logging.Level;
 
 @SuppressWarnings("unused")
+@Getter
 public class UserManager {
 
     private final List<UUID> muteContainer = new ArrayList<>();
     private final Map<UUID, Location> afkContainer = new HashMap<>();
+    private final List<String> usernamesCache = new ArrayList<>();
 
     private final File file;
     private FileConfiguration config;
@@ -116,10 +119,6 @@ public class UserManager {
             afkContainer.put(player.getUniqueId(), player.getLocation());
             setPersistantValue(player, PlayerValues.AFK, 1);
         }
-    }
-
-    public Map<UUID, Location> getAfkContainer() {
-        return this.afkContainer;
     }
 
     public void setupPlayerData(OfflinePlayer player) {
@@ -263,12 +262,15 @@ public class UserManager {
      * @return All UserNames
      */
     public List<String> getAllUsers() {
-        List<String> result = new ArrayList<>();
-        for (String key : Objects.requireNonNull(config.getConfigurationSection("User")).getKeys(false)) {
-
-            result.add(config.getString("User." + key + ".userName"));
+        if (usernamesCache.isEmpty()) {
+            for (String key : Objects.requireNonNull(config.getConfigurationSection("User")).getKeys(false)) {
+                String dbString = config.getString(String.format("User.%s.userName", key));
+                if (dbString != null) {
+                    usernamesCache.add(dbString);
+                }
+            }
         }
-        return result;
+        return usernamesCache;
     }
 
 

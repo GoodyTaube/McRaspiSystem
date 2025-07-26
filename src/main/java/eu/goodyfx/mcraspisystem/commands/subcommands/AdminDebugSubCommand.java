@@ -3,11 +3,13 @@ package eu.goodyfx.mcraspisystem.commands.subcommands;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.SubCommand;
+import eu.goodyfx.mcraspisystem.utils.ItemBuilder;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.Settings;
 import io.papermc.paper.datapack.Datapack;
 import io.papermc.paper.datapack.DatapackManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -51,6 +53,7 @@ public class AdminDebugSubCommand extends SubCommand {
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
         invoke("settings", player, args);
+        invoke("test", player, args);
         return true;
     }
 
@@ -68,5 +71,10 @@ public class AdminDebugSubCommand extends SubCommand {
         }
     }
 
+    public void test(RaspiPlayer player, String[] args){
+        if(args.length == 2 && args[1].equalsIgnoreCase("test")){
+            player.getPlayer().getInventory().addItem(new ItemBuilder(Material.CRAFTING_TABLE).displayName("TEST").build());
+        }
+    }
 
 }

@@ -10,6 +10,8 @@ import eu.goodyfx.mcraspisystem.managers.WarteschlangenManager;
 import eu.goodyfx.mcraspisystem.utils.*;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -17,6 +19,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -38,6 +43,7 @@ public class RaspiPlayerConnectionEvents implements Listener {
     private final PlayerNameController playerNameController = plugin.getModule().getPlayerNameController();
     private final RequestManager requestManager = plugin.getModule().getRequestManager();
     private final UserManager userManager = plugin.getModuleManager().getUserManager();
+    private final NamespacedKey joinErrorKey = plugin.getNameSpaced("joinError");
 
     private final Map<UUID, PlayerTime> timeContainer = new HashMap<>();
 
@@ -57,6 +63,11 @@ public class RaspiPlayerConnectionEvents implements Listener {
         settings.join(player);
         settings.setHeader();
         //REQUEST
+
+        if (!(player.hasPlayedBefore()) || (player.getPersistentDataContainer().has(joinErrorKey))) {
+            spielerNeu(player);
+        }
+
         raspiRequest(raspiPlayer);
 
         playerNameController.setPlayerList(player);
@@ -71,6 +82,47 @@ public class RaspiPlayerConnectionEvents implements Listener {
         timeContainer.put(player.getUniqueId(), new PlayerTime(player));
 
         welcomeMessage(plugin.getRaspiPlayer(player));
+        plugin.getModule().getItemConverterManager().convert(player.getInventory());
+
+    }
+
+    private void spielerNeu(Player player) {
+        //TODO SPIER NEU LOGIC
+        String path = "Utilities.firstJoinCommands.file";
+        PersistentDataContainer container = player.getPersistentDataContainer();
+
+
+        if (!plugin.getConfig().contains(path)) {
+            return;
+        }
+        String fileName = plugin.getConfig().getString(path);
+        assert fileName != null;
+        if (!new File(plugin.getDataFolder(), fileName).exists()) {
+            plugin.getRaspiTeamPlayers().forEach(player1 -> player1.sendMessage(String.format("<red><i>%s hat kein Willkommensbuch bekommen!<reset> <yellow>FEHLER:[404]:: %s NOT FOUND!", player.getName(), fileName), true));
+
+            container.set(joinErrorKey, PersistentDataType.INTEGER, 1);
+            return;
+        } else {
+            if (container.has(joinErrorKey)) {
+                plugin.getRaspiTeamPlayers().forEach(team -> team.sendMessage(String.format("<gray><i>Versuche das Willkommensbuch für %s erneut zu erstellen.", player.getName()), true));
+            }
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(new File(plugin.getDataFolder(), fileName), StandardCharsets.UTF_8))) {
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                line = line.replace("%player%", player.getName());
+                if (!line.isEmpty()) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line);
+                }
+            }
+
+            if (container.has(joinErrorKey) && player.getInventory().contains(new ItemStack(Material.WRITTEN_BOOK).getType())) {
+                plugin.getRaspiTeamPlayers().forEach(team -> team.sendMessage(String.format("<green><i>Willkommensbuch für %s erfolgreich übermittelt!", player.getName()), true));
+                container.remove(joinErrorKey);
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Error while Handling commands.txt", e);
+        }
     }
 
     private void welcomeMessage(RaspiPlayer player) {

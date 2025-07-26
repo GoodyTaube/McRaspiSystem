@@ -3,6 +3,7 @@ package eu.goodyfx.mcraspisystem.events;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;

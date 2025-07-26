@@ -2,3 +2,6 @@
 McRaspiSystem.iml
 .gitignore
 *.jar
+UPLOAD.sh
+README.md
+dependency-reduced-pom.xml

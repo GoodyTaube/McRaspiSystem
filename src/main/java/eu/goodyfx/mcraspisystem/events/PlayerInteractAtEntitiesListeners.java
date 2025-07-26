@@ -6,7 +6,7 @@ import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.utils.LootChestLoot;
 import eu.goodyfx.mcraspisystem.utils.RaspiPlayer;
 import eu.goodyfx.mcraspisystem.utils.RaspiSounds;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import io.papermc.paper.brigadier.PaperBrigadier;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -17,7 +17,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,35 +37,7 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
         lootItemSticks(event);
-        fakeVirus(event);
         villagerInteraction(event);
-    }
-
-    private void fakeVirus(PlayerInteractAtEntityEvent event) {
-        Entity entity = event.getRightClicked();
-        Player player = event.getPlayer(); //The player who click Animal
-        sit(event); //Sit Implementation
-        if (player.getInventory().getItemInMainHand().getType().equals(Material.STICK)) {
-            ItemStack debug = player.getInventory().getItemInMainHand();
-            if (debug.hasItemMeta() && debug.getItemMeta().hasCustomModelData() && debug.getItemMeta().getCustomModelData() == 777) {
-                Player target = null;
-                if (entity instanceof Player pl) {
-                    target = pl;
-                }
-                if (target == null) {
-                    return;
-                }
-                if (debugActivation.contains(entity.getUniqueId()) && !player.isSneaking()) {
-                    sendDemoGUIPacket(target);
-                } else if (debugActivation.contains(entity.getUniqueId()) && player.isSneaking()) {
-                    debugActivation.remove(entity.getUniqueId());
-                } else {
-                    debugActivation.add(entity.getUniqueId());
-                    fakeVirusInjection(target);
-                }
-            }
-        }
-
     }
 
 
@@ -94,35 +65,6 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
                 event.setCancelled(true);
             }
         }
-
-    }
-
-    /**
-     * Send Fake virus Injection to Target Player
-     *
-     * @param target The Injection receiver
-     */
-    private void fakeVirusInjection(Player target) {
-        new BukkitRunnable() {
-            int per = 0;
-
-            @Override
-            public void run() {
-
-                int rando = random.nextInt(4);
-                if (per + rando > 100) {
-                    per++;
-                } else {
-                    per = per + rando;
-                }
-                target.sendActionBar(MiniMessage.miniMessage().deserialize("<green>Injection: <red>p_22cX3_Exploit <reset>|| <gray>" + per + "%"));
-                if (per == 100) {
-                    cancel();
-                    target.sendActionBar(MiniMessage.miniMessage().deserialize("<red><b>Injection Success!"));
-                    sendDemoGUIPacket(target);
-                }
-            }
-        }.runTaskTimerAsynchronously(plugin, random.nextInt(2), random.nextInt(3));
     }
 
     /**

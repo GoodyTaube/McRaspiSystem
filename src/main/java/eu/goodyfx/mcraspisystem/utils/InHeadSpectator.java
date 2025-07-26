@@ -9,6 +9,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
+import eu.goodyfx.mcraspisystem.commands.InHeadCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,6 +26,7 @@ public class InHeadSpectator {
             @Override
             public void onPacketSending(PacketEvent event) {
                 Player player = event.getPlayer();
+
                 PacketContainer packet = event.getPacket();
 
                 //Index define and Gamemode Definition
@@ -36,7 +38,7 @@ public class InHeadSpectator {
                     List<PlayerInfoData> data = packet.getPlayerInfoDataLists().read(index);
                     for (int i = 0; i < data.size(); i++) {
                         PlayerInfoData dataManu = data.get(i);
-                        if (dataManu.getGameMode() == EnumWrappers.NativeGameMode.SPECTATOR && !event.getPlayer().getUniqueId().equals(dataManu.getProfile().getUUID())) {
+                        if (dataManu.getGameMode() == EnumWrappers.NativeGameMode.SPECTATOR && !player.getUniqueId().equals(dataManu.getProfile().getUUID()) && InHeadCommand.getInHeadContainer().containsKey(player.getUniqueId())) {
                             data.set(i, new PlayerInfoData(dataManu.getProfile(), dataManu.getLatency(), gameMode, dataManu.getDisplayName()));
                         }
                     }

@@ -2,6 +2,7 @@ package eu.goodyfx.mcraspisystem.events;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.commands.SitCommand;
+import eu.goodyfx.mcraspisystem.commands.container.SitCommandContainer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -112,11 +113,11 @@ public class PlayerInteractListeners implements Listener {
             Block block = interactEvent.getClickedBlock();
             if (block != null && (block.getBlockData() instanceof Stairs || block.getBlockData() instanceof Slab)) {
                 Location location = block.getLocation();
-                SitCommand.add(player, location, -0.53);
+                SitCommandContainer.performSit(player, location.add(0.5, 0, 0.5), -0.53);
             }
             if (block != null && Tag.WOOL_CARPETS.isTagged(block.getType())) {
                 Location location = block.getLocation();
-                SitCommand.add(player, location, 0.046);
+                SitCommandContainer.performSit(player, location.add(0.5, 0, 0.5), 0.046);
             }
         }
     }

@@ -1,12 +1,17 @@
 package eu.goodyfx.mcraspisystem;
 
+import eu.goodyfx.mcraspisystem.commands.container.ItemConverterCommandContainer;
+import eu.goodyfx.mcraspisystem.commands.container.RaspiGiveCommandContainer;
+import eu.goodyfx.mcraspisystem.commands.container.VoteCommandContainer;
+import eu.goodyfx.mcraspisystem.craftings.CanabolaCraftging;
+import eu.goodyfx.mcraspisystem.craftings.EntityGranadeCrafting;
 import eu.goodyfx.mcraspisystem.managers.RaspiHookManager;
 import eu.goodyfx.mcraspisystem.managers.RaspiModuleManager;
 import eu.goodyfx.mcraspisystem.tasks.*;
 import eu.goodyfx.mcraspisystem.utils.*;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -27,7 +32,6 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private RaspiModuleManager moduleManager;
     private RaspiHookManager hookManager;
-
     private RaspiDebugger debugger;
 
     private final Random random = new Random();
@@ -52,6 +56,18 @@ public final class McRaspiSystem extends JavaPlugin {
         init();
     }
 
+    private void paperCommandsRegister() {
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            //commands.registrar().register(AdminWartungSubCommand.adminWartungCommand().build());
+            //commands.registrar().register(SitCommandContainer.sitCommand());
+            //commands.registrar().register(BackCommandContainer.backCommand());
+            //commands.registrar().register(ChatColorCommandContainer.chatColorCommand());
+            commands.registrar().register(VoteCommandContainer.voteCommand(this));
+            commands.registrar().register(ItemConverterCommandContainer.command());
+            commands.registrar().register(new RaspiGiveCommandContainer().command());
+        });
+    }
+
     private void init() {
         this.debugger = new RaspiDebugger(this);
         getLogger().info("Welcome to McRaspiSystem");
@@ -59,7 +75,8 @@ public final class McRaspiSystem extends JavaPlugin {
         setupConfigs();
         moduleManager = new RaspiModuleManager(this);
         new SystemStartUp();
-
+        paperCommandsRegister();
+        //recipes();
         this.raspiItemsRunner = new RaspiItemsTimer(this).runTaskTimerAsynchronously(this, 0L, 20L);
         this.idleTask = new IdleTask(this, this);
         this.weeklyTimer = new WeeklyTimer(this);
@@ -72,21 +89,16 @@ public final class McRaspiSystem extends JavaPlugin {
         new InHeadSpectator();
     }
 
+    private void recipes() {
+        new CanabolaCraftging(this);
+        new EntityGranadeCrafting();
+    }
+
 
     private void setupConfigs() {
         //ALLE Config bezogenen sachen
         getConfig().options().copyDefaults(true);
         saveConfig();
-
-        if (getConfig().contains("items.mapLabel")) {
-            try {
-                Material material = Material.valueOf(getConfig().getString("items.mapLabel.type"));
-                mapItem = new Item(material, getConfig().getInt("items.mapLabel.id"));
-            } catch (EnumConstantNotPresentException e) {
-                String log = String.format("Das Item %s existiert nicht.", getConfig().getString("items.mapLabel.type"));
-                getLogger().info(log);
-            }
-        }
     }
 
     /**

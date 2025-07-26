@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.utils.DiscordIntegration;
+import lombok.Getter;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -11,6 +12,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.logging.Level;
 
+@Getter
 public class RaspiHookManager {
 
     private final McRaspiSystem system;
@@ -51,23 +53,10 @@ public class RaspiHookManager {
     private boolean protocolManager() {
         ProtocolManager manager = ProtocolLibrary.getProtocolManager();
         if (manager != null) {
-            this.protocolManager = manager;
+          this.protocolManager = manager;
             return true;
         }
         plugin.getLogger().log(Level.SEVERE, "Plugin ProtocolLib not Found!");
         return false;
     }
-
-    public LuckPerms getLuckPerms() {
-        return luckPerms;
-    }
-
-    public DiscordIntegration getDiscordIntegration() {
-        return this.discordIntegration;
-    }
-
-    public ProtocolManager getProtocolManager() {
-        return this.protocolManager;
-    }
-
 }

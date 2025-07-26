@@ -26,7 +26,9 @@ public class RaspiModuleManager {
     private final MOTDManager motdManager;
     private final TraderDB traderDB = new TraderDB();
     private final CommandManager commandManager = new CommandManager();
-
+    private final ItemConverterManager itemConverterManager = new ItemConverterManager();
+    private final RaspiGiveManager raspiGiveManager = new RaspiGiveManager();
+    
     public RaspiModuleManager(McRaspiSystem system) {
         this.plugin = system;
         system.getLogger().info("Initialize Modules...");

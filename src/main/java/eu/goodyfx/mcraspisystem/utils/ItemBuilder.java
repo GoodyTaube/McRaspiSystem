@@ -9,6 +9,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public class ItemBuilder {
@@ -69,6 +70,11 @@ public class ItemBuilder {
         } else {
             stack.addEnchantment(enchantment, level);
         }
+    }
+
+    public ItemBuilder addEnchantments(Map<Enchantment, Integer> enchantmentIntegerMap) {
+        stack.addEnchantments(enchantmentIntegerMap);
+        return this;
     }
 
     public ItemBuilder setModelID(int modelID) {

@@ -37,10 +37,11 @@ public class AdminReloadSubCommand extends SubCommand {
         if (args.length == 1) {
             plugin.reloadConfig();
             plugin.getModule().getMotdManager().reload();
+            plugin.getModule().getRaspiGiveManager().reload();
+            plugin.getModule().getTraderDB().reload();
             player.sendMessage("Die RaspiConfigs wurden neu Geladen.", true);
             plugin.getDebugger().info(plugin.getConfig().getString("Utilities.vote"));
             plugin.getRaspiPlayers().forEach(player1 -> player.getPlayer().updateCommands());
-            player.sendMessage("Die RaspiConfigs wurden neu Geladen.", true);
 
         }
         return true;

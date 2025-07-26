@@ -19,7 +19,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.TNTPrimeEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -183,19 +182,10 @@ public class ServerListeners implements Listener {
         }
     }
 
-    @EventHandler
-    public void onLogin(PlayerLoginEvent event) {
-        Player player = event.getPlayer();
-        userManager.update(player);
-        if (!player.isPermissionSet("system.team") && plugin.getConfig().contains("Utilities.wartung") && plugin.getConfig().getBoolean("Utilities.wartung")) {
-            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize("<gray>Wir befinden uns in Wartung.<br><aqua>Bitte um Verständnis."));
-        }
-    }
 
     @EventHandler
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
         OfflinePlayer player = Bukkit.getOfflinePlayer(event.getUniqueId());
-
         if (playerBanManager.contains(player)) {
             if (System.currentTimeMillis() < playerBanManager.expire(player)) {
                 event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, MiniMessage.miniMessage().deserialize(String.format("<gold>McRaspi.com <gray><b>-</b> <red>Disconnect<br><br><red><b>Du wurdest temporär gesperrt!</b><br>" +

@@ -2,10 +2,7 @@ package eu.goodyfx.mcraspisystem.events;
 
 import eu.goodyfx.mcraspisystem.McRaspiSystem;
 import eu.goodyfx.mcraspisystem.managers.UserManager;
-import eu.goodyfx.mcraspisystem.utils.OldColors;
-import eu.goodyfx.mcraspisystem.utils.PlayerNameController;
-import eu.goodyfx.mcraspisystem.utils.RaspiTimes;
-import eu.goodyfx.mcraspisystem.utils.Settings;
+import eu.goodyfx.mcraspisystem.utils.*;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -55,12 +52,8 @@ public class PlayerChatListeners implements Listener {
             }
         });
         chatEvent.message(LegacyComponentSerializer.legacyAmpersand().deserialize(builder.toString()));
-        String plainMessage = PlainTextComponentSerializer.plainText().serialize(chatEvent.message()); //Message as Plain Message
+        String plainMessage = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()); //Message as Plain Message
         Player player = chatEvent.getPlayer();
-        if (plainMessage.startsWith("?") && plainMessage.endsWith("?")) {
-            player.sendRichMessage("");
-            return;
-        }
 
         if (checkUp(player)) {
             return;
@@ -87,7 +80,7 @@ public class PlayerChatListeners implements Listener {
 
         }
         String log = String.format("[RaspiChat] <%s> %s", player.getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
-        Bukkit.getLogger().info(log);
+        plugin.getLogger().info(log);
         plugin.getHookManager().getDiscordIntegration().send("<" + player.getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
     }
 
@@ -157,14 +150,7 @@ public class PlayerChatListeners implements Listener {
     }
 
     private String cleanUpMessage(String message) {
-        String result = message;
-        result = result.replace("<br", "");
-        result = result.replace("<obf", "");
-        result = result.replace("<click", "");
-        result = result.replace("<rainbow", "");
-        result = result.replace("<hover", "");
-        result = OldColors.convert(result);
-        return result;
+        return RaspiFormatting.formattingChatMessage(message);
     }
 
     private String appendPlayerNameColors(String rawMessage) {

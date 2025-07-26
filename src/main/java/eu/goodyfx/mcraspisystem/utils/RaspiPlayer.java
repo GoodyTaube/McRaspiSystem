@@ -126,8 +126,17 @@ public class RaspiPlayer {
         getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
 
+    public String convertLink(String url) {
+        return String.format("<click:open_url:'%s'>%s", url, url);
+    }
+    public String convertLink(String url, String linkDisplay) {
+        return String.format("<click:open_url:'%s'>%s", url,linkDisplay);
+    }
+
+
     /**
      * Checks if player has raspiPermission
+     *
      * @param raspiPermission The User Permission
      * @return true if Player has permission
      */
@@ -138,6 +147,7 @@ public class RaspiPlayer {
     /**
      * Checks if this object contains an override for the specified
      * permission, by fully qualified name
+     *
      * @param permission Name of the permission
      * @return true if the permission is set, otherwise false
      */
