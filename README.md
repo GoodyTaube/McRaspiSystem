@@ -14,6 +14,8 @@ McRaspiSystem ist das zentrale System für den McRaspi Minecraft Server, entwick
 - **Plugin-Integration**: Unterstützung für verschiedene Minecraft-Plugins zur Erweiterung der Serverfunktionalität.
 - **Benutzerverwaltung**: Verwaltung von Spielerberechtigungen und -rollen.
 
+👉 Befehlsübersicht: [HELP.md](HELP.md)
+
 ## Installation
 
 1. **Repository klonen**:
