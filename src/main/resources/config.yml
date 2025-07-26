@@ -1,3 +1,9 @@
+raspi: #Hier kannst du einzelne Sub Systeme Deaktivieren. (Änderung durch Neustart aktiv.)
+  systems:
+    raspiLoot: true
+    raspiEvents: false
+    raspiReise: true
+    raspiTrader: true
 #Settings to Enable Plugin
 prefix:
   length: 20 #Max Prefix length

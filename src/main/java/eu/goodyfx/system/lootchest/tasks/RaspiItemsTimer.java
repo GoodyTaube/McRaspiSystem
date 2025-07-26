@@ -20,6 +20,7 @@ public class RaspiItemsTimer extends BukkitRunnable {
 
     public RaspiItemsTimer(McRaspiSystem plugin) {
         this.plugin = plugin;
+        runTaskTimerAsynchronously(plugin, 0L, 20L);
     }
 
     protected final long minutes = Powers.FLIGHT.getTime() * 1000;

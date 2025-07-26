@@ -1,22 +1,29 @@
 package eu.goodyfx.system.raspievents;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.SystemTemplate;
+import eu.goodyfx.system.core.utils.RaspiSubSystem;
+import eu.goodyfx.system.raspievents.craftings.CanabolaCraftging;
+import eu.goodyfx.system.raspievents.craftings.EntityGranadeCrafting;
+import eu.goodyfx.system.raspievents.events.CraftingEventListeners;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RaspiEvents implements SystemTemplate {
+public class RaspiEventsSystem implements RaspiSubSystem {
 
     protected final McRaspiSystem plugin;
     private boolean enabled = false;
     private final List<Listener> events = new ArrayList<>();
 
-    public RaspiEvents(McRaspiSystem plugin) {
+    public RaspiEventsSystem(McRaspiSystem plugin) {
         this.plugin = plugin;
-        onEnabled();
+    }
+
+    @Override
+    public String systemKey() {
+        return "raspiEvents";
     }
 
     @Override
@@ -26,18 +33,21 @@ public class RaspiEvents implements SystemTemplate {
 
     @Override
     public void onEnabled() {
-        init();
+        if (enabled) {
+            init();
+        }
     }
 
     @Override
     public void init() {
         commands();
         events();
+        recipes();
     }
 
     @Override
     public void events() {
-
+        new CraftingEventListeners();
     }
 
     @Override
@@ -64,4 +74,11 @@ public class RaspiEvents implements SystemTemplate {
             HandlerList.unregisterAll(event);
         }
     }
+
+
+    private void recipes() {
+        new CanabolaCraftging(plugin);
+        new EntityGranadeCrafting();
+    }
+
 }

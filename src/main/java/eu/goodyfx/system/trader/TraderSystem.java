@@ -1,19 +1,25 @@
 package eu.goodyfx.system.trader;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.SystemTemplate;
+import eu.goodyfx.system.core.utils.RaspiSubSystem;
+import eu.goodyfx.system.trader.commands.TraderCommand;
+import eu.goodyfx.system.trader.events.TraderListeners;
 import org.bukkit.event.Listener;
 
-public class TraderSystem implements SystemTemplate {
+public class TraderSystem implements RaspiSubSystem {
 
     protected final McRaspiSystem plugin;
     private boolean enabled = false;
 
     public TraderSystem(McRaspiSystem plugin) {
         this.plugin = plugin;
-        onEnabled();
     }
 
+
+    @Override
+    public String systemKey() {
+        return "raspiTrader";
+    }
 
     @Override
     public boolean enabled() {
@@ -22,7 +28,9 @@ public class TraderSystem implements SystemTemplate {
 
     @Override
     public void onEnabled() {
-        init();
+        if (enabled) {
+            init();
+        }
     }
 
     @Override
@@ -38,12 +46,12 @@ public class TraderSystem implements SystemTemplate {
 
     @Override
     public void events() {
-
+        new TraderListeners();
     }
 
     @Override
     public void commands() {
-
+        new TraderCommand();
     }
 
     @Override

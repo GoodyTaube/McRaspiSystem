@@ -2,8 +2,9 @@ package eu.goodyfx.system.core.utils;
 
 import org.bukkit.event.Listener;
 
-public interface SystemTemplate {
+public interface RaspiSubSystem {
 
+    String systemKey();
     boolean enabled();
 
     void onEnabled();

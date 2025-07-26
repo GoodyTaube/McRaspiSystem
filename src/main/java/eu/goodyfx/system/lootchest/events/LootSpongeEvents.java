@@ -31,34 +31,6 @@ public class LootSpongeEvents implements Listener {
 
     private final Map<UUID, Location> locationMap = new HashMap<>();
 
-    private void stone(BlockPlaceEvent event) {
-        Block block = event.getBlock();
-        Player player = event.getPlayer();
-        ItemStack stack = event.getItemInHand();
-        if (plugin.getMapItem() != null && block.getType().equals(plugin.getMapItem().getMaterial())) {
-            event.setCancelled(true);
-
-            PluginCommand command = null;
-
-            if (plugin.getServer().getPluginCommand("dynmap") != null) {
-                command = plugin.getServer().getPluginCommand("dynmap");
-            }
-
-            if (command == null) {
-                player.sendRichMessage(plugin.getModule().getRaspiMessages().getPrefix() + "<red>Es scheint ein Problem zu geben. (<yellow>R#2243<red>)");
-                return;
-            }
-
-            String text = PlainTextComponentSerializer.plainText().serialize(stack.getItemMeta().displayName());
-
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dmarker add \"" + text + "\" icon:redflag x:" + block.getLocation().getX() + " y:" + block.getLocation().getY() + " z:" + block.getLocation().getZ() + " world:" + block.getLocation().getWorld().getName());
-
-            ItemStack copyStack = stack.clone();
-            copyStack.setAmount(copyStack.getAmount() - 1);
-            player.getInventory().setItem(event.getHand(), copyStack);
-
-        }
-    }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {

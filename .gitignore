@@ -1,8 +1,19 @@
-/.idea/
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Maven
 /target/
-McRaspiSystem.iml
-.gitignore
-*.jar
-UPLOAD.sh
-README.md
 dependency-reduced-pom.xml
+
+# Build Artifacts
+*.jar
+
+# Shell/Build Scripts (optional)
+UPLOAD.sh
+
+# System-Dateien
+.DS_Store
+Thumbs.db
+.env
+*.key

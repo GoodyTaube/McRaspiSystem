@@ -52,13 +52,8 @@ public class SystemStartUp {
         new TempBanCommand(plugin);
         new UnBanCommand(plugin);
         new WarteschlangeCommand(plugin);
-        new RaspiItemsCommand(plugin);
-        new ReiseCommand(plugin);
-        new ReiseSucheCommand(plugin);
-        new ReisePortCommand(plugin);
         new RandomTeleportCommand(plugin);
         new BackCommand(plugin);
-        new TraderCommand();
         new MuteCommand();
         new InHeadCommand();
     }
@@ -71,19 +66,13 @@ public class SystemStartUp {
         new ServerListeners(plugin);
         new TeleportListeners(plugin);
         //new WarteschlangeListeners(plugin);
-        new LootConsumeEvents(plugin);
-        new LootSpongeEvents(plugin);
         new PlayerMoveListener(plugin);
         new PlayerInteractAtEntitiesListeners(plugin);
         new PlayerInteractListeners(plugin);
         new RaspiPlayerConnectionEvents();
-        new LootChestListeners(plugin);
         new InHeadListeners();
         //new WarnListeners(plugin);
-        new TraderListeners();
         new CompassEvents();
-        new CraftingEventListeners();
         new InventoryListeners();
-
     }
 }

@@ -4,18 +4,15 @@ import eu.goodyfx.system.core.SystemStartUp;
 import eu.goodyfx.system.core.commands.ItemConverterCommandContainer;
 import eu.goodyfx.system.core.commands.RaspiGiveCommandContainer;
 import eu.goodyfx.system.core.commands.VoteCommandContainer;
-import eu.goodyfx.system.core.tasks.*;
-import eu.goodyfx.system.core.utils.InHeadSpectator;
-import eu.goodyfx.system.core.utils.RaspiDebugger;
-import eu.goodyfx.system.core.utils.RaspiPermission;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
-import eu.goodyfx.system.lootchest.tasks.AnimationBlockDisplay;
-import eu.goodyfx.system.lootchest.tasks.LootChestTimer;
-import eu.goodyfx.system.lootchest.tasks.RaspiItemsTimer;
-import eu.goodyfx.system.raspievents.craftings.CanabolaCraftging;
-import eu.goodyfx.system.raspievents.craftings.EntityGranadeCrafting;
 import eu.goodyfx.system.core.managers.RaspiHookManager;
 import eu.goodyfx.system.core.managers.RaspiModuleManager;
+import eu.goodyfx.system.core.tasks.*;
+import eu.goodyfx.system.core.utils.*;
+import eu.goodyfx.system.lootchest.LootChestSystem;
+import eu.goodyfx.system.lootchest.tasks.LootChestTimer;
+import eu.goodyfx.system.raspievents.RaspiEventsSystem;
+import eu.goodyfx.system.reise.RaspiReiseSystem;
+import eu.goodyfx.system.trader.TraderSystem;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -23,15 +20,13 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -56,6 +51,12 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
 
+    private final List<RaspiSubSystem> raspiSubSystems = List.of(
+            new RaspiEventsSystem(this),
+            new LootChestSystem(this),
+            new RaspiReiseSystem(this),
+            new TraderSystem(this));
+
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -72,6 +73,7 @@ public final class McRaspiSystem extends JavaPlugin {
             commands.registrar().register(ItemConverterCommandContainer.command());
             commands.registrar().register(new RaspiGiveCommandContainer().command());
         });
+
     }
 
     private void init() {
@@ -80,14 +82,14 @@ public final class McRaspiSystem extends JavaPlugin {
         hookManager = new RaspiHookManager(this, this);
         setupConfigs();
         moduleManager = new RaspiModuleManager(this);
+
         new SystemStartUp();
+
         paperCommandsRegister();
+        systemsActivation();
         //recipes();
-        this.raspiItemsRunner = new RaspiItemsTimer(this).runTaskTimerAsynchronously(this, 0L, 20L);
         this.idleTask = new IdleTask(this, this);
         this.weeklyTimer = new WeeklyTimer(this);
-        this.animation = new AnimationBlockDisplay(this);
-        this.lootChestTimer = new LootChestTimer(this);
         this.restoreInv = new InventoryBackup(this);
         this.dailyCommand = new CommandResetTask(this);
         this.inHeadTask = new InHeadTask();
@@ -95,13 +97,9 @@ public final class McRaspiSystem extends JavaPlugin {
         new InHeadSpectator();
     }
 
-    private void recipes() {
-        new CanabolaCraftging(this);
-        new EntityGranadeCrafting();
-    }
-
 
     private void setupConfigs() {
+        checkDefaults();
         //ALLE Config bezogenen sachen
         getConfig().options().copyDefaults(true);
         saveConfig();
@@ -145,18 +143,16 @@ public final class McRaspiSystem extends JavaPlugin {
      */
     public void setListeners(Listener listeners) {
         Bukkit.getPluginManager().registerEvents(listeners, this);
+        getDebugger().info(String.format("Registered: %s", listeners.getClass().getSimpleName()));
     }
 
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        this.raspiItemsRunner.cancel();
         this.idleTask.cancel();
         this.weeklyTimer.cancel();
-        this.animation.cancel();
         this.restoreInv.cancel();
-        lootChestTimer.cancel();
         this.dailyCommand.cancel();
         this.inHeadTask.cancel();
     }
@@ -207,6 +203,29 @@ public final class McRaspiSystem extends JavaPlugin {
         return new NamespacedKey(this, key);
     }
 
+    public void systemsActivation() {
+        String systemPath = "raspi.systems.%s";
+        for (RaspiSubSystem subSystem : raspiSubSystems) {
+            String key = String.format(systemPath, subSystem.systemKey());
+            boolean enable = getConfig().getBoolean(key, false);
+            if (enable) {
+                subSystem.setEnabled(true);
+                subSystem.onEnabled();
+                getLogger().info(String.format("Subsystem: %s wird aktiviert.", subSystem.systemKey()));
+            } else {
+                getLogger().info(String.format("Subsystem: %s wurde per Config Deaktiviert.", subSystem.systemKey()));
+            }
+        }
 
+    }
+
+    private void checkDefaults() {
+        if (!getConfig().contains("raspi")) {
+            getConfig().addDefault("raspi.systems.raspiLoot", true);
+            getConfig().addDefault("raspi.systems.raspiTrader", true);
+            getConfig().addDefault("raspi.systems.raspiEvents", false);
+            getConfig().addDefault("raspi.systems.raspiReise", true);
+        }
+    }
 
 }
