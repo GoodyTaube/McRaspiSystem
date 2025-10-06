@@ -1,8 +1,8 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.commandsOLD.BackCommand;
 import eu.goodyfx.system.core.commands.SitCommandContainer;
+import eu.goodyfx.system.core.commandsOLD.BackCommand;
 import org.bukkit.Location;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
@@ -89,6 +89,7 @@ public record TeleportListeners(McRaspiSystem plugin) implements Listener {
         if (dismountEvent.getEntity().getType().equals(EntityType.PLAYER) && dismountEvent.getDismounted().getType().equals(EntityType.INTERACTION)) {
             Player player = (Player) dismountEvent.getEntity();
             SitCommandContainer.endSitting(player);
+            dismountEvent.getDismounted().remove();
             player.teleport(player.getLocation().add(0, 1, 0));
 
         }

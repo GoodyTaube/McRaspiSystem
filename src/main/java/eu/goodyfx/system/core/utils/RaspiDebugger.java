@@ -1,6 +1,8 @@
 package eu.goodyfx.system.core.utils;
 
 import eu.goodyfx.system.McRaspiSystem;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -35,4 +37,7 @@ public class RaspiDebugger extends Logger {
         }
     }
 
+    public void broadCast(String message){
+        Bukkit.getServer().broadcast(MiniMessage.miniMessage().deserialize(String.format("<red>RaspiDebug<reset>::<gray>%s", message)));
+    }
 }

@@ -1,8 +1,8 @@
 package eu.goodyfx.system.reise.commands;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.reise.managers.ReiseLocationManager;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -44,7 +44,7 @@ public class ReiseSucheCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (sender instanceof Player player && args.length == 1) {
-            ReiseLocationManager.checkUser(new RaspiPlayer(player), args[0], system);
+            ReiseLocationManager.checkUser(Raspi.players().get(player), args[0], system);
             return true;
         }
         return false;

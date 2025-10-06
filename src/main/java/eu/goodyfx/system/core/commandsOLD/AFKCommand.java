@@ -4,7 +4,7 @@ import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.events.PlayerAFKEvent;
 import eu.goodyfx.system.core.managers.LocationManager;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
-import eu.goodyfx.system.core.utils.PlayerValues;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -42,21 +42,21 @@ public class AFKCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if (sender instanceof Player playerD) {
-            RaspiPlayer player = plugin.getRaspiPlayer(playerD);
+            RaspiPlayer player = Raspi.players().get(playerD);
             if (args.length == 0) {
                 Location playerLocation = playerD.getLocation();
 
-                if (player.userManager().hasPersistantValue(playerD, PlayerValues.AFK)) {
-                    player.userManager().updateAFK(playerD);
+                if (player.getUserSettings().isAfk()) {
+                    player.getUserSettings().setAfk(false);
                     warteschlangenManager.setHeader();
                     playerD.setCollidable(true);
                     playerD.setSleepingIgnored(false);
                     playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<red>Du bist nicht mehr AFK"));
-                    player.nameController().setPlayerList(playerD);
+                    player.nameController().setPlayerList();
                     return true;
 
                 }
-                player.userManager().updateAFK(playerD);
+                player.getUserSettings().setAfk(true);
 
                 if (!playerLocation.getWorld().getName().equalsIgnoreCase(locationManager.getWorldName("waiting")) && warteschlangenManager.queueSize() > 0 && !warteschlangenManager.playersQueue.contains(playerD.getUniqueId())) {
                     warteschlangenManager.queue();
@@ -66,9 +66,9 @@ public class AFKCommand implements CommandExecutor {
                 warteschlangenManager.setHeader();
                 playerD.setSleepingIgnored(true);
                 playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Du bist nun AFK"));
-                player.nameController().setPlayerList(playerD);
+                player.nameController().setPlayerList();
 
-                PlayerAFKEvent afkEvent = new PlayerAFKEvent(new RaspiPlayer(playerD));
+                PlayerAFKEvent afkEvent = new PlayerAFKEvent(Raspi.players().get(playerD));
                 Bukkit.getPluginManager().callEvent(afkEvent);
                 return true;
             }

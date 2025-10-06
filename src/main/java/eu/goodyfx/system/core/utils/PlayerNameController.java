@@ -2,14 +2,9 @@ package eu.goodyfx.system.core.utils;
 
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.managers.PrefixManager;
-import eu.goodyfx.system.core.managers.RaspiModuleManager;
-import eu.goodyfx.system.core.managers.UserManager;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Scoreboard;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -20,96 +15,87 @@ import java.util.UUID;
 @Getter
 public class PlayerNameController {
 
-    private final Map<UUID, String> colorMap = new HashMap<>();
     private final Map<UUID, String> randomContainer = new HashMap<>();
-    private Scoreboard board;
-    private final UserManager userManager;
-    private final PrefixManager prefixManager;
-
     private final SecureRandom random = new SecureRandom();
+    private final RaspiPlayer player;
 
+    public PlayerNameController(RaspiPlayer player) {
+        this.player = player;
 
-    public PlayerNameController(RaspiModuleManager moduleManager) {
-        this.userManager = moduleManager.getUserManager();
-        this.prefixManager = moduleManager.getPrefixManager();
     }
 
-    public void setPlayerColor(String colorString, Player player) {
-
+    public void setPlayerColor(String colorString) {
         if (colorString.equalsIgnoreCase("<LILA_BLASS_BLUE>")) {
             colorString = OldColors.LILA_BLASS_BLUE.getMinniString();
         }
         if (colorString.equalsIgnoreCase("<MINE_COIN_GOLD>")) {
             colorString = OldColors.MINE_COIN_GOLD.getMinniString();
         }
-        userManager.set(player, "playerColor", colorString);
-        setPlayerList(player);
-
+        player.getUser().setColor(colorString);
+        //userManager.set(player, "playerColor", colorString);
+        setPlayerList();
     }
 
 
-    public String getColorString(Player player) {
-        if (!playerHasColor(player)) {
-            //set player random color if not set by player
-            setPlayerColor("<random>", player);
+    public String getColorString() {
+        if (!player.isInitialized()) {
+            return "<random>";
         }
-
-        String colorString = userManager.get("playerColor", player, String.class);
-        assert colorString != null; //Wir setzen den ja default auf Random
+        //String colorString = userManager.get("playerColor", player, String.class);
+        String colorString = player.getColor();
+        if(colorString == null){
+            colorString = "<random>";
+            setPlayerColor(colorString);
+        }
 
         if (colorString.equalsIgnoreCase("<random>")) {
             //set random color by random Hex generated Code
 
             int randNumber = random.nextInt(0xffffff + 1);
-            if (!randomContainer.containsKey(player.getUniqueId())) {
+            if (!randomContainer.containsKey(player.getUUID())) {
                 String colorGen = String.format("#%06x", randNumber);
                 colorGen = "<" + colorGen + ">"; //make color String
-                randomContainer.put(player.getUniqueId(), colorGen);
+                randomContainer.put(player.getUUID(), colorGen);
             }
-            return randomContainer.get(player.getUniqueId());
+            return randomContainer.get(player.getUUID());
         }
-
         return colorString;
 
     }
 
-    public void setPlayerList(Player player) {
-        if (userManager.hasPersistantValue(player, PlayerValues.AFK)) {
-            player.playerListName(MiniMessage.miniMessage().deserialize(getNameDisplay(player) + " <gray><italic><underlined>AFK"));
+    public void setPlayerList() {
+        if (player.isInitialized() && player.getUserSettings().isAfk()) {
+            player.getPlayer().playerListName(MiniMessage.miniMessage().deserialize(String.format("%s <gray><italic><underlined>AFK", getColorDisplayName())));
         } else {
-            player.playerListName(MiniMessage.miniMessage().deserialize(getNameDisplay(player)));
-        }
+            player.getPlayer().playerListName(MiniMessage.miniMessage().deserialize(getColorDisplayName()));
 
-    }
-
-    public String getNameDisplay(Player player) {
-        if (!prefixManager.get(player).isEmpty()) {
-            return String.format("%1$s[%2$s%1$s] <gray>: <reset>%1$s%3$s<reset>", getColorString(player), prefixManager.get(player), player.getName());
-        } else {
-            return getColorString(player) + player.getName() + "<reset>";
         }
     }
 
 
-    public String getName(Player player) {
-        return getColorString(player) + player.getName() + "<reset>";
+    public String getColorName() {
+        return String.format("%s%s<reset>", getColorString(), player.getPlayer().getName());
     }
 
-    public String getNameDisplay(Player player, String optString) {
-        if (!prefixManager.get(player).isEmpty()) {
-            return String.format("%1$s[%2$s%1$s] <gray>: <reset>%1$s%3$s<reset>", getColorString(player), prefixManager.get(player), player.getName());
+    public String getColorDisplayName() {
+
+        if (player.isInitialized() && player.getPrefix() != null) {
+            return String.format("%1$s[%2$s%1$s] <gray>: <reset>%1$s%3$s<reset>", getColorString(), player.getPrefix(), player.getPlayer().getName());
+        }
+        return String.format("%s %s <reset>", getColorString(), player.getPlayer().getName());
+    }
+
+    public String getColorDisplayName(String optMessage) {
+        if (player.isInitialized() && player.getPrefix() != null) {
+            return String.format("%1$s[%2$s%1$s] <gray>: <reset>%1$s%3$s<reset>", getColorString(), player.getPrefix(), player.getPlayer().getName());
         } else {
-            return optString + getColorString(player) + player.getName() + "<reset>";
+            return String.format("%s%s%s<reset>", optMessage, getColorString(), player.getPlayer().getName());
         }
     }
 
-    private boolean playerHasColor(Player player) {
-        return userManager.contains("playerColor", player);
-    }
-
-    public void resetRandom(Player player) {
-        JavaPlugin.getPlugin(McRaspiSystem.class).getLogger().info("REMOVED");
-        randomContainer.remove(player.getUniqueId());
+    public void resetRandom() {
+        JavaPlugin.getPlugin(McRaspiSystem.class).getDebugger().info("NameController::RESET RANDOM");
+        randomContainer.remove(player.getUUID());
     }
 
 }

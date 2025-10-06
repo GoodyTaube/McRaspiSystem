@@ -10,7 +10,9 @@ public enum RaspiPermission {
     TEAM(10, "system.team"),
     MOD(8, "system.moderator"),
     LONG_PLAYER(4, "system.oldie"),
-    SPIELER(2, "system.default");
+    SPIELER(2, "system.spieler"),
+    SYSTEM_FREISCHALTUNG(1, "system.allowed_by_system"),
+    DEFAULT(0, "system.default");
 
     private final Integer permissionWeight;
     private final String permissionValue;

@@ -1,6 +1,7 @@
 package eu.goodyfx.system.trader.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.trader.commands.TraderCommand;
 import eu.goodyfx.system.trader.managers.TraderDB;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
@@ -56,7 +57,7 @@ public class TraderListeners implements Listener {
         Entity entity = entityEvent.getRightClicked();
         if (entity.getType().equals(EntityType.VILLAGER)) {
             Villager villager = (Villager) entity;
-            RaspiPlayer player = plugin.getRaspiPlayer(entityEvent.getPlayer());
+            RaspiPlayer player = Raspi.players().get(entityEvent.getPlayer());
             PersistentDataContainer container = villager.getPersistentDataContainer();
 
             if (player.getPlayer().getGameMode().equals(GameMode.CREATIVE) && player.getPlayer().isSneaking()) {
@@ -81,7 +82,7 @@ public class TraderListeners implements Listener {
         if (clickEvent.getSlotType().equals(InventoryType.SlotType.OUTSIDE)) {
             return;
         }
-        RaspiPlayer player = plugin.getRaspiPlayer((Player) clickEvent.getWhoClicked());
+        RaspiPlayer player = Raspi.players().get((Player) clickEvent.getWhoClicked());
         String title = LegacyComponentSerializer.legacyAmpersand().serialize(clickEvent.getView().title());
         if (title.equalsIgnoreCase("Trader Settings")) {
             ItemStack stack = clickEvent.getCurrentItem();

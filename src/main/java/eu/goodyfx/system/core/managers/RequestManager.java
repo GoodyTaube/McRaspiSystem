@@ -1,9 +1,11 @@
 package eu.goodyfx.system.core.managers;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiUser;
+import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.utils.RaspiOfflinePlayer;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -25,11 +27,9 @@ public class RequestManager {
     private final File file;
     private final McRaspiSystem plugin;
     private UUID uuid;
-    private final UserManager userManager;
     private FileConfiguration config;
 
     public RequestManager(RaspiModuleManager moduleManager) {
-        this.userManager = moduleManager.getUserManager();
         this.file = new File(moduleManager.getPlugin().getDataFolder(), "reasons.yml");
         this.config = YamlConfiguration.loadConfiguration(file);
         this.plugin = moduleManager.getPlugin();
@@ -68,43 +68,44 @@ public class RequestManager {
     }
 
 
-    public void set(OfflinePlayer denyPlayer, String reason, Player player) {
-        userManager.set(denyPlayer, "state", false);
-        userManager.set(denyPlayer, "denyPerson", player.getName());
-        userManager.set(denyPlayer, "reason", reason);
+    public void set(RaspiOfflinePlayer denyPlayer, String reason, Player player) {
+        remove(denyPlayer.getRaspiUser());
+        denyPlayer.getRaspiUser().setDenied_by(player.getName());
+        denyPlayer.getRaspiUser().setState(false);
+        denyPlayer.getRaspiUser().setDeny_reason(reason);
     }
 
 
-    public void allow(OfflinePlayer player) {
-        userManager.set(player, "allowed-since", new SimpleDateFormat("dd/MM/yyyy").format(new Date(System.currentTimeMillis())));
+    public void allow(RaspiUser player) {
+        remove(player);
+        player.setAllowed_since(new SimpleDateFormat("dd/MM/yyyy").format(new Date(System.currentTimeMillis())));
     }
 
-    public void remove(OfflinePlayer player) {
-        userManager.set(player, "state", null);
-        userManager.set(player, "denyPerson", null);
-        userManager.set(player, "reason", null);
-    }
-
-
-    public boolean isBlocked(OfflinePlayer player) {
-        return userManager.contains("state", player);
-    }
-
-    public boolean isBlocked(String value, Player player) {
-        return userManager.contains(value, player);
+    public void remove(RaspiUser player) {
+        player.setState(null);
+        player.setDenied_by(null);
+        player.setDeny_reason(null);
+        player.setAllowed_since(null);
+        player.setAllowed_by(null);
     }
 
 
-    public String getDeny(Player player) {
-        String name = (String) userManager.get("denyPerson", player);
-        if (Bukkit.getPlayer(name) != null) {
-            return plugin.getRaspiPlayer(Bukkit.getPlayer(name)).getName();
+    public boolean isBlocked(RaspiUser player) {
+        return player.getDenied_by() != null;
+    }
+
+    public String getDeny(RaspiUser player) {
+        if (isBlocked(player)) {
+            return Raspi.players().get(Bukkit.getPlayer(player.getDenied_by())).getColorName();
         }
-        return name;
+        return null;
     }
 
-    public String getReason(OfflinePlayer player) throws NullPointerException {
-        return (String) userManager.get("reason", player);
+    public String getReason(RaspiUser player) {
+        if (isBlocked(player)) {
+            return player.getDeny_reason();
+        }
+        return null;
     }
 
 

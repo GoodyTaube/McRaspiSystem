@@ -3,6 +3,7 @@ package eu.goodyfx.system.core.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -21,7 +22,7 @@ public class VoteCommandContainer {
             if (!(entity instanceof Player player)) {
                 return Command.SINGLE_SUCCESS;
             }
-            RaspiPlayer raspiPlayer = plugin.getRaspiPlayer(player);
+            RaspiPlayer raspiPlayer = Raspi.players().get(player);
 
             if (plugin.getConfig().contains(VOTE_LINK_PATH)) {
                 List<String> voteLinks = plugin.getConfig().getStringList(VOTE_LINK_PATH);

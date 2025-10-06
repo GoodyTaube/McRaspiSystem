@@ -1,9 +1,11 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.DatabaseTables;
 import eu.goodyfx.system.core.managers.RequestManager;
-import eu.goodyfx.system.core.managers.UserManager;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiMessages;
+import eu.goodyfx.system.core.utils.RaspiOfflinePlayer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
@@ -24,13 +26,11 @@ import java.util.*;
 public class RequestCommand implements CommandExecutor, TabCompleter {
 
     private final McRaspiSystem plugin;
-    private final UserManager userManager;
     private final RequestManager requestManager;
     private final RaspiMessages data;
 
     public RequestCommand(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.userManager = plugin.getModule().getUserManager();
         this.requestManager = plugin.getModule().getRequestManager();
         this.data = plugin.getModule().getRaspiMessages();
         plugin.setCommand("request", this, this);
@@ -74,8 +74,9 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
             if (args.length >= 2) {
                 try {
                     OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+                    RaspiOfflinePlayer raspiOfflinePlayer = Raspi.players().getRaspiOfflinePlayer(target);
                     String groupLabel = plugin.getConfig().getString("Utilities.playerGroup");
-                    if (!userManager.userExist(target)) {
+                    if (!plugin.getDatabaseManager().userExistInTable(target.getUniqueId(), DatabaseTables.USER_DATA)) {
                         player.sendRichMessage(data.getPrefix() + "<red>Der Spieler Existiert nicht!");
                         return true;
                     }
@@ -111,7 +112,7 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
 
                         player.sendRichMessage(data.getPrefix() + "<gray>Du hast <yellow><italic>" + target.getName() + " <red>Abgelehnt!");
 
-                        plugin.getRaspiTeamPlayers().forEach(team -> {
+                        Raspi.players().getRaspiTeamPlayers().forEach(team -> {
                             if (!team.getPlayer().getName().equalsIgnoreCase(player.getName()))
                                 team.sendMessage(String.format("<aqua><italic>%s <gray><italic>wurde von %s <red>Abgelehnt.", target.getName(), player.getName()), true);
                         });
@@ -121,7 +122,7 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
                                 builder.append(args[i]).append("@");
                             }
                             builder.setLength(builder.length() - 1);
-                            requestManager.set(target, builder.toString(), player);
+                            requestManager.set(raspiOfflinePlayer, builder.toString(), player);
 
                             requestManager.reload();
                             requestManager.addReason(builder.toString());
@@ -151,10 +152,10 @@ public class RequestCommand implements CommandExecutor, TabCompleter {
 
                         }
 
-                        if (requestManager.isBlocked(target)) {
-                            requestManager.remove(target);
+                        if (requestManager.isBlocked(raspiOfflinePlayer.getRaspiUser())) {
+                            requestManager.remove(raspiOfflinePlayer.getRaspiUser());
                         }
-                        requestManager.allow(target);
+                        requestManager.allow(raspiOfflinePlayer.getRaspiUser());
                         player.sendRichMessage(data.getPrefix() + "<gray>Du hast <yellow><italic>" + target.getName() + " <green>Erlaubt!");
                         Bukkit.getOnlinePlayers().forEach(all -> {
 

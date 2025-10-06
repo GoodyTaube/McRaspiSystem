@@ -3,6 +3,7 @@ package eu.goodyfx.system.core.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -22,7 +23,7 @@ public class ItemConverterCommandContainer {
                 return Command.SINGLE_SUCCESS;
             }
             McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
-            RaspiPlayer raspiPlayer = plugin.getRaspiPlayer(player);
+            RaspiPlayer raspiPlayer = Raspi.players().get(player);
             ItemStack convertRequest = player.getInventory().getItemInMainHand().clone();
             if (convertRequest.getType().equals(Material.AIR)) {
                 raspiPlayer.sendMessage("<gradient:red:yellow>Du musst schon ein Item in der Hand haben... lol", true);

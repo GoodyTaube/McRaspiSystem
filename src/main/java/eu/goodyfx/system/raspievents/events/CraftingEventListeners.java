@@ -1,6 +1,7 @@
 package eu.goodyfx.system.raspievents.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.raspievents.craftings.CanabolaCraftging;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.Location;
@@ -23,7 +24,7 @@ public class CraftingEventListeners implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-        RaspiPlayer player = plugin.getRaspiPlayer(event.getPlayer());
+        RaspiPlayer player = Raspi.players().get(event.getPlayer());
         ItemStack stack = event.getItem();
         if (stack == null) {
             return;

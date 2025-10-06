@@ -19,7 +19,7 @@ public class PlayerAFKEvent extends Event {
     private final List<UUID> afkContainer = new ArrayList<>();
 
     public PlayerAFKEvent(RaspiPlayer player) {
-        if (player.userManager().hasPersistantValue(player.getPlayer(), PlayerValues.AFK)) {
+        if (player.getUserSettings().isAfk()) {
             afkContainer.add(player.getUUID());
         } else {
             afkContainer.remove(player.getUUID());

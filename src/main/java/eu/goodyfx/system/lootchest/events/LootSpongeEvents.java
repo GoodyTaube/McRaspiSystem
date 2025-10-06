@@ -2,14 +2,11 @@ package eu.goodyfx.system.lootchest.events;
 
 import eu.goodyfx.system.McRaspiSystem;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Waterlogged;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -83,12 +80,19 @@ public class LootSpongeEvents implements Listener {
 
     @EventHandler
     public void onBreak(BlockBreakEvent breakEvent) {
+
         Location location = breakEvent.getBlock().getLocation();
         Block block = breakEvent.getBlock();
         Material material = block.getType();
         Player player = breakEvent.getPlayer();
         if (material == Material.POLISHED_BLACKSTONE_BUTTON) {
             if (plugin.getModule().getLootManager().warpExist(location)) {
+                if (!player.isSneaking()) {
+                    breakEvent.setCancelled(true);
+
+                    player.sendActionBar(MiniMessage.miniMessage().deserialize("<red>Sicherheit<white>:: <red>Bitte nutze <u>zusätzlich</u> deinen [<yellow><lang:key.sneak:'Sprinten'><red>] Hotkey zum abbauen."));
+                    return;
+                }
                 plugin.getModule().getLootManager().disable(location);
                 player.sendMessage(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "<red>Teleport zerstört!"));
                 player.playSound(location, Sound.BLOCK_BEACON_DEACTIVATE, 1f, 1f);

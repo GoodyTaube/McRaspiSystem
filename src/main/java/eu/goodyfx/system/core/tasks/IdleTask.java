@@ -3,23 +3,16 @@ package eu.goodyfx.system.core.tasks;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.AFKCommand;
-import eu.goodyfx.system.core.managers.PlayerSettingsManager;
-import eu.goodyfx.system.core.utils.Settings;
+import eu.goodyfx.system.core.utils.Raspi;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class IdleTask extends BukkitRunnable {
 
-    private final McRaspiSystem utilities;
-    private final PlayerSettingsManager playerSettingsManager;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
-    private final Plugin plugin;
-
-    public IdleTask(McRaspiSystem raspiSystem, Plugin plugin) {
-        this.plugin = plugin;
-        this.utilities = raspiSystem;
-        this.playerSettingsManager = raspiSystem.getModule().getPlayerSettingsManager();
+    public IdleTask() {
         start();
     }
 
@@ -34,43 +27,42 @@ public class IdleTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        Bukkit.getOnlinePlayers().forEach(all -> {
-            if (!utilities.getConfig().getBoolean("Utilities.afk.autoAFK")) {
+
+        Raspi.players().getRaspiPlayers().forEach(all -> {
+            if (!plugin.getConfig().getBoolean("Utilities.afk.autoAFK")) {
                 //Enable / Disable out of Config
                 return;
             }
 
-            if (!playerSettingsManager.contains(Settings.AUTO_AFK, all)) {
+            if (!all.getUserSettings().isAuto_afk()) {
                 //If Player Disabled Auto AFK
                 return;
             }
-
-            if (utilities.getModule().getUserManager().getAfkContainer().containsKey(all.getUniqueId())) {
+            if (!all.getUserSettings().isAfk()) {
                 //Check if Player is already AFK
                 return;
             }
-
-            if (AFKCommand.getPlayerIDLE().containsKey(all.getUniqueId())) {
+            if (AFKCommand.getPlayerIDLE().containsKey(all.getUUID())) {
                 //Player AFK Add
-                AFKCommand.getPlayerIDLE().put(all.getUniqueId(), AFKCommand.getPlayerIDLE().get(all.getUniqueId()) + 1);
+                AFKCommand.getPlayerIDLE().put(all.getUUID(), AFKCommand.getPlayerIDLE().get(all.getUUID()) + 1);
             } else {
                 //Player AFK Start
-                AFKCommand.getPlayerIDLE().put(all.getUniqueId(), 1);
+                AFKCommand.getPlayerIDLE().put(all.getUUID(), 1);
             }
 
             //Check if IDLE time is equal to config
-            if (AFKCommand.getPlayerIDLE().get(all.getUniqueId()) != utilities.getConfig().getInt("Utilities.afk.idleTime")) {
+            if (AFKCommand.getPlayerIDLE().get(all.getUUID()) != plugin.getConfig().getInt("Utilities.afk.idleTime")) {
                 return;
             }
 
             //Perform Task sync because Bukkit likes that more than async
-            Bukkit.getScheduler().runTask(utilities, () -> {
-                all.performCommand("afk");
-                AFKCommand.getPlayerIDLE().remove(all.getUniqueId());
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                all.getPlayer().performCommand("afk");
+                AFKCommand.getPlayerIDLE().remove(all.getPlayer().getUniqueId());
             });
 
-        });
 
+        });
 
     }
 

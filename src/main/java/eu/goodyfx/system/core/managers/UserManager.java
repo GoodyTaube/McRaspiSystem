@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 
-@SuppressWarnings("unused")
+
 @Getter
 public class UserManager {
 

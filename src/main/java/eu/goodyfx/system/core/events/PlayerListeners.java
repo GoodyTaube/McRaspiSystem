@@ -1,9 +1,8 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.managers.UserManager;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
-import eu.goodyfx.system.core.utils.PlayerValues;
+import eu.goodyfx.system.core.utils.Raspi;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -30,8 +29,6 @@ public class PlayerListeners implements Listener {
 
     private final McRaspiSystem plugin;
     private final WarteschlangenManager warteschlangenManager;
-    private final UserManager userManager;
-
     private final Random random = new Random();
 
     private final List<UUID> debugActivation = new ArrayList<>();
@@ -39,7 +36,6 @@ public class PlayerListeners implements Listener {
 
     public PlayerListeners(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.userManager = plugin.getModule().getUserManager();
         this.warteschlangenManager = plugin.getModule().getWarteschlangenManager();
         plugin.setListeners(this);
     }
@@ -47,7 +43,7 @@ public class PlayerListeners implements Listener {
 
     @EventHandler
     public void onHunger(FoodLevelChangeEvent event) {
-        if (event.getEntity() instanceof Player player && plugin.getRaspiPlayer(player).isDefault()) {
+        if (event.getEntity() instanceof Player player && Raspi.players().get(player).isDefault()) {
             event.setCancelled(true);
         }
     }
@@ -71,8 +67,6 @@ public class PlayerListeners implements Listener {
         Player player = deathEvent.getPlayer();
         List<ItemStack> drops = deathEvent.getDrops();
         int exp = deathEvent.getDroppedExp();
-
-        userManager.setPersistantValue(player, PlayerValues.DEATH, System.currentTimeMillis());
         if (plugin.getConfig().getBoolean("Utilities.dead-signs")) {
             Location location = deathEvent.getEntity().getLocation();
             Block highest = location.getBlock();

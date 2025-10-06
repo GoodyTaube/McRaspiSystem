@@ -114,6 +114,28 @@ public class ExtraInfos {
         }
     }
 
+    private String modCheckForDialog(OfflinePlayer target) {
+        if (player.isPermissionSet("system.team")) {
+            if (modConfig.contains(USER_PATH)) {
+                if (hasEntry(target, true)) {
+                    Set<String> list = Objects.requireNonNull(modConfig.getConfigurationSection(pathContent(target.getUniqueId().toString()))).getKeys(false);
+                    if (list.isEmpty()) {
+                        return "";
+                    }
+                    StringBuilder builder = new StringBuilder("<gold>Team Infos:<br>");
+                    for (String key : list) {
+                        builder.append("<gray>-").append(" ").append(get(target, key, true)).append(" ").append(getRemoveDisplay(target, key, true)).append("<br>");
+                    }
+                    builder.setLength(builder.length() - 4);
+                    return builder.toString();
+                }
+            } else {
+                return "<red>Bisher keine Mod Infos";
+            }
+        }
+        return "";
+    }
+
     public void getExtraInfos(OfflinePlayer target) {
         modCheck(target); //Check if Asked Player is Moderator
         if (hasEntry(target, false)) {
@@ -127,6 +149,23 @@ public class ExtraInfos {
             player.sendRichMessage(getAddDisplay(target));
         }
     }
+
+
+    public String getExtraInfosForDialog(OfflinePlayer target) {
+        String mod = modCheckForDialog(target); //Check if Asked Player is Moderator
+        if (hasEntry(target, false)) {
+            StringBuilder builder = new StringBuilder("<green>Private Infos:<br>");
+            for (String key : Objects.requireNonNull(configuration.getConfigurationSection(pathContent(target.getUniqueId().toString()))).getKeys(false)) {
+                builder.append("<gray>-").append(" ").append(get(target, key, false)).append(" ").append(getRemoveDisplay(target, key, false)).append("<br>");
+            }
+            builder.setLength(builder.length() - 4);
+            return mod + "<br><br>" + builder + "<br><br>" + getAddDisplay(target);
+        } else {
+
+            return getAddDisplay(target);
+        }
+    }
+
 
     private boolean hasEntry(OfflinePlayer target, boolean mod) {
 

@@ -3,6 +3,7 @@ package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.OldColors;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -22,9 +23,9 @@ public class PrefixCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
         if (sender instanceof Player dummy) {
-            RaspiPlayer player = plugin.getRaspiPlayer(dummy);
+            RaspiPlayer player = Raspi.players().get(dummy);
             if (args.length == 0) {
-                if (player.getPrefix().length() > 1) {
+                if (player.getPrefix() != null) {
                     removePrefix(player);
                 } else {
                     player.sendMessage("Du hast bisher keinen Prefix." + String.format("<white>[ <click:suggest_command:'/prefix '><hover:show_text:'Klicke um deinen Prefix zu setzten.'><green>%s <white>]<reset>", "Prefix Setzen"), true);

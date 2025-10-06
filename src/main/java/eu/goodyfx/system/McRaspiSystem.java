@@ -1,13 +1,17 @@
 package eu.goodyfx.system;
 
 import eu.goodyfx.system.core.SystemStartUp;
-import eu.goodyfx.system.core.commands.ItemConverterCommandContainer;
-import eu.goodyfx.system.core.commands.RaspiGiveCommandContainer;
-import eu.goodyfx.system.core.commands.VoteCommandContainer;
+import eu.goodyfx.system.core.commands.*;
+import eu.goodyfx.system.core.database.DatabaseManager;
+import eu.goodyfx.system.core.database.RaspiPlayers;
+import eu.goodyfx.system.core.events.PlayerLifecycleListener;
 import eu.goodyfx.system.core.managers.RaspiHookManager;
 import eu.goodyfx.system.core.managers.RaspiModuleManager;
 import eu.goodyfx.system.core.tasks.*;
-import eu.goodyfx.system.core.utils.*;
+import eu.goodyfx.system.core.utils.InHeadSpectator;
+import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.utils.RaspiDebugger;
+import eu.goodyfx.system.core.utils.RaspiSubSystem;
 import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.lootchest.tasks.LootChestTimer;
 import eu.goodyfx.system.raspievents.RaspiEventsSystem;
@@ -19,15 +23,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 @Getter
 public final class McRaspiSystem extends JavaPlugin {
@@ -35,6 +40,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private RaspiModuleManager moduleManager;
     private RaspiHookManager hookManager;
     private RaspiDebugger debugger;
+    private DatabaseManager databaseManager;
 
     private final Random random = new Random();
 
@@ -46,55 +52,89 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable restoreInv;
     private BukkitRunnable dailyCommand;
     private BukkitRunnable inHeadTask;
+    private BukkitRunnable playTimeTask;
+    private BukkitRunnable tabListTask;
+    private final List<BukkitRunnable> tasks = new ArrayList<>();
     private LootChestTimer lootChestTimer;
 
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
 
-    private final List<RaspiSubSystem> raspiSubSystems = List.of(
-            new RaspiEventsSystem(this),
-            new LootChestSystem(this),
-            new RaspiReiseSystem(this),
-            new TraderSystem(this));
+    private final List<RaspiSubSystem> raspiSubSystems = List.of(new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSystem(this));
 
     @Override
     public void onEnable() {
         // Plugin startup logic
+
         init();
+        dataMigration();
     }
+
+    private void playerInit() {
+        RaspiPlayers players = new RaspiPlayers();
+        Raspi.init(players, debugger);
+        new PlayerLifecycleListener(players);
+    }
+
 
     private void paperCommandsRegister() {
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
-            //commands.registrar().register(AdminWartungSubCommand.adminWartungCommand().build());
-            //commands.registrar().register(SitCommandContainer.sitCommand());
-            //commands.registrar().register(BackCommandContainer.backCommand());
-            //commands.registrar().register(ChatColorCommandContainer.chatColorCommand());
+            commands.registrar().register(SitCommandContainer.sitCommand());
             commands.registrar().register(VoteCommandContainer.voteCommand(this));
             commands.registrar().register(ItemConverterCommandContainer.command());
+            commands.registrar().register(RequestCommandContainer.command());
             commands.registrar().register(new RaspiGiveCommandContainer().command());
+            commands.registrar().register(ChatCommandContainer.runCommand());
         });
 
     }
 
     private void init() {
+        this.databaseManager = new DatabaseManager();
         this.debugger = new RaspiDebugger(this);
         getLogger().info("Welcome to McRaspiSystem");
         hookManager = new RaspiHookManager(this, this);
         setupConfigs();
         moduleManager = new RaspiModuleManager(this);
+        playerInit();
 
         new SystemStartUp();
 
         paperCommandsRegister();
         systemsActivation();
-        //recipes();
-        this.idleTask = new IdleTask(this, this);
-        this.weeklyTimer = new WeeklyTimer(this);
-        this.restoreInv = new InventoryBackup(this);
-        this.dailyCommand = new CommandResetTask(this);
-        this.inHeadTask = new InHeadTask();
+        tasks();
         moduleManager.getMotdManager().set();
         new InHeadSpectator();
+    }
+
+    private void tasks() {
+        this.idleTask = new IdleTask();
+        tasks.add(idleTask);
+        this.weeklyTimer = new WeeklyTimer(this);
+        tasks.add(weeklyTimer);
+        this.restoreInv = new InventoryBackup(this);
+        tasks.add(restoreInv);
+        this.dailyCommand = new CommandResetTask(this);
+        tasks.add(dailyCommand);
+        this.inHeadTask = new InHeadTask();
+        tasks.add(inHeadTask);
+        this.playTimeTask = new PlayTimeTask();
+        tasks.add(playTimeTask);
+        this.tabListTask = new TablistAnimator();
+        tasks.add(tabListTask);
+
+    }
+
+    private void dataMigration() {
+        File file = new File(getDataFolder(), "UserDB.yml");
+        if (file.exists()) {
+            getServer().getWhitelistedPlayers().clear();
+            getServer().setWhitelist(true);
+            getConfig().set("Utilities.wartung", true);
+            Raspi.players().checkOldContents();
+        } else {
+            getDebugger().info("Keine Dateien zur Migration gefunden // SKIP TASK");
+        }
     }
 
 
@@ -150,48 +190,15 @@ public final class McRaspiSystem extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        this.idleTask.cancel();
-        this.weeklyTimer.cancel();
-        this.restoreInv.cancel();
-        this.dailyCommand.cancel();
-        this.inHeadTask.cancel();
-    }
-
-    /**
-     * Get List of RaspiPlayers by {@link Bukkit#getOnlinePlayers()}
-     *
-     * @return A list of RaspiPlayers
-     */
-    public Set<RaspiPlayer> getRaspiPlayers() {
-        Set<RaspiPlayer> playerSet = new HashSet<>();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            playerSet.add(new RaspiPlayer(player));
+        if (databaseManager != null) {
+            databaseManager.disconnect();
         }
-        return playerSet;
+        for (BukkitRunnable task : tasks) {
+            if (task != null && !task.isCancelled()) {
+                task.cancel();
+            }
+        }
     }
-
-    public Set<RaspiPlayer> getRaspiTeamPlayers() {
-        return getRaspiPlayers().stream()
-                .filter(raspiPlayer -> raspiPlayer.hasPermission(RaspiPermission.TEAM))
-                .collect(Collectors.toSet());
-    }
-
-    public Set<RaspiPlayer> getRaspiPlayersPerPermission(RaspiPermission permission) {
-        return getRaspiPlayers().stream()
-                .filter(raspiPlayer -> raspiPlayer.hasPermission(permission))
-                .collect(Collectors.toSet());
-    }
-
-    /**
-     * Convert normal Player to RaspiPlayer
-     *
-     * @param player The Bukkit Player
-     * @return Converted Raspi PLayer
-     */
-    public RaspiPlayer getRaspiPlayer(Player player) {
-        return new RaspiPlayer(player);
-    }
-
 
     /**
      * Get a NameSpacedKey for Different actions.     *
@@ -223,9 +230,13 @@ public final class McRaspiSystem extends JavaPlugin {
         if (!getConfig().contains("raspi")) {
             getConfig().addDefault("raspi.systems.raspiLoot", true);
             getConfig().addDefault("raspi.systems.raspiTrader", true);
-            getConfig().addDefault("raspi.systems.raspiEvents", false);
             getConfig().addDefault("raspi.systems.raspiReise", true);
+            getConfig().addDefault("raspi.systems.raspiVoting", false);
         }
+    }
+
+    public boolean subSystemExists(String key) {
+        return getConfig().contains("raspi.systems." + key);
     }
 
 }

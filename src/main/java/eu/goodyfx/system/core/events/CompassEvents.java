@@ -2,6 +2,7 @@ package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.ItemBuilder;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -37,19 +38,19 @@ public class CompassEvents implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onCompassJoin(PlayerJoinEvent joinEvent) {
-        RaspiPlayer player = plugin.getRaspiPlayer(joinEvent.getPlayer());
+        RaspiPlayer player = Raspi.players().get(joinEvent.getPlayer());
         compassCheck(player);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onCompassDeath(PlayerDeathEvent deathEvent) {
-        RaspiPlayer player = plugin.getRaspiPlayer(deathEvent.getPlayer());
+        RaspiPlayer player = Raspi.players().get(deathEvent.getPlayer());
         deathEvent.getDrops().remove(compass);
     }
 
     @EventHandler
     public void onRespawnCompass(PlayerRespawnEvent respawnEvent) {
-        RaspiPlayer player = plugin.getRaspiPlayer(respawnEvent.getPlayer());
+        RaspiPlayer player = Raspi.players().get(respawnEvent.getPlayer());
         compassCheck(player);
     }
 

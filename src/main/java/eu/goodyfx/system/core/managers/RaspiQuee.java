@@ -2,6 +2,7 @@ package eu.goodyfx.system.core.managers;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.QueueContainer;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -20,12 +21,12 @@ public class RaspiQuee {
     private List<World> activeWorlds = new ArrayList<>();
     private Integer maxPlayers = 0;
 
-    private final String MAX_PLAYER_VALUE_PATH = "warteschlange.maxPlayer";
-    private final String ACTIVE_WORLDS_PATH = "warteschlange.activeWorlds";
-
+    private static final String MAX_PLAYER_VALUE_PATH = "warteschlange.maxPlayer";
+    private static final String ACTIVE_WORLDS_PATH = "warteschlange.activeWorlds";
 
     public RaspiQuee(McRaspiSystem plugin) {
         this.plugin = plugin;
+
         setUp();
     }
 
@@ -70,7 +71,7 @@ public class RaspiQuee {
             if (playerContainer.get(per).getQueuePosition() == oldPos) {
                 return;
             }
-            sendQueuePosition(new RaspiPlayer(per));
+            sendQueuePosition(Raspi.players().get(Bukkit.getPlayer(per)));
         }
     }
 

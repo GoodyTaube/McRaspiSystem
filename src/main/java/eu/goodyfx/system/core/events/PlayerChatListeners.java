@@ -1,12 +1,10 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.managers.UserManager;
-import eu.goodyfx.system.core.utils.PlayerNameController;
-import eu.goodyfx.system.core.utils.RaspiFormatting;
-import eu.goodyfx.system.core.utils.RaspiTimes;
-import eu.goodyfx.system.core.utils.Settings;
+import eu.goodyfx.system.core.utils.*;
 import io.papermc.paper.event.player.AsyncChatEvent;
+import io.papermc.paper.registry.data.dialog.body.PlainMessageDialogBody;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -16,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -23,27 +22,19 @@ import java.util.Arrays;
 public class PlayerChatListeners implements Listener {
 
 
-    private final McRaspiSystem plugin;
-    private final UserManager userManager;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
-    private final PlayerNameController playerNameController;
-
-    public PlayerChatListeners(McRaspiSystem plugin) {
-        this.plugin = plugin;
-        this.userManager = plugin.getModule().getUserManager();
-        this.playerNameController = plugin.getModule().getPlayerNameController();
+    public PlayerChatListeners() {
         plugin.setListeners(this);
     }
 
     private String lastMessage = "";
 
-
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(AsyncChatEvent chatEvent) {
-        if(chatEvent.isCancelled()){
+        if (chatEvent.isCancelled()) {
             return;
         }
-
         chatEvent.setCancelled(true);//Disabled the core funktion of normal Minecraft Chat.
         String[] legacy = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()).split(" ");
         StringBuilder builder = new StringBuilder();
@@ -56,7 +47,8 @@ public class PlayerChatListeners implements Listener {
         });
         chatEvent.message(LegacyComponentSerializer.legacyAmpersand().deserialize(builder.toString()));
         String plainMessage = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()); //Message as Plain Message
-        Player player = chatEvent.getPlayer();
+        RaspiPlayer player = Raspi.players().get(chatEvent.getPlayer());
+
 
         if (checkUp(player)) {
             return;
@@ -71,31 +63,41 @@ public class PlayerChatListeners implements Listener {
 
 
         String finalPlainMessage = plainMessage;
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (plugin.getModule().getPlayerSettingsManager().contains(Settings.ADVANCED_CHAT, onlinePlayer)) {
-                onlinePlayer.sendRichMessage("<" + commandClick("/playerinfo " + player.getName()) + hoverText("<gray>Player Infos<br>" +
-                        "Bisher Gespielt: <aqua>" + RaspiTimes.Ticks.getTimeUnit(player.getStatistic(Statistic.PLAY_ONE_MINUTE)) + "<br>" +
-                        "<gray><italic>Klicke um mehr Infos zu bekommen.") + playerNameController.getNameDisplay(player) + "> " + hoverText("<aqua>" + new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())) + finalPlainMessage);
 
-            } else if (!plugin.getModule().getPlayerSettingsManager().contains(Settings.ADVANCED_CHAT, onlinePlayer)) {
-                onlinePlayer.sendRichMessage("<" + playerNameController.getNameDisplay(player) + "> " + finalPlainMessage);
-            }
-
+        Component checkMessage = MiniMessage.miniMessage().deserialize(finalPlainMessage);
+        if (PlainTextComponentSerializer.plainText().serialize(checkMessage).isEmpty()) {
+            return;
         }
-        String log = String.format("[RaspiChat] <%s> %s", player.getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            RaspiPlayer perPlayer = Raspi.players().get(onlinePlayer);
+
+            if (perPlayer.getUserSettings().isOpt_chat()) {
+                String commandClick = commandClick(String.format("/playerinfo %s", player.getPlayer().getName()));
+                String hoverText = hoverText(String.format("<gray>PlayerInfos<br>Bisher Gespielt: <aqua>%s<br><gray><italic>Klicke um mehr Infos zu bekommen.", RaspiTimes.Ticks.getTimeUnit(player.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE)))); //REPLACE DURCH ONLINE_HOURS
+                String optMessage = String.format("%s%s", commandClick, hoverText);
+                String hoverMessageClock = hoverText(String.format("<aqua>%s", new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())));
+
+                String message = String.format("<%s%s> %s%s", optMessage, player.getDisplayName(), hoverMessageClock, finalPlainMessage);
+
+                perPlayer.sendMessage(message);
+            } else {
+                perPlayer.sendMessage(String.format("<%s> %s", player.getDisplayName(), finalPlainMessage));
+            }
+        }
+        String log = String.format("[RaspiChat] <%s> %s", player.getPlayer().getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
         plugin.getLogger().info(log);
-        plugin.getHookManager().getDiscordIntegration().send("<" + player.getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+        plugin.getHookManager().getDiscordIntegration().send("<" + player.getPlayer().getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
     }
 
-    private boolean checkUp(Player player) {
+    private boolean checkUp(RaspiPlayer player) {
         boolean failed = false;
-        if (userManager.isMuted(player)) {
-            player.sendActionBar(MiniMessage.miniMessage().deserialize("<red>Du kannst den Chat nicht benutzen."));
+        if (player.getManagement().isMuted()) {
             failed = true;
+            player.sendActionBar("<red>Du kannst den Chat nicht benutzen. <yellow>(Stummgeschaltet)");
         }
-
-        if (plugin.getModule().getWarteschlangenManager().isQueue(player) && plugin.getModule().getRaspiMessages().blockChat()) {
-            player.sendRichMessage(plugin.getModule().getRaspiMessages().blocking());
+        if (plugin.getModule().getWarteschlangenManager().isQueue(player.getPlayer()) && plugin.getModule().getRaspiMessages().blockChat()) {
+            player.sendMessage(plugin.getModule().getRaspiMessages().blocking());
             failed = true;
         }
 
@@ -130,25 +132,24 @@ public class PlayerChatListeners implements Listener {
      *
      * @param player The possible Team Member
      */
-    private boolean teamIntegration(Player player, String message) {
+    private boolean teamIntegration(RaspiPlayer player, String message) {
         boolean isTeam = false;
-        if (player.isPermissionSet("system.team") && message.startsWith("!")) {
-            isTeam = true;
 
-            Bukkit.getOnlinePlayers().forEach(teamMember -> {
-                if (teamMember.isPermissionSet("system.team")) {
+        if (player.hasPermission(RaspiPermission.TEAM) && message.startsWith("!") && message.length() > 1) {
+            isTeam = true;
+            Bukkit.getOnlinePlayers().forEach(all -> {
+                RaspiPlayer mabeTeam = Raspi.players().get(all);
+                if (mabeTeam.hasPermission(RaspiPermission.TEAM)) {
                     if (!lastMessage.startsWith("!")) {
-                        teamMember.sendPlainMessage(" ");
-                        teamMember.sendRichMessage("<gold><b>TEAM<reset><gray>: " + player.getName() + " : " + url(message.substring(1)));
-                        teamMember.sendPlainMessage(" ");
+                        mabeTeam.getPlayer().sendPlainMessage(" ");
+                        mabeTeam.sendMessage("<gold><b>TEAM<reset><gray>: " + player.getDisplayName() + " : " + url(message.substring(1)));
+                        mabeTeam.getPlayer().sendPlainMessage(" ");
                     } else {
-                        teamMember.sendRichMessage("<gold><b>TEAM<reset><gray>: " + player.getName() + " : " + url(message.substring(1)));
+                        mabeTeam.sendMessage("<gold><b>TEAM<reset><gray>: " + player.getDisplayName() + " : " + url(message.substring(1)));
                     }
                 }
             });
-            lastMessage = message;
         }
-
         return isTeam;
     }
 
@@ -164,9 +165,10 @@ public class PlayerChatListeners implements Listener {
             int finalI = i;
 
             Bukkit.getOnlinePlayers().forEach(online -> {
+                RaspiPlayer raspiPlayer = Raspi.players().get(online);
                 if (args[finalI].toLowerCase().contains(online.getName().toLowerCase()) && !args[finalI].startsWith("<blue><underlined><click")) {
-                    args[finalI] = args[finalI].replaceAll(online.getName().toLowerCase(), playerNameController.getName(online));
-                    args[finalI] = args[finalI].replaceAll(online.getName(), playerNameController.getName(online));
+                    args[finalI] = args[finalI].replaceAll(online.getName().toLowerCase(), raspiPlayer.getColorName());
+                    args[finalI] = args[finalI].replaceAll(online.getName(), raspiPlayer.getColorName());
 
                 }
             });

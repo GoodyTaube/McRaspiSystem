@@ -2,10 +2,9 @@ package eu.goodyfx.system.core.commandsOLD;
 
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.DatabaseTables;
 import eu.goodyfx.system.core.managers.ExtraInfos;
-import eu.goodyfx.system.core.managers.UserManager;
-import eu.goodyfx.system.core.utils.PlayerInfo;
-import eu.goodyfx.system.core.utils.RaspiMessages;
+import eu.goodyfx.system.core.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -28,13 +27,11 @@ import java.util.List;
 public class InfoCommand implements CommandExecutor, TabCompleter {
 
     private final RaspiMessages data;
-    private final UserManager userManager;
     private final McRaspiSystem plugin;
 
     public InfoCommand(McRaspiSystem plugin) {
         this.data = plugin.getModule().getRaspiMessages();
         this.plugin = plugin;
-        this.userManager = plugin.getModule().getUserManager();
         plugin.setCommand("playerinfo", this, this);
     }
 
@@ -42,13 +39,6 @@ public class InfoCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (command.getName().equalsIgnoreCase("playerinfo") && args.length == 1) {
             List<String> result = new ArrayList<>();
-            List<String> databaseUsers = userManager.getAllUsers();
-
-            for (String name : databaseUsers) {
-                if (name.startsWith(args[0])) {
-                    result.add(name);
-                }
-            }
             Collections.sort(result);
             return result;
 
@@ -59,28 +49,31 @@ public class InfoCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (sender instanceof Player player) {
+        if (sender instanceof Player dummy) {
+            RaspiPlayer player = Raspi.players().get(dummy);
             if (args.length == 0) {
-                player.performCommand("playerinfo " + player.getName());
+                dummy.performCommand("playerinfo " + dummy.getName());
                 return true;
             }
             if (args.length == 1) {
-                OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-                if (!userManager.userExist(target)) {
-                    player.sendRichMessage(data.getPrefix() + "<red>Der Spieler hat noch nicht gespielt.");
+                OfflinePlayer targetBukkit = Bukkit.getOfflinePlayer(args[0]);
+                if (!plugin.getDatabaseManager().userExistInTable(targetBukkit.getUniqueId(), DatabaseTables.USER_DATA)) {
+                    player.sendMessage("<red>Der Spieler hat noch nicht bei uns gespielt.", true);
                     return true;
                 }
+                RaspiOfflinePlayer target = Raspi.players().getRaspiOfflinePlayer(Bukkit.getOfflinePlayer(args[0]));
+
                 //reload
-                player.sendRichMessage(new PlayerInfo(plugin, target).buildPlayerInfos());
+                dummy.showDialog(new PlayerInfo(target).buildPlayerInfosDialog(target.getPlayer(), dummy));
+                //dummy.sendRichMessage(new PlayerInfo(target).buildPlayerInfos());
 
-                ExtraInfos extraInfos = new ExtraInfos(player);
-                extraInfos.getExtraInfos(target);
-
+                ExtraInfos extraInfos = new ExtraInfos(dummy);
+                //extraInfos.getExtraInfos(target);
                 return true;
             }
             if (args.length >= 3) {
-                addInfo(player, args);
-                removeInfo(player, args);
+                addInfo(dummy, args);
+                removeInfo(dummy, args);
                 return true;
             }
         }

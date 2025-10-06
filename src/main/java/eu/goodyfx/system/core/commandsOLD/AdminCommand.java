@@ -1,12 +1,12 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
-import eu.goodyfx.system.core.utils.SubCommand;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.subcommands.*;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiMessages;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
-import eu.goodyfx.system.core.utils.Settings;
+import eu.goodyfx.system.core.utils.SubCommand;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -37,8 +37,6 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private final RaspiMessages data;
 
-    private AdminDebugSubCommand debugSubCommand;
-
     private final List<SubCommand> subCommands = new ArrayList<>();
 
     public AdminCommand() {
@@ -49,10 +47,8 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
     }
 
     public void addSubCommands() {
-        debugSubCommand = new AdminDebugSubCommand(plugin);
         subCommands.add(new AdminHelpCommand(data, this));
         subCommands.add(new AdminSudoCommand(plugin));
-        subCommands.add(debugSubCommand);
         subCommands.add(new AdminSkullSubCommand());
         subCommands.add(new AdminLootChestSubCommand(plugin));
         subCommands.add(new AdminCombineFileSubCommand(plugin));
@@ -61,6 +57,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminReloadSubCommand(plugin));
         subCommands.add(new AdminResetPlayerSubCommand());
         subCommands.add(new AdminPLHideSubCommand());
+        subCommands.add(new AdminPlayerInfoCommand());
     }
 
 
@@ -72,9 +69,6 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 subCommands.forEach(val -> results.add(val.getLabel()));
                 Collections.sort(results);
                 return results;
-            }
-            if (args.length == 2&& args[0].equalsIgnoreCase("debug")) {
-                return debugSubCommand.getActions().keySet().stream().toList();
             }
             if ((args.length > 2 && args.length < 6) && args[0].equalsIgnoreCase("skull")) {
 
@@ -115,7 +109,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 syntaxCheck(player, args);
                 for (SubCommand subCommand : subCommands) {
                     if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                        return subCommand.commandPerform(new RaspiPlayer(player), args);
+                        return subCommand.commandPerform(Raspi.players().get(player), args);
                     }
                 }
             } else {
@@ -221,12 +215,12 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             return false;
         }
 
-        RaspiPlayer raspiPlayer = new RaspiPlayer(player);
+        RaspiPlayer raspiPlayer = Raspi.players().get(player);
 
-        plugin.getRaspiPlayers().forEach(all -> {
-            if (all.hasSetting(Settings.MESSAGES)) {
-                String output = String.format("%s%s hat Teleport %s benutzt.", data.getPrefix(), raspiPlayer.getName(), location);
-                all.sendMessage(output);
+        Raspi.players().getRaspiPlayers().forEach(all -> {
+            if (all.getUserSettings().isServer_messages()) {
+                String output = String.format("%s hat Teleport %s benutzt.", raspiPlayer.getColorName(), location);
+                all.sendMessage(output, true);
             }
         });
         String log = String.format("Raspi-Teleport: %s hat Teleport %s benutzt", player.getName(), location);

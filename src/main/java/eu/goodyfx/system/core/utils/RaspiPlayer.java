@@ -2,19 +2,21 @@ package eu.goodyfx.system.core.utils;
 
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.managers.PlayerSettingsManager;
-import eu.goodyfx.system.core.managers.UserManager;
+import eu.goodyfx.system.core.database.RaspiManagement;
+import eu.goodyfx.system.core.database.RaspiUser;
+import eu.goodyfx.system.core.database.RaspiUsernames;
+import eu.goodyfx.system.core.database.UserSettings;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -25,57 +27,76 @@ public class RaspiPlayer {
 
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private final Player player;
+    private RaspiUser user;
+    private RaspiManagement management;
+    private UserSettings userSettings;
+    private PlayerNameController nameController;
+    private RaspiUsernames usernames;
+    private volatile boolean initialized;
 
     public RaspiPlayer(Player player) {
         this.player = player;
     }
 
-    public RaspiPlayer(UUID uuid) {
-        this.player = Bukkit.getPlayer(uuid);
-    }
+    public void initData(RaspiUser raspiUser, RaspiManagement raspiManagement, UserSettings settings, RaspiUsernames usernames) {
+        if (initialized) return;
+        this.user = Raspi.players().getRaspiUser(getUUID());
+        this.management = Raspi.players().getManagement(getUUID());
+        this.userSettings = Raspi.players().getUserSettings(getUUID());
+        this.nameController = new PlayerNameController(this);
+        this.usernames = Raspi.players().getUserNameCache(getUUID());
 
+        this.initialized = true;
+    }
 
     public void openInventory(Inventory inventory) {
-        getPlayer().openInventory(inventory);
+        player.openInventory(inventory);
     }
 
+    public void ban(Player banOwner, String reason) {
+        management.performBan(banOwner, reason);
+    }
+
+    public void unBan() {
+        management.performUnban();
+    }
+
+    public void mute(Player muteOwner, String reason) {
+        management.performMute(muteOwner, reason);
+    }
+
+    public void unMute() {
+        management.performUnMute();
+    }
+
+
     public void openInventory(InventoryView view) {
-        getPlayer().openInventory(view);
+        player.openInventory(view);
     }
 
     public String getPrefix() {
-        return plugin.getModuleManager().getPrefixManager().get(this.getPlayer());
+        String prefix = user.getPrefix();
+        if (prefix != null) {
+            prefix = prefix.replace("@", " ");
+        }
+        return prefix;
     }
 
-    public void setPrefix(@NotNull String db_prefix) {
-        plugin.getModuleManager().getPlayerNameController().setPlayerList(this.getPlayer());
-        plugin.getModuleManager().getPrefixManager().set(this.getPlayer(), db_prefix);
+    public void setPrefix(String db_prefix) {
+        user.setPrefix(db_prefix);
+        nameController().setPlayerList();
     }
 
     public void removePrefix() {
-        plugin.getModuleManager().getPrefixManager().remove(this.getPlayer());
+        user.setPrefix(null);
+        nameController.setPlayerList();
     }
 
-    public boolean hasSetting(Settings setting) {
-        return plugin.getModule().getPlayerSettingsManager().contains(setting, player);
-    }
 
     public PlayerNameController nameController() {
-        return plugin.getModule().getPlayerNameController();
+        return nameController;
     }
 
-    public PlayerSettingsManager getPlayerSettingsManager() {
-        return plugin.getModule().getPlayerSettingsManager();
-    }
-
-    /**
-     * Get Player Name with color
-     *
-     * @return The Player Name With color
-     */
-    public String getName() {
-        return nameController().getName(player);
-    }
 
     /**
      * Get Current Player Color
@@ -83,7 +104,7 @@ public class RaspiPlayer {
      * @return The current Color String
      */
     public String getColor() {
-        return nameController().getColorString(player);
+        return user.getColor();
     }
 
     /**
@@ -92,16 +113,11 @@ public class RaspiPlayer {
      * @return Name Display with Prefix if set
      */
     public String getDisplayName() {
-        return nameController().getNameDisplay(player);
+        return nameController().getColorDisplayName();
     }
 
-    /**
-     * UserManager Referenz
-     *
-     * @return The User Manager
-     */
-    public UserManager userManager() {
-        return plugin.getModule().getUserManager();
+    public String getColorName() {
+        return nameController().getColorName();
     }
 
 
@@ -123,14 +139,28 @@ public class RaspiPlayer {
             player.sendMessage(Component.empty());
             return;
         }
-        getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(message));
+        player.sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
 
     public String convertLink(String url) {
         return String.format("<click:open_url:'%s'>%s", url, url);
     }
+
     public String convertLink(String url, String linkDisplay) {
-        return String.format("<click:open_url:'%s'>%s", url,linkDisplay);
+        return String.format("<click:open_url:'%s'>%s", url, linkDisplay);
+    }
+
+    /**
+     * Checks if player has played Time by value
+     *
+     * @param amount Amount in hours
+     * @return True if player has played more than valued Hours
+     */
+    public boolean hasTimePlayed(int amount) {
+        long timePlayed = player.getStatistic(Statistic.PLAY_ONE_MINUTE); //ticks Played 20 Ticks = 1 Second
+        long timeHours = timePlayed / 20 / 60 / 60;
+        plugin.getDebugger().info(String.format("TIME_REQUEST:: %s Spielzeit: %s. Soll-Mindestens: %s.", player.getName(), timeHours, amount));
+        return timePlayed / 20 / 60 / 60 > amount;
     }
 
 
@@ -171,11 +201,11 @@ public class RaspiPlayer {
             builder.append(plugin.getModule().getRaspiMessages().getPrefix());
         }
         builder.append(message);
-        getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(builder.toString()));
+        player.sendMessage(MiniMessage.miniMessage().deserialize(builder.toString()));
     }
 
     public void sendActionBar(String message) {
-        getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize(message));
+        player.sendActionBar(MiniMessage.miniMessage().deserialize(message));
     }
 
 
@@ -229,6 +259,15 @@ public class RaspiPlayer {
      */
     public void sendDebugMessage(String message) {
         player.sendRichMessage(String.format("<dark_red>DEBUG:// <gray>%s", message));
+    }
+
+    /**
+     * Perform player Command
+     *
+     * @param command The Command without "/"
+     */
+    public void performCommand(String command) {
+        Bukkit.dispatchCommand(player, command.replace("/", ""));
     }
 
 

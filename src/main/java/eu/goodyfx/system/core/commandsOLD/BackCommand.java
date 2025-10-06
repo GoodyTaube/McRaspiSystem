@@ -1,7 +1,9 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -19,6 +21,7 @@ public class BackCommand implements CommandExecutor {
 
 
     private final McRaspiSystem plugin;
+    @Getter
     private static final Map<UUID, Location> locationMap = new HashMap<>();
 
     public BackCommand(McRaspiSystem plugin) {
@@ -36,7 +39,7 @@ public class BackCommand implements CommandExecutor {
     }
 
     private boolean playerCommand(Player player, String[] args) {
-        RaspiPlayer raspiPlayer = plugin.getRaspiPlayer(player);
+        RaspiPlayer raspiPlayer = Raspi.players().get(player);
         if (args.length == 0) {
             //TELEPORT BACK
             Location location = getLocation(player);
@@ -67,15 +70,11 @@ public class BackCommand implements CommandExecutor {
                 if (location != null) {
                     target.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
                 } else sender.sendRichMessage(target.getName() + "<red> hat bisher noch keine Location verlassen.");
-            } else{
+            } else {
                 sender.sendRichMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[0]));
             }
         }
         return false;
-    }
-
-    public static Map<UUID, Location> getLocationMap() {
-        return locationMap;
     }
 
 }

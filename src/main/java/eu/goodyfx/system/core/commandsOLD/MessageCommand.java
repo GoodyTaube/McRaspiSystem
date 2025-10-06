@@ -1,7 +1,7 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.PlayerNameController;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiMessages;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -18,12 +18,10 @@ import java.util.List;
 public class MessageCommand implements CommandExecutor, TabCompleter {
 
     private final RaspiMessages data;
-    private final PlayerNameController playerNameController;
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
     public MessageCommand(McRaspiSystem plugin) {
         this.data = plugin.getModule().getRaspiMessages();
-        this.playerNameController = plugin.getModule().getPlayerNameController();
         plugin.setCommand("message", this, this);
     }
 
@@ -104,7 +102,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
      * @return ClickAble Target Name
      */
     private String getName(Player target) {
-        return "<click:suggest_command:'/msg " + target.getName() + " '><hover:show_text:'<green>Antworten'>" + playerNameController.getName(target) + "<reset>";
+        return "<click:suggest_command:'/msg " + target.getName() + " '><hover:show_text:'<green>Antworten'>" + Raspi.players().get(target).getColorName() + "<reset>";
     }
 
 }

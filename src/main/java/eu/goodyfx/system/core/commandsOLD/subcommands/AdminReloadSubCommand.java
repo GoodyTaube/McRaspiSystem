@@ -3,6 +3,8 @@ package eu.goodyfx.system.core.commandsOLD.subcommands;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.SubCommand;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 public class AdminReloadSubCommand extends SubCommand {
 
@@ -41,8 +43,7 @@ public class AdminReloadSubCommand extends SubCommand {
             plugin.getModule().getTraderDB().reload();
             player.sendMessage("Die RaspiConfigs wurden neu Geladen.", true);
             plugin.getDebugger().info(plugin.getConfig().getString("Utilities.vote"));
-            plugin.getRaspiPlayers().forEach(player1 -> player.getPlayer().updateCommands());
-
+            Bukkit.getOnlinePlayers().forEach(Player::updateCommands);
         }
         return true;
     }

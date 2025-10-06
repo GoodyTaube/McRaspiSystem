@@ -3,16 +3,6 @@ package eu.goodyfx.system.core;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.*;
 import eu.goodyfx.system.core.events.*;
-import eu.goodyfx.system.lootchest.commands.RaspiItemsCommand;
-import eu.goodyfx.system.lootchest.events.LootChestListeners;
-import eu.goodyfx.system.lootchest.events.LootConsumeEvents;
-import eu.goodyfx.system.lootchest.events.LootSpongeEvents;
-import eu.goodyfx.system.raspievents.events.CraftingEventListeners;
-import eu.goodyfx.system.reise.commands.ReiseCommand;
-import eu.goodyfx.system.reise.commands.ReisePortCommand;
-import eu.goodyfx.system.reise.commands.ReiseSucheCommand;
-import eu.goodyfx.system.trader.commands.TraderCommand;
-import eu.goodyfx.system.trader.events.TraderListeners;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,16 +17,18 @@ public class SystemStartUp {
     }
 
     private void welcome() {
-        Bukkit.getConsoleSender().sendRichMessage("<br><br><rainbow>" +
-                "███╗   ███╗ ██████╗██████╗  █████╗ ███████╗██████╗ ██╗      ███████╗██╗   ██╗███████╗████████╗███████╗███╗   ███╗<br>" +
-                "████╗ ████║██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██║      ██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝██╔════╝████╗ ████║<br>" +
-                "██╔████╔██║██║     ██████╔╝███████║███████╗██████╔╝██║█████╗███████╗ ╚████╔╝ ███████╗   ██║   █████╗  ██╔████╔██║<br>" +
-                "██║╚██╔╝██║██║     ██╔══██╗██╔══██║╚════██║██╔═══╝ ██║╚════╝╚════██║  ╚██╔╝  ╚════██║   ██║   ██╔══╝  ██║╚██╔╝██║<br>" +
-                "██║ ╚═╝ ██║╚██████╗██║  ██║██║  ██║███████║██║     ██║      ███████║   ██║   ███████║   ██║   ███████╗██║ ╚═╝ ██║<br>" +
-                "╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝      ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝<br>" +
-                "                                                                                                                 <br>");
+        Bukkit.getConsoleSender().sendMessage("""
+                
+                
+                ███╗   ███╗ ██████╗██████╗  █████╗ ███████╗██████╗ ██╗      ███████╗██╗   ██╗███████╗████████╗███████╗███╗   ███╗
+                ████╗ ████║██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██║      ██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝██╔════╝████╗ ████║
+                ██╔████╔██║██║     ██████╔╝███████║███████╗██████╔╝██║█████╗███████╗ ╚████╔╝ ███████╗   ██║   █████╗  ██╔████╔██║
+                ██║╚██╔╝██║██║     ██╔══██╗██╔══██║╚════██║██╔═══╝ ██║╚════╝╚════██║  ╚██╔╝  ╚════██║   ██║   ██╔══╝  ██║╚██╔╝██║
+                ██║ ╚═╝ ██║╚██████╗██║  ██║██║  ██║███████║██║     ██║      ███████║   ██║   ███████║   ██║   ███████╗██║ ╚═╝ ██║
+                ╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝      ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝
+                                                                                                                                \s
+                """);
     }
-
 
     private void addCommands(McRaspiSystem plugin) {
         //Main System
@@ -46,9 +38,9 @@ public class SystemStartUp {
         new InfoCommand(plugin);
         new MessageCommand(plugin);
         new PrefixCommand();
-        new RequestCommand(plugin);
+        //new RequestCommand(plugin);
         new SettingsCommand(plugin);
-        new SitCommand(plugin);
+        //new SitCommand(plugin);
         new TempBanCommand(plugin);
         new UnBanCommand(plugin);
         new WarteschlangeCommand(plugin);
@@ -60,13 +52,13 @@ public class SystemStartUp {
 
 
     private void addEvents(McRaspiSystem plugin) {
+
         new CommandListeners();
-        new PlayerChatListeners(plugin);
+        new PlayerChatListeners();
         new PlayerListeners(plugin);
-        new ServerListeners(plugin);
+        new ServerListeners();
         new TeleportListeners(plugin);
         //new WarteschlangeListeners(plugin);
-        new PlayerMoveListener(plugin);
         new PlayerInteractAtEntitiesListeners(plugin);
         new PlayerInteractListeners(plugin);
         new RaspiPlayerConnectionEvents();
@@ -75,4 +67,7 @@ public class SystemStartUp {
         new CompassEvents();
         new InventoryListeners();
     }
+
+
+
 }

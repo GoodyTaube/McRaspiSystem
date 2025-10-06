@@ -1,7 +1,9 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.managers.PlayerSettingsManager;
+import eu.goodyfx.system.core.database.UserSettings;
+import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.Settings;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,11 +18,8 @@ import java.util.List;
 
 public class SettingsCommand implements CommandExecutor, TabCompleter {
 
-    private final PlayerSettingsManager playerSettingsManager;
-
 
     public SettingsCommand(McRaspiSystem plugin) {
-        this.playerSettingsManager = plugin.getModule().getPlayerSettingsManager();
         plugin.setCommand("settings", this, this);
     }
 
@@ -32,30 +31,26 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
             results.add("chat");
             results.add("opt-chat");
             return results;
-
         }
         return null;
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-
-        if (sender instanceof Player player && (args.length == 1)) {
+        if (sender instanceof Player dummy && (args.length == 1)) {
+            RaspiPlayer raspiPlayer = Raspi.players().get(dummy);
             // settings chat
             switch (args[0]) {
                 case "chat":
-                    perform(Settings.MESSAGES, player);
+                    perform(Settings.MESSAGES, raspiPlayer);
                     break;
                 case "afk":
-                    perform(Settings.AUTO_AFK, player);
+                    perform(Settings.AUTO_AFK, raspiPlayer);
                     break;
                 case "opt-chat":
-                    perform(Settings.ADVANCED_CHAT, player);
+                    perform(Settings.ADVANCED_CHAT, raspiPlayer);
                     break;
-                default:
-                    return false;
             }
-            playerSettingsManager.refresh(player);
             return true;
         }
         return false;
@@ -69,18 +64,49 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private boolean hasSetting(Player player, Settings setting) {
-        return playerSettingsManager.contains(setting, player);
+
+    public Boolean hasSetting(Settings settings, RaspiPlayer player) {
+        return switch (settings) {
+            case ADVANCED_CHAT -> player.getUserSettings().isOpt_chat();
+            case AUTO_AFK -> player.getUserSettings().isAuto_afk();
+            case MESSAGES -> player.getUserSettings().isServer_messages();
+        };
+
     }
 
-    private void perform(Settings settings, Player player) {
-        if (Boolean.TRUE.equals(hasSetting(player, settings))) {
-            playerSettingsManager.remove(settings, player);
-            player.sendRichMessage(createMessage(settings, false));
-        } else if (!playerSettingsManager.contains(settings, player)) {
-            playerSettingsManager.set(settings, player);
-            player.sendRichMessage(createMessage(settings, true));
+
+    private void perform(Settings settings, RaspiPlayer player) {
+        UserSettings userSettings = player.getUserSettings();
+        switch (settings) {
+            case ADVANCED_CHAT:
+                if (userSettings.isOpt_chat()) {
+                    userSettings.setOpt_chat(false);
+                    player.sendMessage(createMessage(settings, false), true);
+                } else {
+                    userSettings.setOpt_chat(true);
+                    player.sendMessage(createMessage(settings, true), true);
+                }
+                break;
+            case AUTO_AFK:
+                if (userSettings.isAuto_afk()) {
+                    userSettings.setAuto_afk(false);
+                    player.sendMessage(createMessage(settings, false), true);
+                } else {
+                    userSettings.setAuto_afk(true);
+                    player.sendMessage(createMessage(settings, true), true);
+                }
+                break;
+            case MESSAGES:
+                if (userSettings.isServer_messages()) {
+                    userSettings.setServer_messages(false);
+                    player.sendMessage(createMessage(settings, false), true);
+                } else {
+                    userSettings.setServer_messages(true);
+                    player.sendMessage(createMessage(settings, true), true);
+                }
+                break;
         }
+
     }
 
 }

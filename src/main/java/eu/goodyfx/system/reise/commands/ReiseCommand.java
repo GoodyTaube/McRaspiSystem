@@ -5,7 +5,7 @@ import eu.goodyfx.system.core.commandsOLD.subcommands.ReiseListSubCommand;
 import eu.goodyfx.system.core.commandsOLD.subcommands.ReiseRemoveSubCommand;
 import eu.goodyfx.system.core.commandsOLD.subcommands.ReiseResetSubCommand;
 import eu.goodyfx.system.core.commandsOLD.subcommands.ReiseSetupSubCommand;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.SubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -56,7 +56,7 @@ public class ReiseCommand implements CommandExecutor, TabCompleter {
         if (sender instanceof Player player) {
             for (SubCommand subCommand : subCommands) {
                 if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                    if (subCommand.commandPerform(new RaspiPlayer(player), args)) {
+                    if (subCommand.commandPerform(Raspi.players().get(player), args)) {
                         return true;
                     } else {
                         if (subCommand.getDescription() != null && subCommand.getSyntax() != null) {

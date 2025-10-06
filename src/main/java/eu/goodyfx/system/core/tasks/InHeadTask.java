@@ -2,6 +2,7 @@ package eu.goodyfx.system.core.tasks;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.InHeadCommand;
+import eu.goodyfx.system.core.utils.Raspi;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -45,7 +46,7 @@ public class InHeadTask extends BukkitRunnable {
                     public void run() {
                         OfflinePlayer target = Bukkit.getOfflinePlayer(inHeadContainer.get(uuid));
                         player.performCommand("inhead");
-                        plugin.getRaspiPlayer(player).sendMessage(String.format("%s ist offline gegangen. InHead beendet!", target.getName()), true);
+                        Raspi.players().get(player).sendMessage(String.format("%s ist offline gegangen. InHead beendet!", target.getName()), true);
                     }
                 }.runTask(plugin);
             }

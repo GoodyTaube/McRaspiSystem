@@ -3,8 +3,10 @@ package eu.goodyfx.system.core.commandsOLD.subcommands;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.RandomTeleportCommand;
-import eu.goodyfx.system.core.utils.SubCommand;
+import eu.goodyfx.system.core.database.DatabaseTables;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
+import eu.goodyfx.system.core.utils.SubCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -30,6 +32,7 @@ public class AdminResetDailyCommandSubCommand extends SubCommand {
     public String getSyntax() {
         return "/admin resetCommand <player>";
     }
+
     @Override
     public int length() {
         return 1;
@@ -40,12 +43,12 @@ public class AdminResetDailyCommandSubCommand extends SubCommand {
         if (args.length == 2) {
             PlayerProfile target = Bukkit.createProfile(args[1]);
 
-            if (target.isComplete() && plugin.getModule().getUserManager().userExist(Bukkit.getOfflinePlayer(target.getId()))) {
-                RandomTeleportCommand.getPlayerContainer().remove(target.getUniqueId());
+            if (target.isComplete() && plugin.getDatabaseManager().userExistInTable(target.getId(), DatabaseTables.USER_DATA)) {
+                RandomTeleportCommand.getPlayerContainer().remove(target.getId());
                 player.sendMessage(plugin.getModule().getRaspiMessages().getPrefix() + "<green>" + target.getName() + " Erfolgreich zurückgesetzt!");
                 Player targetPlayer = Bukkit.getPlayer(target.getName());
                 if (targetPlayer.isOnline()) {
-                    plugin.getRaspiPlayer(targetPlayer).sendActionBar("<green>Du kannst deinen RandomTP Neu setzten.");
+                    Raspi.players().get(targetPlayer).sendActionBar("<green>Du kannst deinen RandomTP Neu setzten.");
                 }
             } else
                 player.sendMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[1]));

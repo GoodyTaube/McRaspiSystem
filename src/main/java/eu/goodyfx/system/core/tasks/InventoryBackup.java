@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.tasks;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,7 +23,7 @@ public class InventoryBackup extends BukkitRunnable {
 
     @Override
     public void run() {
-        for (RaspiPlayer player : plugin.getRaspiPlayers()) {
+        for (RaspiPlayer player : Raspi.players().getRaspiPlayers()) {
             inventoryContainer.put(player.getUUID(), player.getPlayer().getInventory().getContents());
         }
     }

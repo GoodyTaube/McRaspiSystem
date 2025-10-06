@@ -1,8 +1,11 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.managers.UserManager;
+import eu.goodyfx.system.core.database.DatabaseTables;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiMessages;
+import eu.goodyfx.system.core.utils.RaspiOfflinePlayer;
+import eu.goodyfx.system.core.utils.RaspiPlayer;
 import net.luckperms.api.model.group.Group;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -21,10 +24,8 @@ public class MuteCommand implements CommandExecutor {
 
     private final RaspiMessages data;
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
-    private final UserManager userManager;
 
     public MuteCommand() {
-        this.userManager = this.plugin.getModule().getUserManager();
         plugin.setCommand("mute", this);
         this.data = plugin.getModule().getRaspiMessages();
     }
@@ -34,12 +35,12 @@ public class MuteCommand implements CommandExecutor {
 
         if (sender instanceof Player player && args.length >= 1) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-
-            if (!userManager.userExist(player)) {
-                player.sendRichMessage("<red>Der User existiert nicht.");
+            RaspiOfflinePlayer targetPlayer = Raspi.players().getRaspiOfflinePlayer(target);
+            RaspiPlayer raspiPlayer = Raspi.players().get(player);
+            if (!plugin.getDatabaseManager().userExistInTable(target.getUniqueId(), DatabaseTables.USER_DATA)) {
+                raspiPlayer.sendMessage("<red>Der Spieler hat noch nicht das Interesse gehabt zu Spielen.", true);
                 return true;
             }
-
             //Nachtrag zu Bernds Wunsch
             if (!player.isPermissionSet("group.OP")) { //Bypass Check
                 //ASYNC
@@ -48,15 +49,15 @@ public class MuteCommand implements CommandExecutor {
                         player.sendRichMessage(data.getPrefix() + "<red>Der Spieler ist nicht 'Neu' und kann nicht mehr Stumm geschaltet werden!");
                     } else {
                         if (args.length == 1) {
-                            if (userManager.isMuted(target)) {
-                                userManager.unMuteUser(target);
+                            if (targetPlayer.getManagement().isMuted()) {
+                                targetPlayer.getManagement().performUnMute();
                                 Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(broadcastChatUnMute(player, target)));
                                 return;
                             }
                             player.sendRichMessage(errorMessageReason(target));
                             return;
                         }
-                        if (userManager.isMuted(target)) {
+                        if (targetPlayer.getManagement().isMuted()) {
                             player.sendRichMessage(errorMessageAllReadyMuted(target));
                             return;
                         }
@@ -67,16 +68,15 @@ public class MuteCommand implements CommandExecutor {
                             reason.append(args[i]).append("@"); //Build Reason for Database
                         }
                         reason.setLength(reason.length() - 1); //Remove last @ char
-                        userManager.muteUser(target, player, reason.toString());
+                        targetPlayer.getManagement().performMute(player, reason.toString());
                         Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(broadcastChatMute(target, player, reason)));
                     }
                 });
             } else {
                 //Nachtrag ENDE
-                userManager.reloadFile(); //Reload User Database
                 if (args.length == 1) {
-                    if (userManager.isMuted(target)) {
-                        userManager.unMuteUser(target);
+                    if (targetPlayer.getManagement().isMuted()) {
+                        targetPlayer.getManagement().performUnMute();
                         Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(broadcastChatUnMute(player, target)));
                         return true;
                     }
@@ -86,7 +86,7 @@ public class MuteCommand implements CommandExecutor {
                 }
 
 
-                if (userManager.isMuted(target)) {
+                if (targetPlayer.getManagement().isMuted()) {
                     player.sendRichMessage(errorMessageAllReadyMuted(target));
                     return true;
                 }
@@ -98,7 +98,7 @@ public class MuteCommand implements CommandExecutor {
                     reason.append(args[i]).append("@"); //Build Reason for Database
                 }
                 reason.setLength(reason.length() - 1); //Remove last @ char
-                userManager.muteUser(target, player, reason.toString());
+                targetPlayer.getManagement().performMute(player, reason.toString());
                 Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(broadcastChatMute(target, player, reason)));
             }
             return true;

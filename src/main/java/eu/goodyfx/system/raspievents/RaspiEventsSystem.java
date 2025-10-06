@@ -3,7 +3,6 @@ package eu.goodyfx.system.raspievents;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.RaspiSubSystem;
 import eu.goodyfx.system.raspievents.craftings.CanabolaCraftging;
-import eu.goodyfx.system.raspievents.craftings.EntityGranadeCrafting;
 import eu.goodyfx.system.raspievents.events.CraftingEventListeners;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -42,7 +41,6 @@ public class RaspiEventsSystem implements RaspiSubSystem {
     public void init() {
         commands();
         events();
-        recipes();
     }
 
     @Override
@@ -73,12 +71,6 @@ public class RaspiEventsSystem implements RaspiSubSystem {
         for (Listener event : events) {
             HandlerList.unregisterAll(event);
         }
-    }
-
-
-    private void recipes() {
-        new CanabolaCraftging(plugin);
-        new EntityGranadeCrafting();
     }
 
 }

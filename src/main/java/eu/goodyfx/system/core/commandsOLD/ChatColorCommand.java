@@ -3,8 +3,9 @@ package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.OldColors;
-import eu.goodyfx.system.core.utils.PlayerNameController;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiMessages;
+import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,14 +21,12 @@ import java.util.Locale;
 
 public class ChatColorCommand implements CommandExecutor, TabCompleter {
 
-    private final PlayerNameController playerNameController;
     private final RaspiMessages data;
 
     private static final String RANDOM = "random";
 
     public ChatColorCommand(McRaspiSystem utilities) {
         this.data = utilities.getModule().getRaspiMessages();
-        this.playerNameController = utilities.getModule().getPlayerNameController();
         utilities.setCommand("chatColor", this, this);
         setColors();
     }
@@ -70,12 +69,13 @@ public class ChatColorCommand implements CommandExecutor, TabCompleter {
     @Override //Command Logic
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player player) {
+            RaspiPlayer raspiPlayer = Raspi.players().get(player);
             if (args.length == 0) {
                 player.sendRichMessage(data.getUsage("/chatcolor <farbe>"));
             }
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("info")) {
-                    player.sendRichMessage("<green>Dein Aktueller Hex code ist: " + playerNameController.getColorString(player).replace("<", "").replace(">", ""));
+                    player.sendRichMessage("<green>Dein Aktueller Hex code ist: " + raspiPlayer.getColor().replace("<", "").replace(">", ""));
                     return true;
                 }
                 String codeRaw = args[0];
@@ -94,13 +94,13 @@ public class ChatColorCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (codeRaw.equalsIgnoreCase(RANDOM)) {
-                    playerNameController.resetRandom(player);
+                    raspiPlayer.nameController().resetRandom();
                 }
 
                 codeRaw = "<" + codeRaw + ">";
-                playerNameController.setPlayerColor(codeRaw, player);
-                player.sendRichMessage("<gray>Deine Neue Chat Farbe ist jetzt: " + playerNameController.getColorString(player) + "▆▇ " + player.getName() + " ▇▆");
-                playerNameController.setPlayerList(player);
+                raspiPlayer.nameController().setPlayerColor(codeRaw);
+                raspiPlayer.sendMessage(String.format("<gray>Deine Neue Chat Farbe ist jetzt: %s▆▇ %s ▇▆", raspiPlayer.getColor(), player.getName()));
+                raspiPlayer.nameController().setPlayerList();
             }
         }
         return false;

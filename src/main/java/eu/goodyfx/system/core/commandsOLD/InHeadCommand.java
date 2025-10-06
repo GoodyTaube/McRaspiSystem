@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPermission;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import lombok.Getter;
@@ -37,7 +38,7 @@ public class InHeadCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (sender instanceof Player dummy) {
-            RaspiPlayer raspiPlayer = new RaspiPlayer(dummy);
+            RaspiPlayer raspiPlayer = Raspi.players().get(dummy);
 
             if (args.length == 0 && inHeadContainer.containsKey(dummy.getUniqueId())) {
                 removeInHead(raspiPlayer);
@@ -47,6 +48,7 @@ public class InHeadCommand implements CommandExecutor {
                 if (dummy.isPermissionSet(RaspiPermission.MOD.getPermissionValue())) {
                     Player target = Bukkit.getPlayer(args[0]);
                     if (target != null) {
+                        RaspiPlayer targetPlayer = Raspi.players().get(target);
                         if (target == dummy) {
                             raspiPlayer.sendMessage("<red>Du kannst dich nicht selber prüfen.", true);
                             return true;
@@ -63,7 +65,7 @@ public class InHeadCommand implements CommandExecutor {
                             return true;
                         }
                         if (!raspiPlayer.getPlayer().isPermissionSet("system.allow")) {
-                            if (plugin.getModule().getUserManager().hasTimePlayed(target, plugin.getConfig().getInt("Utilities.inHead"))) {
+                            if (targetPlayer.hasTimePlayed(plugin.getConfig().getInt("Utilities.inHead"))) {
                                 raspiPlayer.sendMessage("<red>Der Spieler ist nicht NEU und kann nicht geprüft werden.", true);
                                 return true;
                             }
@@ -83,7 +85,7 @@ public class InHeadCommand implements CommandExecutor {
         inHeadGamemode.put(player.getUUID(), player.getPlayer().getGameMode());
         player.getPlayer().setGameMode(GameMode.SPECTATOR);
         player.getPlayer().setSpectatorTarget(target);
-        player.sendMessage("<gray>Du beobachtest nun: <aqua>" + plugin.getRaspiPlayer(target).getName(), true);
+        player.sendMessage("<gray>Du beobachtest nun: <aqua>" + Raspi.players().get(target).getColorName(), true);
         plugin.getHookManager().getDiscordIntegration().send(String.format("`Raspi-InHead:: %s ----> %s`", player.getPlayer().getName(), target.getName()));
 
     }

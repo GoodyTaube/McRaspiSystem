@@ -22,7 +22,6 @@ public class RaspiHookManager {
     private DiscordIntegration discordIntegration;
     private ProtocolManager protocolManager;
 
-
     public RaspiHookManager(McRaspiSystem system, Plugin plugin) {
         this.system = system;
         this.plugin = plugin;
@@ -30,13 +29,14 @@ public class RaspiHookManager {
     }
 
     public void startHook() {
-        boolean hook = false;
-        hook = luckPermsHook();
-        hook = protocolManager();
-        discordIntegration = new DiscordIntegration();
+        boolean hook = true;
+        hook = hook && luckPermsHook();
+        hook = hook && protocolManager();
         if (!hook) {
             plugin.getLogger().log(Level.SEVERE, "Hooking Failed!");
             Bukkit.getPluginManager().disablePlugin(plugin);
+        } else {
+            discordIntegration = new DiscordIntegration();
         }
     }
 
@@ -53,7 +53,7 @@ public class RaspiHookManager {
     private boolean protocolManager() {
         ProtocolManager manager = ProtocolLibrary.getProtocolManager();
         if (manager != null) {
-          this.protocolManager = manager;
+            this.protocolManager = manager;
             return true;
         }
         plugin.getLogger().log(Level.SEVERE, "Plugin ProtocolLib not Found!");

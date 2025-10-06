@@ -6,10 +6,6 @@ depend:
   - LuckPerms
   - ProtocolLib
 commands:
-  request:
-    description: request system mod command
-    usage: "Benutze: /request <accept:deny> <player> [reason]"
-    permission: "system.moderator"
   warteschlange:
     description: Main Plugin Command by GoodyFX
   prefix:
@@ -45,8 +41,6 @@ commands:
       - tell
     description: "Replace for MSG Command."
     usage: "Bitte nutze: /msg <player> <msg>"
-  sit:
-    description: Sit replacement by GoodyFX
   loot:
     description: Raspi Item Command
   reise:

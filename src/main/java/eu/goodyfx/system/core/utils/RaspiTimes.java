@@ -10,6 +10,7 @@ public interface RaspiTimes {
 
     Long getTime();
 
+
     enum MilliSeconds implements RaspiTimes {
 
         SECOND("Sekunde(n)", 1000L),

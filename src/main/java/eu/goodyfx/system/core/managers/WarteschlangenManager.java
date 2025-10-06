@@ -2,6 +2,9 @@ package eu.goodyfx.system.core.managers;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.PlayerValues;
+import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.utils.RaspiPlayer;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -12,13 +15,12 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Getter
 public class WarteschlangenManager {
 
     private final McRaspiSystem plugin;
-    private final UserManager userManager;
 
     public WarteschlangenManager(RaspiModuleManager moduleManager) {
-        this.userManager = moduleManager.getUserManager();
         this.plugin = moduleManager.getPlugin();
     }
 
@@ -44,26 +46,17 @@ public class WarteschlangenManager {
     private final Map<UUID, Integer> queuePosition = new HashMap<>();
     public final List<UUID> players = new ArrayList<>();
 
-    /**
-     * Gets the PlayerQue per Plugin reboot
-     *
-     * @return The PlayerQue
-     */
-    public Map<UUID, Location> getLocationHashMap() {
-        return this.locationHashMap;
-    }
-
     public List<UUID> getQueuedPlayers() {
         return new ArrayList<>(this.playersQueue);
     }
 
-    public void join(Player player) {
+    public void join(RaspiPlayer player) {
         // If max player
         if (getAffectedPlayers().size() - this.playersQueue.size() > getMaxPlayers()) {
             //FINISH
-            if (!this.playersQueue.isEmpty() && !userManager.hasPersistantValue(player, PlayerValues.AFK)) {
+            if (!this.playersQueue.isEmpty() && !player.getUserSettings().isAfk()) {
                 for (Player all : Bukkit.getOnlinePlayers()) {
-                    if (userManager.hasPersistantValue(all, PlayerValues.AFK)) {
+                    if (player.getUserSettings().isAfk()) {
                         addToQueue(all.getUniqueId(), all.getLocation());
                         setHeader();
                         break;
@@ -72,8 +65,8 @@ public class WarteschlangenManager {
             }
 
 
-            if (!isQueue(player)) {
-                addToQueue(player.getUniqueId(), player.getLocation());
+            if (!isQueue(player.getPlayer())) {
+                addToQueue(player.getUUID(), player.getLocation());
             }
 
         }
@@ -107,12 +100,13 @@ public class WarteschlangenManager {
     }
 
     public void addToQueue(UUID uuid, Location location) {
+        RaspiPlayer player = Raspi.players().get(uuid);
         String world = Objects.requireNonNull(location.getWorld()).getName();
         Location waiting = plugin.getModule().getLocationManager().get("waiting");
         if (!world.equalsIgnoreCase(Objects.requireNonNull(waiting.getWorld()).getName())) {
             locationHashMap.put(uuid, location);
         }
-        if (!this.playersQueue.isEmpty() && userManager.hasPersistantValue(Objects.requireNonNull(Bukkit.getPlayer(playersQueue.peek())), PlayerValues.AFK)) {
+        if (!this.playersQueue.isEmpty() && player.getUserSettings().isAfk()) {
             UUID afkUUID = playersQueue.peek();
             this.playersQueue.remove(afkUUID);
             this.playersQueue.add(uuid);
@@ -136,22 +130,20 @@ public class WarteschlangenManager {
     public void setHeader() {
 
         AtomicInteger afk = new AtomicInteger();
-        Bukkit.getOnlinePlayers().forEach(all -> {
-            if (userManager.hasPersistantValue(all, PlayerValues.AFK)) {
+        Raspi.players().getRaspiPlayers().forEach(all -> {
+            if (all.getUserSettings().isAfk()) {
                 afk.getAndIncrement();
             }
-
-            if (userManager.getAfkContainer().size() > 0) {
-                all.sendPlayerListHeaderAndFooter(Component.text("Spieler Online: " + Bukkit.getOnlinePlayers().size()
+            if (!Raspi.players().getAfkContainer().isEmpty()) {
+                all.getPlayer().sendPlayerListHeaderAndFooter(Component.text("Spieler Online: " + Bukkit.getOnlinePlayers().size()
                         + "/" + getMaxPlayers() + " wartende Spieler " + plugin.getModule().getWarteschlangenManager().queueSize()).append(Component.newline()).append(Component.text("Spieler Abwesend: "
                         + afk)), Component.empty());
             } else {
-                all.sendPlayerListHeaderAndFooter(Component.text("Spieler Online: " + Bukkit.getOnlinePlayers().size()
+                all.getPlayer().sendPlayerListHeaderAndFooter(Component.text("Spieler Online: " + Bukkit.getOnlinePlayers().size()
                         + "/" + getMaxPlayers() + " wartende Spieler " + plugin.getModule().getWarteschlangenManager().queueSize()), Component.empty());
+
             }
-
         });
-
     }
 
     /**

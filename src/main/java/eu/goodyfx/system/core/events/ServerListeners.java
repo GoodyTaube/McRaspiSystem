@@ -2,13 +2,18 @@ package eu.goodyfx.system.core.events;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.managers.PlayerBanManager;
-import eu.goodyfx.system.core.managers.UserManager;
-import eu.goodyfx.system.core.utils.OldColors;
+import eu.goodyfx.system.core.database.RaspiManagement;
+import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.utils.RaspiFormatting;
+import eu.goodyfx.system.core.utils.RaspiOfflinePlayer;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
+import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.*;
@@ -23,29 +28,21 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+@Getter
 public class ServerListeners implements Listener {
 
-    private final McRaspiSystem plugin;
-    private final UserManager userManager;
-    private final PlayerBanManager playerBanManager;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private static final Map<UUID, Material> lastBreak = new HashMap<>();
 
-    public ServerListeners(McRaspiSystem plugin) {
-        this.plugin = plugin;
-        this.playerBanManager = plugin.getModule().getPlayerBanManager();
-        this.userManager = plugin.getModule().getUserManager();
-
+    public ServerListeners() {
         plugin.setListeners(this);
-    }
-
-    public static Map<UUID, Material> getLastBreak() {
-        return lastBreak;
     }
 
 
@@ -53,6 +50,7 @@ public class ServerListeners implements Listener {
     public void onPrimeTNT(TNTPrimeEvent tntPrimeEvent) {
         Entity entity = tntPrimeEvent.getPrimingEntity();
         if (entity instanceof Player player) {
+            RaspiPlayer raspiPlayer = Raspi.players().get(player);
             int hours = 100;
             if (!player.getWorld().equals(Bukkit.getWorld("world"))) {
                 return;
@@ -60,7 +58,7 @@ public class ServerListeners implements Listener {
             if (plugin.getConfig().contains("Utilities.tnt_hours")) {
                 hours = plugin.getConfig().getInt("Utilities.tnt_hours");
             }
-            if (!userManager.hasTimePlayed(player, hours)) {
+            if (!raspiPlayer.hasTimePlayed(hours)) {
                 tntPrimeEvent.setCancelled(true);
                 player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "<red>TNT gibt es erst ab: <gray>" + hours + " <red>Spielstunden."));
             }
@@ -71,7 +69,7 @@ public class ServerListeners implements Listener {
     public void onBreak(BlockBreakEvent breakEvent) {
         lastBreak.put(breakEvent.getPlayer().getUniqueId(), breakEvent.getBlock().getType());
         Player player = breakEvent.getPlayer();
-        RaspiPlayer raspiPlayer = plugin.getRaspiPlayer(player);
+        RaspiPlayer raspiPlayer = Raspi.players().get(player);
         Block block = breakEvent.getBlock();
 
         if (raspiPlayer.isDefault()) {
@@ -127,10 +125,11 @@ public class ServerListeners implements Listener {
     public void onBlockPlaced(@NotNull BlockPlaceEvent placeEvent) {
 
         Player player = placeEvent.getPlayer();
+        RaspiPlayer raspiPlayer = Raspi.players().get(player);
         Block block = placeEvent.getBlock();
         Location location = block.getLocation();
 
-        if (plugin.getRaspiPlayer(player).isDefault()) {
+        if (Raspi.players().get(player).isDefault()) {
             placeEvent.setCancelled(true);
             player.sendRichMessage("Du bist noch nicht registriert.");
             return;
@@ -154,7 +153,7 @@ public class ServerListeners implements Listener {
                 hours = plugin.getConfig().getInt("Utilities.tnt_hours");
             }
 
-            if (!userManager.hasTimePlayed(player, hours)) {
+            if (!raspiPlayer.hasTimePlayed(hours)) {
                 placeEvent.setCancelled(true);
 
                 if (!location.getNearbyEntities(0.1, 0.1, 0.1).isEmpty()) {
@@ -183,32 +182,6 @@ public class ServerListeners implements Listener {
     }
 
 
-    @EventHandler
-    public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
-        OfflinePlayer player = Bukkit.getOfflinePlayer(event.getUniqueId());
-        if (playerBanManager.contains(player)) {
-            if (System.currentTimeMillis() < playerBanManager.expire(player)) {
-                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, MiniMessage.miniMessage().deserialize(String.format("<gold>McRaspi.com <gray><b>-</b> <red>Disconnect<br><br><red><b>Du wurdest temporär gesperrt!</b><br>" +
-                                "<gray>Du wurdest von: <aqua>%s <gray>für folgendes gesperrt:<br>" +
-                                "<yellow>'%s'<br><br>" +
-                                "<gray>Du wirst am <aqua>%s <gray>entsperrt.",
-                        playerBanManager.performer(player), playerBanManager.reason(player), new SimpleDateFormat("dd-MM-yyyy HH:mm").format(playerBanManager.expire(player)))));
-            } else {
-                playerBanManager.removeBan(player);
-                plugin.getLogger().info(plugin.getModule().getRaspiMessages().getPrefix() + " " + player.getName() + " wurde Entsperrt weil seine sperrzeit abgelaufen ist.");
-                event.allow();
-            }
-        }
-
-        if (player.hasPlayedBefore()) {
-            return;
-        }
-
-
-        if (plugin.getConfig().getBoolean("Utilities.kickNewbies")) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize(String.format("McRaspi.com<br><br>%s<br><br><aqua>%s", "<gray>Du wurdest gekickt.", plugin.getModule().getRaspiMessages().getDisallowNewbie()[0])));
-        }
-    }
 
     @EventHandler
     public void onAnvilPre(PrepareAnvilEvent event) {
@@ -226,7 +199,7 @@ public class ServerListeners implements Listener {
                 String renameText = event.getView().getRenameText();
 
                 if (renameText != null) {
-                    renameText = OldColors.convert(renameText);
+                    renameText = RaspiFormatting.formattingChatMessage(renameText);
                     assert renameText != null;
                     meta.displayName(MiniMessage.miniMessage().deserialize(renameText));
                 }

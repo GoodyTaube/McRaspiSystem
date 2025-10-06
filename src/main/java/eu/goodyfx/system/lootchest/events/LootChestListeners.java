@@ -2,9 +2,10 @@ package eu.goodyfx.system.lootchest.events;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.InventoryBuilder;
-import eu.goodyfx.system.lootchest.utils.LootChestMenuItems;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiSounds;
+import eu.goodyfx.system.lootchest.utils.LootChestMenuItems;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -89,7 +90,7 @@ public class LootChestListeners implements Listener {
 
     private void lootChest(InventoryClickEvent clickEvent) {
         Player player = (Player) clickEvent.getWhoClicked();
-        RaspiPlayer raspiPlayer = new RaspiPlayer(player);
+        RaspiPlayer raspiPlayer = Raspi.players().get(player);
         if (isLootChest(clickEvent.getView())) {
             handleLootChestMenuClick(clickEvent, raspiPlayer);
             handleBackItem(clickEvent, raspiPlayer);

@@ -1,4 +1,25 @@
 raspi: #Hier kannst du einzelne Sub Systeme Deaktivieren. (Änderung durch Neustart aktiv.)
+  raspi-vote:
+    aktiv: true
+    belohnungen:
+      vote:
+        items:
+          - type: CLOCK
+            amount: 1
+            name: <red>Voting Coin
+            lore:
+              - "<gray>Danke für deinen Beitrag für die Spielergewinnung"
+              - "<gray>Als Dank bekommst du einen Vote Coin!"
+      erster-am-tag:
+        items:
+          - type: CLOCK
+            amount: 1
+            name: <red>Voting Coin
+            lore:
+              - "<gray>Du bist heute: {dd:MM:yyyy} der erste Vote!"
+              - "<gray>Danke für deinen Beitrag für die Spielergewinnung"
+              - "<gray>Als Dank bekommst du einen Vote Coin!"
+
   systems:
     raspiLoot: true
     raspiEvents: false

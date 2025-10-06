@@ -2,15 +2,24 @@ package eu.goodyfx.system.core.utils;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.managers.UserManager;
+import eu.goodyfx.system.core.database.RaspiManagement;
+import eu.goodyfx.system.core.database.RaspiUser;
+import eu.goodyfx.system.core.managers.ExtraInfos;
+import io.papermc.paper.ban.BanListType;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
-import org.bukkit.BanList;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Statistic;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,23 +31,23 @@ import java.util.stream.Collectors;
 public class PlayerInfo {
 
     private final OfflinePlayer player;
-    private final UserManager userManager;
+    private final RaspiUser raspiUser;
+    private final RaspiManagement management;
 
-    private final McRaspiSystem plugin;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
     private final List<String> playerInfoAssets = new ArrayList<>();
 
-    public PlayerInfo(McRaspiSystem plugin, OfflinePlayer player) {
-        this.plugin = plugin;
-        this.userManager = plugin.getModule().getUserManager();
-        this.player = player;
+    public PlayerInfo(RaspiOfflinePlayer player) {
 
+        this.raspiUser = player.getRaspiUser();
+        this.management = player.getManagement();
+        this.player = player.getPlayer();
+        //lastNames();
+        firstDocumentation();
         parseGroups();
         registration();
-        firstDocumentation();
-        lastNames();
         timePlayed();
-        timePlayedWeekly();
         lastDeath();
         lastSeen();
         playerXP();
@@ -46,29 +55,57 @@ public class PlayerInfo {
     }
 
     private void parseValueToInfo(PlayerInfosValues info, String value) {
-        playerInfoAssets.add(String.format("%s %s<reset><br>", info.getLabel(), value));
+        playerInfoAssets.add(String.format("%s %s<reset>", info.getLabel(), value));
     }
 
     public String buildPlayerInfos() {
-        StringBuilder builder = new StringBuilder("<gray>Player Infos: <aqua>" + player.getName() + "<reset><br>");
+
+        StringBuilder playerInfos = new StringBuilder("<gray>Player Infos: <aqua>" + player.getName() + "<reset><br>");
         for (String inf : playerInfoAssets) {
-            builder.append(inf);
+            playerInfos.append(inf);
         }
-        builder.setLength(builder.length() - 4);
-        return builder.toString();
+        playerInfos.setLength(playerInfos.length() - 4);
+        return playerInfos.toString();
+    }
+
+
+    public Dialog buildPlayerInfosDialog(OfflinePlayer player, Player performer) {
+        List<DialogBody> dialogBodies = new ArrayList<>();
+
+        ItemStack stack = new ItemStack(Material.PLAYER_HEAD, 1);
+        SkullMeta meta = (SkullMeta) stack.getItemMeta();
+        meta.setOwningPlayer(player);
+        stack.setItemMeta(meta);
+
+        dialogBodies.add(DialogBody.item(stack, DialogBody.plainMessage(Component.empty()), false, false, 10, 10));
+        dialogBodies.add(DialogBody.plainMessage(MiniMessage.miniMessage().deserialize(String.format("<gray>Spieler Infos: <aqua>%s", player.getName())), 1024));
+        for (String info : playerInfoAssets) {
+            dialogBodies.add(DialogBody.plainMessage(MiniMessage.miniMessage().deserialize(info), 1024));
+        }
+
+        ExtraInfos extraInfos = new ExtraInfos(performer);
+        dialogBodies.add(DialogBody.plainMessage(MiniMessage.miniMessage().deserialize(extraInfos.getExtraInfosForDialog(player))));
+
+        return Dialog.create(builder -> builder.empty()
+                .base(DialogBase.builder(Component.empty()).body(dialogBodies).canCloseWithEscape(true).build()).type(DialogType.notice()));
     }
 
     private void registration() {
-        boolean state = userManager.contains("allowed-since", player);
+        Boolean state = raspiUser.getState();
+        if (state == null) {
+            parseValueToInfo(PlayerInfosValues.REGISTRATION, "<red>Noch nicht Freigeschaltet.");
+            return;
+        }
         String val;
         if (state) {
-            val = "<green>Erfolgte";
-            parseValueToInfo(PlayerInfosValues.REGISTRATION, val);
+            val = "<green>Freigeschaltet";
+        } else {
+            val = String.format("<red>Abgelehnt von %s<br>(%s)", raspiUser.getDenied_by(), raspiUser.getDeny_reason());
         }
+        parseValueToInfo(PlayerInfosValues.REGISTRATION, val);
     }
 
     private void parseGroups() {
-
         StringBuilder builder = new StringBuilder();
         Set<String> groups = new HashSet<>();
         User user = plugin.getHookManager().getLuckPerms().getUserManager().getUser(player.getUniqueId());
@@ -92,11 +129,12 @@ public class PlayerInfo {
     }
 
     private void firstDocumentation() {
-        parseValueToInfo(PlayerInfosValues.FIRST_JOIN, new SimpleDateFormat("dd/MM/yyyy").format(userManager.get("firstDoc", player)));
+        parseValueToInfo(PlayerInfosValues.FIRST_JOIN, new SimpleDateFormat("dd/MM/yyyy").format(raspiUser.getFirst_join()));
     }
 
     private void lastNames() {
-        List<String> names = userManager.getUserNames(player);
+        List<String> names = List.of("<red>Momentan nicht Verfügbar");
+
         StringBuilder builder = new StringBuilder();
         for (String val : names) {
             if (val.equalsIgnoreCase(player.getName())) {
@@ -111,31 +149,22 @@ public class PlayerInfo {
     }
 
     private void playerServerInfos() {
-        if (userManager.contains("muted", player)) {
-            parseValueToInfo(PlayerInfosValues.MUTED, (String) userManager.get("muteReason", player));
+        if (management.isMuted()) {
+            parseValueToInfo(PlayerInfosValues.MUTED, management.getMute_message());
         }
         PlayerProfile profile = Bukkit.createProfile(player.getUniqueId());
-        BanList<PlayerProfile> entry = Bukkit.getBanList(BanList.Type.PROFILE);
-        if (plugin.getModule().getPlayerBanManager().contains(player)) {
-            parseValueToInfo(PlayerInfosValues.BANNED, plugin.getModule().getPlayerBanManager().reason(player));
+        BanList<PlayerProfile> entry = Bukkit.getBanList(BanListType.PROFILE);
+        if (management.isBanned()) {
+            parseValueToInfo(PlayerInfosValues.BANNED, management.getBan_message());
         }
         if (entry.isBanned(profile)) {
             parseValueToInfo(PlayerInfosValues.BANNED, entry.getBanEntry(profile).getReason());
         }
-        if (plugin.getModule().getRequestManager().isBlocked(player)) {
-            parseValueToInfo(PlayerInfosValues.DENYED, "(" + plugin.getModule().getRequestManager().getReason(player).replace("@", " ") + ")");
-        }
-
     }
 
     private void timePlayed() {
         long time = player.getStatistic(Statistic.PLAY_ONE_MINUTE);
-        parseValueToInfo(PlayerInfosValues.TIME_PLAYED, RaspiTimes.Ticks.getTimeUnit(time));
-    }
-
-    private void timePlayedWeekly() {
-        long time = plugin.getModule().getTimeDBManager().get(Bukkit.getOfflinePlayer(player.getUniqueId()));
-        parseValueToInfo(PlayerInfosValues.TIME_PLAYED_WEEKLY, RaspiTimes.MilliSeconds.getTimeUnit(time));
+        parseValueToInfo(PlayerInfosValues.TIME_PLAYED, String.format("%s Stunde(n)", raspiUser.getOnlineHours()));
     }
 
     private void lastDeath() {
@@ -145,10 +174,14 @@ public class PlayerInfo {
     }
 
     public void lastSeen() {
+        if (raspiUser.getLastSeen() == null) {
+            parseValueToInfo(PlayerInfosValues.LAST_SEEN, "<red>E:404");
+            return;
+        }
         if (player.isOnline()) {
-            parseValueToInfo(PlayerInfosValues.BACK_AFTER, RaspiTimes.MilliSeconds.getTimeUnit(userManager.lastSeen(player)));
+            parseValueToInfo(PlayerInfosValues.BACK_AFTER, RaspiTimeUtils.formatDuration(RaspiTimeUtils.getBetween(raspiUser.getLastSeen())));
         } else {
-            parseValueToInfo(PlayerInfosValues.LAST_SEEN, RaspiTimes.MilliSeconds.getTimeUnit(player.getLastSeen()));
+            parseValueToInfo(PlayerInfosValues.LAST_SEEN, RaspiTimeUtils.formatDuration(RaspiTimeUtils.getBetween(raspiUser.getLastSeen())));
         }
     }
 

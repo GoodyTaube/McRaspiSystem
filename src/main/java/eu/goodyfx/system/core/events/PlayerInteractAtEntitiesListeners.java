@@ -3,6 +3,7 @@ package eu.goodyfx.system.core.events;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.lootchest.utils.LootChestLoot;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiSounds;
@@ -111,7 +112,7 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
             Interaction interaction = (Interaction) event.getRightClicked();
             if (interaction.getPersistentDataContainer().has(new NamespacedKey(plugin, "special"))) {
                 event.setCancelled(true);
-                RaspiPlayer player = plugin.getRaspiPlayer(event.getPlayer());
+                RaspiPlayer player = Raspi.players().get(event.getPlayer());
                 if (plugin.getLootChestTimer().isLootChestReady()) {
                     new LootChestLoot(plugin).openLoot(player);
                 } else {

@@ -9,10 +9,8 @@ import java.util.Objects;
 public class RaspiMessages {
 
     private final McRaspiSystem plugin;
-    private final PlayerNameController playerNameController;
 
     public RaspiMessages(RaspiModuleManager moduleManager) {
-        this.playerNameController = moduleManager.getPlayerNameController();
         this.plugin = moduleManager.getPlugin();
     }
 
@@ -35,15 +33,15 @@ public class RaspiMessages {
     public String getJoin(Player player) {
         String raw = get("join");
         raw = prefix(raw);
-        raw = raw.replace("{player}", playerNameController.getNameDisplay(player));
+        raw = raw.replace("{player}", Raspi.players().get(player).getDisplayName());
         return raw;
 
     }
 
-    public String getLeave(Player player) {
+    public String getLeave(String player) {
         String raw = get("leave");
         raw = prefix(raw);
-        raw = raw.replace("{player}", playerNameController.getName(player));
+        raw = raw.replace("{player}", player);
         return raw;
     }
 

@@ -2,6 +2,7 @@ package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.managers.CommandManager;
+import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,7 +30,7 @@ public class CommandListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onCommandSend(PlayerCommandSendEvent event) {
-        RaspiPlayer raspiPlayer = plugin.getRaspiPlayer(event.getPlayer());
+        RaspiPlayer raspiPlayer = Raspi.players().get(event.getPlayer());
         Collection<String> commandCollections = event.getCommands(); //die liste der commands auf dem server
         commandHide(event);
         if (raspiPlayer.hasPermission("group.default") && !raspiPlayer.hasPermission("group.spieler")) { // Checken ob der Spieler schon registriert ist
@@ -40,7 +41,7 @@ public class CommandListeners implements Listener {
 
 
     private void commandHide(PlayerCommandSendEvent event) {
-        RaspiPlayer player = plugin.getRaspiPlayer(event.getPlayer());
+        RaspiPlayer player = Raspi.players().get(event.getPlayer());
         if (player.hasPermission("*")) {
             return;
         }
@@ -63,7 +64,7 @@ public class CommandListeners implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onCommand(PlayerCommandPreprocessEvent commandEvent) {
         String[] command = commandEvent.getMessage().split(" ");
-        RaspiPlayer player = new RaspiPlayer(commandEvent.getPlayer());
+        RaspiPlayer player = Raspi.players().get(commandEvent.getPlayer());
         commandControlUnit(commandEvent);
         checkMuted(commandEvent, command); //Wichtig
 
@@ -71,7 +72,7 @@ public class CommandListeners implements Listener {
 
 
     public void commandControlUnit(PlayerCommandPreprocessEvent event) {
-        RaspiPlayer player = plugin.getRaspiPlayer(event.getPlayer());
+        RaspiPlayer player = Raspi.players().get(event.getPlayer());
         if ((player.hasPermission("*")) || (player.getPlayer().isOp())) {
             return;
         }
@@ -95,7 +96,8 @@ public class CommandListeners implements Listener {
      * Check if PLayer is Muted and Tried to use forbidden Commands.
      */
     private void checkMuted(PlayerCommandPreprocessEvent commandEvent, String[] command) {
-        if ((command[0].equalsIgnoreCase("/msg") || command[0].equalsIgnoreCase("/tell") || command[0].equalsIgnoreCase("/me")) && (plugin.getModule().getUserManager().isMuted(commandEvent.getPlayer()))) {
+        RaspiPlayer raspiPlayer = Raspi.players().get(commandEvent.getPlayer());
+        if ((command[0].equalsIgnoreCase("/msg") || command[0].equalsIgnoreCase("/tell") || command[0].equalsIgnoreCase("/me")) && (raspiPlayer.getManagement().isMuted())) {
             commandEvent.getPlayer().sendRichMessage("<red><hover:show_text:'<red>Sei einfach Leise bitte.<gray> Kuss'>Du bist Stumm. Das geht so nicht..");
             commandEvent.setCancelled(true);
         }

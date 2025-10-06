@@ -33,6 +33,7 @@ public enum RaspiFormatting {
     ITALIC("<italic>", true, "&o", "<i>", "<em>"),
     UNDERLINED("<underlined>", true, "&n", "<u>"),
     OBFUSCATED("<obfuscated>", true, "&k", "<obf>"),
+    NEW_LINE("<br>", true, null, "<newline>"),
     STRIKETHROUGH("<strikethrough>", true, "&m", "<st>"),
     RAINBOW("<rainbow>", true, "&z"),
     RANDOM("<random>", false, "&t"),
@@ -65,12 +66,13 @@ public enum RaspiFormatting {
         return Arrays.stream(RaspiFormatting.values()).filter(value -> !value.isBlocked_chat()).collect(Collectors.toSet());
     }
 
-    public static String setUpHex(String hexVal){
-        return String.format(HEX.getValue(),hexVal);
+    public static String setUpHex(String hexVal) {
+        return String.format(HEX.getValue(), hexVal);
     }
 
     public static String formattingChatMessage(String legacyChatMessage) {
 
+        String backup = legacyChatMessage;
         for (RaspiFormatting blocked : RaspiFormatting.values()) {
             if (blocked.isBlocked_chat()) {
                 if (blocked.getLegacyValue() != null) {
@@ -83,14 +85,11 @@ public enum RaspiFormatting {
             }
 
         }
-
         for (RaspiFormatting formatting : RaspiFormatting.chatAllowed()) {
             if (formatting.getLegacyValue() != null && !formatting.getValue().isEmpty()) {
                 legacyChatMessage = legacyChatMessage.replace(formatting.getLegacyValue(), formatting.getValue());
             }
         }
-
-
         return legacyChatMessage;
     }
 }
