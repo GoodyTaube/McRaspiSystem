@@ -8,23 +8,16 @@ import eu.goodyfx.system.core.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * PlayerStatistic Based
  */
 
 @SuppressWarnings("ConstantConditions")
-public class InfoCommand implements CommandExecutor, TabCompleter {
+public class InfoCommand {
 
     private final RaspiMessages data;
     private final McRaspiSystem plugin;
@@ -32,22 +25,8 @@ public class InfoCommand implements CommandExecutor, TabCompleter {
     public InfoCommand(McRaspiSystem plugin) {
         this.data = plugin.getModule().getRaspiMessages();
         this.plugin = plugin;
-        plugin.setCommand("playerinfo", this, this);
     }
 
-    @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (command.getName().equalsIgnoreCase("playerinfo") && args.length == 1) {
-            List<String> result = new ArrayList<>();
-            Collections.sort(result);
-            return result;
-
-        }
-        return null;
-    }
-
-
-    @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player dummy) {
             RaspiPlayer player = Raspi.players().get(dummy);
@@ -61,10 +40,9 @@ public class InfoCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage("<red>Der Spieler hat noch nicht bei uns gespielt.", true);
                     return true;
                 }
-                RaspiOfflinePlayer target = Raspi.players().getRaspiOfflinePlayer(Bukkit.getOfflinePlayer(args[0]));
-
+                //TODO TARGET INIT ABFRAGE
                 //reload
-                dummy.showDialog(new PlayerInfo(target).buildPlayerInfosDialog(target.getPlayer(), dummy));
+                //dummy.showDialog(new PlayerInfo(target).buildPlayerInfosDialog(target.getPlayer(), dummy));
                 //dummy.sendRichMessage(new PlayerInfo(target).buildPlayerInfos());
 
                 ExtraInfos extraInfos = new ExtraInfos(dummy);

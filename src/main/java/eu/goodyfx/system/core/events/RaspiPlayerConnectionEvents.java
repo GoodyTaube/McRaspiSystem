@@ -1,9 +1,6 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.commands.SitCommandContainer;
-import eu.goodyfx.system.core.commandsOLD.RequestCommand;
-import eu.goodyfx.system.core.commandsOLD.SitCommand;
 import eu.goodyfx.system.core.database.RaspiUser;
 import eu.goodyfx.system.core.managers.LocationManager;
 import eu.goodyfx.system.core.managers.RequestManager;
@@ -12,7 +9,6 @@ import eu.goodyfx.system.core.utils.PlayerTime;
 import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiMessages;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -27,7 +23,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -156,11 +151,10 @@ public class RaspiPlayerConnectionEvents implements Listener {
                 }
                 String message = String.format("<white>[<red>%s<white>] [<green>%s<white>]", String.format("<click:run_command:'/request kick %s'>Kicken<reset>", player.getName()), String.format("<click:run_command:'/request accept %s'>Erlauben<reset>", player.getName()));
                 String banMessage = String.format("// <white>[<gold><click:run_command:'/tempban %s RSP:6723 Überdenk Dein Leben --MOD'>Ban<reset><white>]", player.getName());
-                if (RequestCommand.freeToBan(player.getUniqueId())) {
-                    team.sendMessage(message + banMessage, true);
-                } else {
-                    team.sendMessage(message, true);
-                }
+                //TODO SEND BAN BUTTON
+
+                team.sendMessage(message, true);
+
             });
         }
     }

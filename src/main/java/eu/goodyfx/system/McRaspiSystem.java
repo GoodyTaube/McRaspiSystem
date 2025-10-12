@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Getter
 public final class McRaspiSystem extends JavaPlugin {
@@ -56,6 +58,8 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable tabListTask;
     private final List<BukkitRunnable> tasks = new ArrayList<>();
     private LootChestTimer lootChestTimer;
+
+    private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(4);
 
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
@@ -85,6 +89,9 @@ public final class McRaspiSystem extends JavaPlugin {
             commands.registrar().register(RequestCommandContainer.command());
             commands.registrar().register(new RaspiGiveCommandContainer().command());
             commands.registrar().register(ChatCommandContainer.runCommand());
+            commands.registrar().register(BackCommandContainer.backCommand());
+            commands.registrar().register(PlayerInfoCommandContainer.command());
+            commands.registrar().register(MuteCommandContainer.muteCommand());
         });
 
     }
@@ -133,6 +140,7 @@ public final class McRaspiSystem extends JavaPlugin {
             getConfig().set("Utilities.wartung", true);
             Raspi.players().checkOldContents();
         } else {
+            getServer().setWhitelist(false);
             getDebugger().info("Keine Dateien zur Migration gefunden // SKIP TASK");
         }
     }

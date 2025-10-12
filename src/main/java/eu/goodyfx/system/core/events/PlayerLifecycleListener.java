@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.SimpleDateFormat;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class PlayerLifecycleListener implements Listener {
 
@@ -101,10 +102,11 @@ public class PlayerLifecycleListener implements Listener {
         }
         //Pre Load PlayerData from DB
         plugin.getDebugger().info(String.format("[Lifecycle] loading %s async to  RaspiPLayers!", event.getName()));
-        Raspi.players().loadAsync(uuid);
 
-        //Check if player is Banned and Handle Properly
-        banCheck(uuid, event);
+        Raspi.players().loadAsyncFuture(uuid, false).thenRun(() -> {
+            Raspi.debugger().info("[Lifecycle] Async preload done for " + event.getName());
+            banCheck(uuid, event);
+        });
     }
 
     private void banCheck(UUID uuid, AsyncPlayerPreLoginEvent event) {

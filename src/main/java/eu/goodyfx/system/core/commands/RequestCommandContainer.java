@@ -6,9 +6,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.database.RaspiUser;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiOfflinePlayer;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -18,10 +18,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RequestCommandContainer {
 
@@ -112,19 +117,24 @@ public class RequestCommandContainer {
         RaspiPlayer player = Raspi.players().get(dummy);
         OfflinePlayer target = Bukkit.getOfflinePlayer(context.getArgument("player", String.class));
         String reason = context.getArgument("reason", String.class);
-        String allowed = "<gray>Du hast %s <green>Erfolgreich <gray>abgelehnt.";
+        AtomicReference<String> allowed = new AtomicReference<>("<gray>Du hast %s <green>Erfolgreich <gray>abgelehnt.");
         if (target.isOnline()) {
             RaspiPlayer targetPlayer = Raspi.players().get(target.getUniqueId());
             playerDeny(reason, dummy, targetPlayer.getUser());
 
-            allowed = String.format(allowed, targetPlayer.getColorName());
+            allowed.set(String.format(allowed.get(), targetPlayer.getColorName()));
 
         } else {
-            RaspiOfflinePlayer offlinePlayer = Raspi.players().getRaspiOfflinePlayer(target);
-            playerDeny(reason, dummy, offlinePlayer.getRaspiUser());
-            allowed = String.format(allowed, offlinePlayer.getRaspiUser().getColor() + offlinePlayer.getPlayer().getName());
+            Raspi.players().getRaspiOfflinePlayer(target).thenAcceptAsync(raspiOfflinePlayer -> {
+                if (raspiOfflinePlayer == null) {
+                    player.sendMessage("Der Spieler hat noch nicht gespielt.", true);
+                    return;
+                }
+                playerDeny(reason, dummy, raspiOfflinePlayer.getRaspiUser());
+                allowed.set(String.format(allowed.get(), raspiOfflinePlayer.getRaspiUser().getColor() + raspiOfflinePlayer.getPlayer().getName()));
+            }, runnable -> Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(McRaspiSystem.class), runnable));
         }
-        player.sendMessage(allowed, true);
+        player.sendMessage(allowed.get(), true);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -136,18 +146,22 @@ public class RequestCommandContainer {
         RaspiPlayer player = Raspi.players().get(dummy);
         OfflinePlayer target = Bukkit.getOfflinePlayer(context.getArgument("player", String.class));
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        String allowed = "<gray>Du hast %s <green>Erfolgreich <gray>freigeschaltet.";
+        AtomicReference<String> allowedA = new AtomicReference<>("<gray>Du hast %s <green>Erfolgreich <gray>Freigeschaltet.");
         if (target.isOnline()) {
             RaspiPlayer targetPlayer = Raspi.players().get(target.getUniqueId());
             playerAllow(simpleDateFormat, player.getPlayer(), targetPlayer.getUser());
-            allowed = String.format(allowed, targetPlayer.getColorName());
-
+            allowedA.set(String.format(allowedA.get(), targetPlayer.getColorName()));
         } else {
-            RaspiOfflinePlayer offlinePlayer = Raspi.players().getRaspiOfflinePlayer(target);
-            playerAllow(simpleDateFormat, player.getPlayer(), offlinePlayer.getRaspiUser());
-            allowed = String.format(allowed, offlinePlayer.getRaspiUser().getColor() + offlinePlayer.getPlayer().getName());
+            Raspi.players().getRaspiOfflinePlayer(target).thenAcceptAsync(raspiOfflinePlayer -> {
+                if (raspiOfflinePlayer == null) {
+                    player.sendMessage("Der Spieler hat noch nicht gespielt.", true);
+                    return;
+                }
+                playerAllow(simpleDateFormat, player.getPlayer(), raspiOfflinePlayer.getRaspiUser());
+                allowedA.set(String.format(allowedA.get(), raspiOfflinePlayer.getRaspiUser().getColor() + raspiOfflinePlayer.getPlayer().getName()));
+            }, runnable -> Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(McRaspiSystem.class), runnable));
         }
-        player.sendMessage(allowed, true);
+        player.sendMessage(allowedA.get(), true);
         return Command.SINGLE_SUCCESS;
     }
 

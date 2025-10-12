@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -27,6 +25,23 @@ public class DatabaseManager {
     public HikariDataSource dataSource;
     public FallBackManager fallBackManager = new FallBackManager();
 
+    private final List<String> allUsernamesCache = new ArrayList<>();
+
+
+    public List<String> getAllUsernamesCache() {
+        if(dataSource != null && allUsernamesCache.isEmpty()){
+            try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT username FROM user_data")){
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()){
+                    allUsernamesCache.add(resultSet.getString("username"));
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().log(Level.SEVERE, "[DB_CALL] playerUsernames", e);
+            }
+        }
+        return allUsernamesCache;
+    }
+
     private void setupDataSource() {
         String host = config.getString("raspi.database.host");
         String username = config.getString("raspi.database.username");
@@ -36,7 +51,7 @@ public class DatabaseManager {
 
         HikariConfig hikariConfig = new HikariConfig();
 
-        hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false&serverTimezone=UTC", host, port, database));
+        hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", host, port, database));
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
         hikariConfig.setMaximumPoolSize(20);

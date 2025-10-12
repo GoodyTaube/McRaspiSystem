@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -26,6 +27,7 @@ public class RaspiPlayers {
     private final ConcurrentHashMap<UUID, RaspiUsernames> userNameCache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, RaspiOfflinePlayer> cacheBundleOffline = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Location> afkContainer = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Boolean> userPlayedBefore = new ConcurrentHashMap<>();
 
     public List<RaspiPlayer> getRaspiPlayers() {
         return Bukkit.getOnlinePlayers().stream().map(this::get).toList();
@@ -55,24 +57,36 @@ public class RaspiPlayers {
         return userCache.get(uuid);
     }
 
-    public void loadAsync(UUID uuid) { //Lag prävention
+    public CompletableFuture<Void> loadAsyncFuture(UUID uuid, boolean offline) {
+        return CompletableFuture.runAsync(() -> loadAsync(uuid, offline), plugin.getAsyncExecutor());
+    }
+
+
+    private void loadAsync(UUID uuid, boolean offline) { //Lag prävention
         RaspiUser raspiUser = new RaspiUser(uuid);
         RaspiManagement management = new RaspiManagement(uuid);
         UserSettings userSettings = new UserSettings(uuid);
         RaspiUsernames raspiUsernames = new RaspiUsernames(uuid);
+        boolean playedBefore = false;
         if (plugin.getDatabaseManager().userExistInTable(uuid, DatabaseTables.USER_DATA)) {
             plugin.getDebugger().info(String.format("[RP.loadAsync] Fetching Dataset for %s", uuid));
             raspiUser.fetch();
             management.fetchData();
             userSettings.fetch();
             raspiUsernames.update();
+            playedBefore = true;
         } else {
-            plugin.getDebugger().info(String.format("[RP.loadAsync] Creating NEW Dataset for %s", uuid));
+            if (offline) {
+                plugin.getDebugger().info("[RP.loadAsync#OFFLINE] Offline User! No Data Creation required.");
+                return;
+            }
+            plugin.getDebugger().info(String.format("[RP.loadAsync#ONLINE] Creating NEW Dataset for %s", uuid));
             management.writeUser();
             raspiUser.write();
             userSettings.write();
             raspiUsernames.update();
         }
+        userPlayedBefore.put(uuid, playedBefore);
         userCache.put(uuid, raspiUser);
         managementCache.put(uuid, management);
         settingsCache.put(uuid, userSettings);
@@ -95,6 +109,10 @@ public class RaspiPlayers {
     }
 
     public void initPlayer(OfflinePlayer player) {
+        if (!userPlayedBefore.containsKey(player.getUniqueId())) {
+            loadAsync(player.getUniqueId(), true);
+            return;
+        }
         RaspiOfflinePlayer raspiOfflinePlayer = new RaspiOfflinePlayer(player);
         RaspiUser user = getRaspiUser(player.getUniqueId());
         RaspiManagement management = getManagement(player.getUniqueId());
@@ -105,14 +123,17 @@ public class RaspiPlayers {
     }
 
 
-    public RaspiOfflinePlayer getRaspiOfflinePlayer(OfflinePlayer offlinePlayer) {
+    public CompletableFuture<RaspiOfflinePlayer> getRaspiOfflinePlayer(OfflinePlayer offlinePlayer) {
         UUID uuid = offlinePlayer.getUniqueId();
-        if (!cacheBundleOffline.containsKey(uuid)) {
-            initPlayer(offlinePlayer);
+        if (cacheBundleOffline.containsKey(uuid)) {
+            return CompletableFuture.completedFuture(cacheBundleOffline.get(uuid));
         }
-        return cacheBundleOffline.get(uuid);
-    }
 
+        return loadAsyncFuture(uuid, true).thenApplyAsync(v -> {
+            initPlayer(offlinePlayer);
+            return cacheBundleOffline.get(uuid);
+        }, runnable -> Bukkit.getScheduler().runTask(plugin, runnable));
+    }
 
     public RaspiPlayer getOrCreate(Player player) {
         if (!cacheBundle.containsKey(player.getUniqueId())) {

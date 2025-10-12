@@ -35,7 +35,6 @@ public class SystemStartUp {
         new AdminCommand();
         new AFKCommand(plugin);
         new ChatColorCommand(plugin);
-        new InfoCommand(plugin);
         new MessageCommand(plugin);
         new PrefixCommand();
         //new RequestCommand(plugin);
@@ -45,8 +44,6 @@ public class SystemStartUp {
         new UnBanCommand(plugin);
         new WarteschlangeCommand(plugin);
         new RandomTeleportCommand(plugin);
-        new BackCommand(plugin);
-        new MuteCommand();
         new InHeadCommand();
     }
 
@@ -67,7 +64,6 @@ public class SystemStartUp {
         new CompassEvents();
         new InventoryListeners();
     }
-
 
 
 }
