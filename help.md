@@ -67,18 +67,3 @@ Eine Übersicht aller verfügbaren Befehle mit Beschreibung und Parametern.
 | *(siehe auch `/admin lootChest`)* | | |
 
 ---
-
-## 🧩 **Sonstige / Utility**
-
-| Command | Parameter / Subcommand | Beschreibung |
-|----------|------------------------|---------------|
-| `/admin help` | – | Zeigt eine Liste der Admin-Befehle |
-| `/reloadConfig` | – | Lädt Konfigurationsdateien neu |
-| `/filecombine` | – | Kombiniert alte und neue YAMLs |
-
----
-
-## 🧱 Struktur-Tipp
-
-Falls du die Datei im Plugin-Repo nutzt, könntest du sie in Abschnitte unterteilen:
-
