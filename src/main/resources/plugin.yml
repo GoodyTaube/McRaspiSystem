@@ -1,0 +1,54 @@
+name: McRaspiSystem
+version: '${project.version}'
+main: eu.goodyfx.system.McRaspiSystem
+api-version: '1.21'
+depend:
+  - LuckPerms
+  - ProtocolLib
+commands:
+  warteschlange:
+    description: Main Plugin Command by GoodyFX
+  prefix:
+    description: Set Chat Prefix
+  afk:
+    description: AFK Command
+    usage: "Benutze: /afk"
+  settings:
+    description: Player Settings
+    usage: "Benutze: /settings <chat>"
+  tempban:
+    description: Temporary Ban a player
+    permission: system.moderator
+    usage: "Bitte nutze: /tempban <player> <timeVal> <[Grund]>"
+  unban:
+    description: Unban Player
+    permission: group.op
+    usage: "Bitte nutze: /unban <player>"
+  chatColor:
+    aliases: cc
+  admin:
+    usage: Admin commands
+  message:
+    aliases:
+      - msg
+      - tell
+    description: "Replace for MSG Command."
+    usage: "Bitte nutze: /msg <player> <msg>"
+  loot:
+    description: Raspi Item Command
+  reise:
+    description: Main Command from RB System
+  reisePort:
+    description: Teleport to RB Port
+  rbsuche:
+    description: Search and Mark RB Port
+  randomTP:
+    description: Teleportiert einen Spieler einmal am Tag zufällig.
+    usage: /randomTP
+  vote:
+    description: Kommando um den Vote link aufzurufen.
+    usage: /vote
+  trader:
+    description: handles Raspi Trader
+  inHead:
+    description: "ADMIN STAFF"

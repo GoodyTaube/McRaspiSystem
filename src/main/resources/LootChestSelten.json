@@ -1,0 +1,118 @@
+{
+  "selten": [
+    {
+      "items": [
+        {
+          "itemDisplay": "<name>",
+          "type": "diamond_axe",
+          "modelID": "none",
+          "lore": [
+            {
+              "text1": "",
+              "text2": "",
+              "text3": ""
+            }
+          ]
+        },
+        {
+          "itemDisplay": "<name>",
+          "type": "diamond_axe",
+          "modelID": "none",
+          "lore": ""
+        }
+      ]
+    }
+  ],
+  "nichtSoSelten": [
+    {
+      "items": [
+        {
+          "itemDisplay": "<name>",
+          "type": "stick",
+          "modelID": "none",
+          "lore": [
+            {
+              "text1": "Some Example Text"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+
+[
+  "",
+  {
+    "text": "Voting_Coin",
+    "color": "red",
+    "underlined": true
+  }
+]',lore=['[
+  ""
+]','[
+  "",
+  {
+    "text": "Danke
+    fürs
+    Voten!
+    ","
+    italic
+    ":false,"
+    underlined
+    ":true}]','["
+    "]','["
+    ",{"
+    text
+    ":"
+    Geh
+    zur
+    Spielhalle
+    ","
+    italic
+    ":false}]','["
+    ",{"
+    text
+    ":"
+    und
+    tausche
+    es
+    gegen
+    ","
+    italic
+    ":false}]','["
+    ",{"
+    text
+    ":"
+    eine
+    Überraschung
+    ein,
+    ","
+    italic
+    ":false}]','["
+    ",{"
+    text
+    ":"
+    oder
+    nutze
+    es
+    als
+    offizielles
+    ","
+    italic
+    ":false}]','["
+    ",{"
+    text
+    ":"
+    Zahlungsmittel.
+    ","
+    italic
+    ":false}]','["
+    ",{"
+    text
+    ":"
+    ","
+    italic
+    ":false}]']]
