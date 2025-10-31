@@ -68,8 +68,6 @@ public final class McRaspiSystem extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
-
         init();
         dataMigration();
     }
@@ -129,7 +127,6 @@ public final class McRaspiSystem extends JavaPlugin {
         tasks.add(playTimeTask);
         this.tabListTask = new TablistAnimator();
         tasks.add(tabListTask);
-
     }
 
     private void dataMigration() {

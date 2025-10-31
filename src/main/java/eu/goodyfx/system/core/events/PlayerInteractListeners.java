@@ -1,7 +1,6 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.commandsOLD.SitCommand;
 import eu.goodyfx.system.core.commands.SitCommandContainer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -106,7 +105,7 @@ public class PlayerInteractListeners implements Listener {
         Player player = interactEvent.getPlayer();
         Action action = interactEvent.getAction();
 
-        if (action.equals(Action.RIGHT_CLICK_BLOCK) && interactEvent.getHand() == EquipmentSlot.HAND && interactEvent.getPlayer().getInventory().getItem(EquipmentSlot.HAND).getType().equals(Material.AIR) && !SitCommand.getSits().containsKey(player.getUniqueId())) {
+        if (action.equals(Action.RIGHT_CLICK_BLOCK) && interactEvent.getHand() == EquipmentSlot.HAND && interactEvent.getPlayer().getInventory().getItem(EquipmentSlot.HAND).getType().equals(Material.AIR) && !SitCommandContainer.sitContainer.containsKey(player.getUniqueId())) {
             if (interactEvent.getClickedBlock().getLocation().getY() > player.getLocation().getY()) {
                 return;
             }

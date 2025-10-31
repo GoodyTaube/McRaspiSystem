@@ -1,5 +1,6 @@
 package eu.goodyfx.system.lootchest.utils;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
 public enum LootItems {
     SPONGE(Material.SPONGE, "<green>Super Sponge", 1, null, "<aqua>Absorbation: <gray>x100", "<red>Test"), SWIFT(Material.ENCHANTED_BOOK, "Schnelligkeit 3", 1, Enchantment.SOUL_SPEED, "<gray>Schnelligkeit III"), FLY(Material.GOLDEN_APPLE, "<green>Flug Power", Powers.FLIGHT.getId(), null, "<gray>Aktiviere um zu Fliegen.", "<aqua>Zeit: <gray>" + Powers.FLIGHT.getTime() + " min"), NIGHT(Material.GOLDEN_APPLE, "<green>SAW Power", Powers.NIGHT_VISION.getId(), null, "<gray>Aktiviere um in der Nacht zu Sehen.", "<aqua>Zeit: <gray>" + Powers.NIGHT_VISION.getTime() + " min"),
 
@@ -16,10 +18,11 @@ public enum LootItems {
 
     Adult_Stick(Material.STICK, "<green>Adult Stick", 2, null, null),
 
+    DAY_NIGHT(Material.CLOCK, "", 2, null, null),
+
     Baby_Stick(Material.STICK, "<green>Baby Stick", 3, null, null),
 
     CREEPER_CHARGE(Material.STICK, "<green>Creeper Charge", 4, null, "Gibt einen Creeper [Charge]", "<red>!Noch in Arbeit!"),
-
 
     TELEPORTER(Material.POLISHED_BLACKSTONE_BUTTON, "<green>Teleporter", 1, null, "Setze deinen eigenen Teleport"),
 
@@ -46,11 +49,6 @@ public enum LootItems {
     public Component getLabel() {
         return MiniMessage.miniMessage().deserialize(this.label);
     }
-
-    public Enchantment getEnchantment() {
-        return this.enchantment;
-    }
-
     public List<Component> getLore() {
 
         if (this.lore == null) {
@@ -59,13 +57,4 @@ public enum LootItems {
 
         return this.lore.stream().map(val -> MiniMessage.miniMessage().deserialize(val)).collect(Collectors.toList());
     }
-
-    public Material getMaterial() {
-        return this.material;
-    }
-
-    public int getModelID() {
-        return this.modelID;
-    }
-
 }

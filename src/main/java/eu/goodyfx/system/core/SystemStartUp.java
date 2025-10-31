@@ -34,7 +34,6 @@ public class SystemStartUp {
         //Main System
         new AdminCommand();
         new AFKCommand(plugin);
-        new ChatColorCommand(plugin);
         new MessageCommand(plugin);
         new PrefixCommand();
         //new RequestCommand(plugin);

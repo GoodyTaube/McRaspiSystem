@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.Objects;
+import java.util.UUID;
 
 public class TempBanCommand implements CommandExecutor {
 
@@ -38,6 +39,7 @@ public class TempBanCommand implements CommandExecutor {
         if (sender instanceof Player dummy) {
             RaspiPlayer player = Raspi.players().get(dummy);
             if (args.length > 2) {
+
                 Raspi.players().getRaspiOfflinePlayer(Bukkit.getOfflinePlayer(args[0])).thenAcceptAsync(target -> {
                     if (target == null) {
                         player.sendMessage("<red>Der Spieler existiert nicht :X", true);

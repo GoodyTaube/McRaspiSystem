@@ -4,6 +4,7 @@ import eu.goodyfx.system.McRaspiSystem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,23 +13,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class TablistAnimator extends BukkitRunnable {
 
 
-    private final String tTA = "McRaspi.com | Vanilla Minecraft Server";
+    private final String tTA = "McRaspi.com ";
 
     private int index;
 
     public TablistAnimator() {
-        runTaskTimerAsynchronously(JavaPlugin.getPlugin(McRaspiSystem.class), 0, 2L);
+        runTaskTimerAsynchronously(JavaPlugin.getPlugin(McRaspiSystem.class), 0, 7L);
     }
 
     @Override
     public void run() {
         Component animated = getAnimatedTitle();
         Component header = Component.empty()
-                .append(Component.newline())
                 .append(animated)
-                .append(Component.newline())
-                .append(Component.text("Wartende Spieler: 0 / ~").color(NamedTextColor.GRAY))
-                .append(Component.newline());
+                .append(Component.text("// Wartende Spieler: 0 / ~").color(NamedTextColor.GRAY));
         sendPlayer(header);
         index++;
         if (index >= tTA.length()) {
