@@ -2,7 +2,6 @@ package eu.goodyfx.system.raspievents;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.RaspiSubSystem;
-import eu.goodyfx.system.raspievents.craftings.CanabolaCraftging;
 import eu.goodyfx.system.raspievents.events.CraftingEventListeners;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -34,6 +33,9 @@ public class RaspiEventsSystem implements RaspiSubSystem {
     public void onEnabled() {
         if (enabled) {
             init();
+            //new CanabolaCraftging(plugin);
+
+
         }
     }
 

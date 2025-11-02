@@ -54,7 +54,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable restoreInv;
     private BukkitRunnable dailyCommand;
     private BukkitRunnable inHeadTask;
-    private BukkitRunnable playTimeTask;
+    //private BukkitRunnable playTimeTask;
     private BukkitRunnable tabListTask;
     private final List<BukkitRunnable> tasks = new ArrayList<>();
     private LootChestTimer lootChestTimer;
@@ -123,8 +123,8 @@ public final class McRaspiSystem extends JavaPlugin {
         tasks.add(dailyCommand);
         this.inHeadTask = new InHeadTask();
         tasks.add(inHeadTask);
-        this.playTimeTask = new PlayTimeTask();
-        tasks.add(playTimeTask);
+        //this.playTimeTask = new PlayTimeTask();
+        //tasks.add(playTimeTask);
         this.tabListTask = new TablistAnimator();
         tasks.add(tabListTask);
     }

@@ -21,7 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.SimpleDateFormat;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 public class PlayerLifecycleListener implements Listener {
 
@@ -103,10 +103,14 @@ public class PlayerLifecycleListener implements Listener {
         //Pre Load PlayerData from DB
         plugin.getDebugger().info(String.format("[Lifecycle] loading %s async to  RaspiPLayers!", event.getName()));
 
-        Raspi.players().loadAsyncFuture(uuid, false).thenRun(() -> {
+        try {
+            Raspi.players().loadAsyncFuture(uuid, false).join();
             Raspi.debugger().info("[Lifecycle] Async preload done for " + event.getName());
             banCheck(uuid, event);
-        });
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.SEVERE, "Error while Connecting " + event.getName(), e);
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize("<red><b>Fehler beim Laden deiner Daten.<br><gray><o>Versuche es erneut oder wende Dich ans Team."));
+        }
     }
 
     private void banCheck(UUID uuid, AsyncPlayerPreLoginEvent event) {

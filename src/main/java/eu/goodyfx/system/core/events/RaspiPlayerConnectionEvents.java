@@ -5,10 +5,7 @@ import eu.goodyfx.system.core.database.RaspiUser;
 import eu.goodyfx.system.core.managers.LocationManager;
 import eu.goodyfx.system.core.managers.RequestManager;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
-import eu.goodyfx.system.core.utils.PlayerTime;
-import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiMessages;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
+import eu.goodyfx.system.core.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -67,6 +64,7 @@ public class RaspiPlayerConnectionEvents implements Listener {
 
         raspiRequest(raspiPlayer);
         playerJoinEvent.joinMessage(null);
+        Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(RaspiFormatting.formattingChatMessage(plugin.getModule().getJoinMessageManager().get(player))));
 
         if ((!player.isPermissionSet("system.bypass") && (raspiPlayer.hasTimePlayed(100)))) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + player.getName() + " permission set system.bypass");

@@ -152,17 +152,17 @@ public class ExtraInfos {
 
 
     public String getExtraInfosForDialog(OfflinePlayer target) {
-        String mod = modCheckForDialog(target); //Check if Asked Player is Moderator
+        //Check if Asked Player is Moderator
+        String message = modCheckForDialog(target) + "<br><br>";
         if (hasEntry(target, false)) {
             StringBuilder builder = new StringBuilder("<green>Private Infos:<br>");
             for (String key : Objects.requireNonNull(configuration.getConfigurationSection(pathContent(target.getUniqueId().toString()))).getKeys(false)) {
                 builder.append("<gray>-").append(" ").append(get(target, key, false)).append(" ").append(getRemoveDisplay(target, key, false)).append("<br>");
             }
             builder.setLength(builder.length() - 4);
-            return mod + "<br><br>" + builder + "<br><br>" + getAddDisplay(target);
+            return message + builder + "<br><br>" + getAddDisplay(target);
         } else {
-
-            return getAddDisplay(target);
+            return message + getAddDisplay(target);
         }
     }
 

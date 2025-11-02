@@ -118,12 +118,16 @@ public class RequestCommandContainer {
         OfflinePlayer target = Bukkit.getOfflinePlayer(context.getArgument("player", String.class));
         String reason = context.getArgument("reason", String.class);
         AtomicReference<String> allowed = new AtomicReference<>("<gray>Du hast %s <green>Erfolgreich <gray>abgelehnt.");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format("lp user %s permission set group.default", target.getName()));
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format("lp user %s permission unset group.spieler", target.getName()));
+
+
         if (target.isOnline()) {
             RaspiPlayer targetPlayer = Raspi.players().get(target.getUniqueId());
             playerDeny(reason, dummy, targetPlayer.getUser());
 
             allowed.set(String.format(allowed.get(), targetPlayer.getColorName()));
-
+            player.sendMessage(allowed.get(), true);
         } else {
             Raspi.players().getRaspiOfflinePlayer(target).thenAcceptAsync(raspiOfflinePlayer -> {
                 if (raspiOfflinePlayer == null) {
@@ -132,9 +136,10 @@ public class RequestCommandContainer {
                 }
                 playerDeny(reason, dummy, raspiOfflinePlayer.getRaspiUser());
                 allowed.set(String.format(allowed.get(), raspiOfflinePlayer.getRaspiUser().getColor() + raspiOfflinePlayer.getPlayer().getName()));
+                player.sendMessage(allowed.get(), true);
+
             }, runnable -> Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(McRaspiSystem.class), runnable));
         }
-        player.sendMessage(allowed.get(), true);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -147,10 +152,13 @@ public class RequestCommandContainer {
         OfflinePlayer target = Bukkit.getOfflinePlayer(context.getArgument("player", String.class));
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         AtomicReference<String> allowedA = new AtomicReference<>("<gray>Du hast %s <green>Erfolgreich <gray>Freigeschaltet.");
+        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), String.format("lp user %s permission set group.spieler", target.getName()));
+        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), String.format("lp user %s permission unset group.default", target.getName()));
         if (target.isOnline()) {
             RaspiPlayer targetPlayer = Raspi.players().get(target.getUniqueId());
             playerAllow(simpleDateFormat, player.getPlayer(), targetPlayer.getUser());
-            allowedA.set(String.format(allowedA.get(), targetPlayer.getColorName()));
+            allowedA.lazySet(String.format(allowedA.get(), targetPlayer.getColorName()));
+            player.sendMessage(allowedA.get(), true);
         } else {
             Raspi.players().getRaspiOfflinePlayer(target).thenAcceptAsync(raspiOfflinePlayer -> {
                 if (raspiOfflinePlayer == null) {
@@ -159,9 +167,9 @@ public class RequestCommandContainer {
                 }
                 playerAllow(simpleDateFormat, player.getPlayer(), raspiOfflinePlayer.getRaspiUser());
                 allowedA.set(String.format(allowedA.get(), raspiOfflinePlayer.getRaspiUser().getColor() + raspiOfflinePlayer.getPlayer().getName()));
+                player.sendMessage(allowedA.get(), true);
             }, runnable -> Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(McRaspiSystem.class), runnable));
         }
-        player.sendMessage(allowedA.get(), true);
         return Command.SINGLE_SUCCESS;
     }
 

@@ -58,7 +58,7 @@ public class MojangPlayerWrapper {
 
             return json.substring(quoteStart + 1, quoteEnd);
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, String.format("Failed to get name from %s", uuid), e);
+            plugin.getDebugger().log(Level.SEVERE, String.format("Failed to get name from %s", uuid), e);
             return null;
         }
     }

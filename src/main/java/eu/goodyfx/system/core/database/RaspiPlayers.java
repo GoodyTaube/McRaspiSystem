@@ -162,15 +162,18 @@ public class RaspiPlayers {
         try {
             if (userCache.containsKey(uuid)) {
                 userCache.get(uuid).updateUserData();
+                plugin.getDebugger().info(String.format("[RP.saveAndRemove] removed %s from userCache", uuid));
             } else {
                 plugin.getDebugger().info(String.format("[RP.saveAndRemove] no RaspiUser found for %s.", uuid));
             }
             if (managementCache.containsKey(uuid)) {
                 managementCache.get(uuid).updateUserData();
+                plugin.getDebugger().info(String.format("[RP.saveAndRemove] removed %s from managementCache", uuid));
             } else {
                 plugin.getDebugger().info(String.format("[RP.saveAndRemove] no RaspiManagement found for %s. ", uuid));
             }
             if (settingsCache.containsKey(uuid)) {
+                plugin.getDebugger().info(String.format("[RP.saveAndRemove] removed %s from settingsCache", uuid));
                 settingsCache.get(uuid).update();
             } else {
                 plugin.getDebugger().info(String.format("[RP.saveAndRemove] no RaspiSetting found for %s.", uuid));
@@ -189,6 +192,8 @@ public class RaspiPlayers {
         Bukkit.getScheduler().runTaskAsynchronously(JavaPlugin.getPlugin(McRaspiSystem.class), () -> {
             FallBackManager fallBackManager = JavaPlugin.getPlugin(McRaspiSystem.class).getDatabaseManager().getFallBackManager();
             for (String uuidString : Objects.requireNonNull(fallBackManager.getConfig().getConfigurationSection("User")).getKeys(false)) {
+
+                loadAsync(UUID.fromString(uuidString), false);
                 UUID uuid = UUID.fromString(uuidString);
                 String username = MojangPlayerWrapper.getName(uuid);
                 if (username == null) {
@@ -197,11 +202,18 @@ public class RaspiPlayers {
                 }
                 fallBackManager.getConfig().set("User." + uuidString + ".userName", null);
 
-                fallBackManager.perform(getRaspiUser(uuid));
-                fallBackManager.perform(getManagement(uuid));
-                fallBackManager.perform(getUserSettings(uuid));
-                fallBackManager.perform(getUserNameCache(uuid));
-
+                RaspiUser user = getRaspiUser(uuid);
+                if (user == null) {
+                    getRaspiOfflinePlayer(Bukkit.getOfflinePlayer(uuid)).thenAcceptAsync(raspiOfflinePlayer -> {
+                        if (raspiOfflinePlayer == null) {
+                            return;
+                        }
+                        fallBackManager.perform(raspiOfflinePlayer.getRaspiUser());
+                        fallBackManager.perform(raspiOfflinePlayer.getManagement());
+                        fallBackManager.perform(raspiOfflinePlayer.getUserSettings());
+                        fallBackManager.perform(getUserNameCache(uuid));
+                    });
+                }
                 if (Objects.requireNonNull(fallBackManager.getConfig().getConfigurationSection("User." + uuidString)).getKeys(false).isEmpty()) {
                     fallBackManager.getConfig().set("User." + uuidString, null);
                     fallBackManager.save();
@@ -220,6 +232,7 @@ public class RaspiPlayers {
         Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(McRaspiSystem.class), () -> Bukkit.getServer().setWhitelist(false));
         Raspi.debugger().info(String.format("CleanUp User Migration Done! Time(%s)", RaspiTimeUtils.formatDuration(RaspiTimeUtils.getBetween(start))));
         plugin.getConfig().set("Utilities.wartung", false);
+        Bukkit.getServer().shutdown();
     }
 
     private void cleanUp() {
