@@ -1,7 +1,6 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.lootchest.events.LootConsumeEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
@@ -15,7 +14,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -80,55 +78,5 @@ public class RaspiItemsListener implements Listener {
     }
 
 
-    @EventHandler
-    public void enDamage(EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Player player) {
-            ItemStack stack = player.getInventory().getItemInMainHand();
-            if (stack.getType().equals(Material.STICK) && stack.hasItemMeta()) {
-                if (stack.getItemMeta().hasCustomModelData()) {
-                    if (stack.getItemMeta().getCustomModelData() == 1) {
-                        ItemMeta meta = stack.getItemMeta();
-                        PersistentDataContainer container = meta.getPersistentDataContainer();
-                        if (plugin.getConfig().contains("items.knock.uses")) {
-                            if (!container.has(plugin.getRaspiItemKey(), PersistentDataType.INTEGER)) {
-                                container.set(plugin.getRaspiItemKey(), PersistentDataType.INTEGER, plugin.getConfig().getInt("items.knock.uses"));
-                            }
-                            Integer current = container.get(plugin.getRaspiItemKey(), PersistentDataType.INTEGER);
-                            assert current != null;
-                            container.set(plugin.getRaspiItemKey(), PersistentDataType.INTEGER, (current - 1));
-
-                            current = current - 1;
-                            List<Component> lore = new ArrayList<>();
-                            lore.add(MiniMessage.miniMessage().deserialize("Benutzungen: " + current));
-                            meta.lore(lore);
-                            stack.setItemMeta(meta);
-
-                            if (current == 0) {
-                                stack.setAmount(stack.getAmount() - 1);
-                                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1F, 1F);
-
-                            }
-
-                            if (plugin.getConfig().contains("items.knock.power")) {
-                                event.getEntity().teleport(event.getEntity().getLocation().add(0, 1, 0));
-                                event.getEntity().setVelocity(player.getEyeLocation().getDirection().multiply(plugin.getConfig().getInt("items.knock.power")));
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-    }
-
-
-    @EventHandler
-    public void onJoin(PlayerJoinEvent joinEvent) {
-        if (LootConsumeEvents.getTimeStampMap().containsKey(joinEvent.getPlayer().getUniqueId())) {
-            Player player = joinEvent.getPlayer();
-            player.setAllowFlight(true);
-            player.setFlying(true);
-        }
-    }
 
 }

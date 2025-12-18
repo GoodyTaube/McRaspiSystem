@@ -26,10 +26,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Level;
 
 public class RaspiPlayerConnectionEvents implements Listener {
@@ -159,8 +157,20 @@ public class RaspiPlayerConnectionEvents implements Listener {
 
     private void handleNewbie(RaspiPlayer player) {
         if (player.getUser().getState() == null) {
-            player.sendDebugMessage("State is null.");
+            if (player.hasPermission("group.spieler")) {
+                //Spieler bereits freigeschaltet interne Verarbeitung, freischaltung setzten
+                RaspiUser targetPlayer = player.getUser();
+                targetPlayer.setState(true);
+                targetPlayer.setAllowed_since(new SimpleDateFormat("dd/MM/yyyy").format(new Date(System.currentTimeMillis())));
+                targetPlayer.setAllowed_by("SYSTEM");
+                targetPlayer.setDeny_reason(null);
+                targetPlayer.setDenied_by(null);
+                plugin.getLogger().info("[PLAYER ALLOW_STATE RECOVER]:: ALLOWED :: " + targetPlayer.getUsername() + " BY SYSTEM");
+                return;
+            }
             List<RaspiPlayer> teams = Raspi.players().getRaspiModPlayers();
+
+
             if (!teams.isEmpty()) {
                 teams.forEach(moderator -> {
                     moderator.sendMessage(String.format("<gray><italic>%s ist noch nicht Registriert!", player.getPlayer().getName()), true);

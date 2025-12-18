@@ -45,8 +45,8 @@ public class RaspiPlayer {
         this.userSettings = Raspi.players().getUserSettings(getUUID());
         this.nameController = new PlayerNameController(this);
         this.usernames = Raspi.players().getUserNameCache(getUUID());
-
         this.initialized = true;
+        Raspi.debugger().info(player.getName() + " INIT FINISHED");
     }
 
     public void openInventory(Inventory inventory) {
@@ -271,4 +271,7 @@ public class RaspiPlayer {
     }
 
 
+    public Object getUZs() {
+        return null;
+    }
 }

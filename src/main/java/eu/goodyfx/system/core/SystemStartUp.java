@@ -62,6 +62,8 @@ public class SystemStartUp {
         //new WarnListeners(plugin);
         new CompassEvents();
         new InventoryListeners();
+        new PlayerAFKHandler();
+        new RaspiCoinsEvents();
     }
 
 

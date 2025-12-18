@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.system.core.database.RaspiSuggestions;
 import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -18,7 +19,7 @@ public class MuteCommandContainer {
         return Commands.literal("mute").executes(context -> {
             context.getSource().getSender().sendRichMessage("<gray>Bitte nutze: <yellow>/mute <player> <grund>");
             return Command.SINGLE_SUCCESS;
-        }).then(Commands.argument("player", StringArgumentType.string()).then(Commands.argument("reason", StringArgumentType.string()).executes(MuteCommandContainer::execute))).build();
+        }).then(Commands.argument("player", StringArgumentType.string()).suggests(((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder))).then(Commands.argument("reason", StringArgumentType.string()).executes(MuteCommandContainer::execute))).build();
     }
 
     private static int execute(CommandContext<CommandSourceStack> context) {
@@ -32,8 +33,8 @@ public class MuteCommandContainer {
         String formatted = reason.replace(" ", "@");
         if (target.isOnline()) {
             RaspiPlayer targetOnline = Raspi.players().get(target.getPlayer());
-            targetOnline.mute(player, formatted);
-            //TODO MUTE USER
+            targetOnline.getManagement().performMute(player, reason);
+            player.sendRichMessage("Du hast den Spieler erfolgreich muted.");
             return Command.SINGLE_SUCCESS;
         }
         Raspi.players().getRaspiOfflinePlayer(target).thenAcceptAsync(raspiOfflinePlayer -> {

@@ -64,11 +64,10 @@ public class PlayerNameController {
     }
 
     public void setPlayerList() {
-        if (player.isInitialized() && player.getUserSettings().isAfk()) {
+        if (player.isInitialized() && player.getUserSettings() != null && player.getUserSettings().isAfk()) {
             player.getPlayer().playerListName(MiniMessage.miniMessage().deserialize(String.format("%s <gray><italic><underlined>AFK", getColorDisplayName())));
         } else {
             player.getPlayer().playerListName(MiniMessage.miniMessage().deserialize(getColorDisplayName()));
-
         }
     }
 

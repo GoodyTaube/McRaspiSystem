@@ -27,7 +27,8 @@ public class RaspiUser {
     private Boolean state = null;
     private String allowed_since = null;
     private Integer voting = 0;
-    private Boolean played_before =null;
+    private Boolean played_before = null;
+    private Long coins = 0L;
 
     protected final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     private final DatabaseManager databaseManager = plugin.getDatabaseManager();
@@ -37,7 +38,6 @@ public class RaspiUser {
         this.uuid = uuid.toString();
         this.username = MojangPlayerWrapper.getName(uuid);
     }
-
 
 
     public boolean allowedToPlay() {
@@ -60,6 +60,7 @@ public class RaspiUser {
                 color = resultSet.getString("color");
                 prefix = resultSet.getObject("prefix", String.class);
                 voting = resultSet.getObject("voting", Integer.class);
+                coins = resultSet.getObject("coins", Long.class);
                 plugin.getDebugger().info(String.format("[RaspiUser] Fetched userData for %s successfully.", username));
             }
         } catch (SQLException e) {
@@ -88,7 +89,7 @@ public class RaspiUser {
     }
 
     public void updateUserData() {
-        try (Connection connection = databaseManager.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(String.format("UPDATE %s SET first_doc = ?, denied_by = ?, deny_reason = ?, allowed_since = ?, allowed_by = ?, request_state = ?, last_seen = ?, online_hours = ?, color = ?, prefix = ?, voting = ?  WHERE uuid = ?", table))) {
+        try (Connection connection = databaseManager.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(String.format("UPDATE %s SET first_doc = ?, denied_by = ?, deny_reason = ?, allowed_since = ?, allowed_by = ?, request_state = ?, last_seen = ?, online_hours = ?, color = ?, prefix = ?, voting = ?, coins = ?  WHERE uuid = ?", table))) {
             statement.setObject(1, first_join, JDBCType.BIGINT);
             statement.setObject(2, denied_by, JDBCType.VARCHAR);
             statement.setObject(3, deny_reason, JDBCType.VARCHAR);
@@ -100,7 +101,8 @@ public class RaspiUser {
             statement.setObject(9, color, JDBCType.VARCHAR);
             statement.setObject(10, prefix, JDBCType.VARCHAR);
             statement.setObject(11, voting, JDBCType.INTEGER);
-            statement.setObject(12, uuid, JDBCType.VARCHAR);
+            statement.setObject(12, coins, JDBCType.BIGINT);
+            statement.setObject(13, uuid, JDBCType.VARCHAR);
             statement.executeUpdate();
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("Error while Updating data for %s in %s", username, table), e);

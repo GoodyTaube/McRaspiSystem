@@ -4,6 +4,7 @@ import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.ItemBuilder;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.SubCommand;
+import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.lootchest.tasks.AnimationBlockDisplay;
 import eu.goodyfx.system.lootchest.utils.LootChest;
 import eu.goodyfx.system.lootchest.utils.LootChestLoot;
@@ -57,10 +58,10 @@ public class AdminLootChestSubCommand extends SubCommand {
         } else if (args.length == 2 && args[1].equalsIgnoreCase("open")) {
             new LootChestLoot(plugin).openLoot(player);
         } else if (args.length == 2 && args[1].equalsIgnoreCase("kill")) {
-            for (LootChest lootChest : plugin.getLootChestTimer().getLootChestDisplay()) {
+            for (LootChest lootChest : LootChestSystem.getLootChestSubSystem().getLootChestTimer().getLootChestDisplay()) {
                 lootChest.killAll();
             }
-            plugin.getLootChestTimer().getLootChestDisplay().clear();
+            LootChestSystem.getLootChestSubSystem().getLootChestTimer().getLootChestDisplay().clear();
             AnimationBlockDisplay.getBlockDisplayList().clear();
         }
 

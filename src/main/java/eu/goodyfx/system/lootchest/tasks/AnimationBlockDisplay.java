@@ -1,9 +1,15 @@
 package eu.goodyfx.system.lootchest.tasks;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.managers.LocationManager;
+import eu.goodyfx.system.core.utils.Raspi;
+import lombok.Getter;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 
@@ -15,9 +21,35 @@ public class AnimationBlockDisplay extends BukkitRunnable {
 
     public AnimationBlockDisplay(McRaspiSystem plugin) {
         this.runTaskTimerAsynchronously(plugin, 0, 1L); // Läuft alle 1 Ticks für eine flüssige Animation
+        LocationManager locationManager = plugin.getModule().getLocationManager();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (locationManager.exist("lootchest")) {
+                    Raspi.debugger().info("FOUND LOCATION LOOTCHEST!");
+                    Location location = locationManager.get("lootchest");
+                    location.getChunk().load();
+                    location.getNearbyEntities(4, 4, 4).forEach(entity -> {
+                        Raspi.debugger().info("FOUND: " + entity.getType().name());
+                        if (entity.getType().equals(EntityType.BLOCK_DISPLAY)) {
+                            blockDisplayList.add((BlockDisplay) entity);
+                        }
+                        if (entity.getType().equals(EntityType.TEXT_DISPLAY)) {
+                            Raspi.debugger().info("Added TEXT DISPLAY TO LIST");
+                            textDisplayList.add((TextDisplay) entity);
+                        }
+                    });
+                }
+
+            }
+        }.runTaskLater(plugin, 20 * 5);
     }
 
+    @Getter
     private final static List<BlockDisplay> blockDisplayList = new ArrayList<>();
+    @Getter
+    private final static List<TextDisplay> textDisplayList = new ArrayList<>();
+
 
     private double tickCount = 0; // Zähler für die Sinuswellen-Berechnung
     private final double amplitude = 0.1; // Amplitude der Bewegung (maximale Höhe)
@@ -29,6 +61,9 @@ public class AnimationBlockDisplay extends BukkitRunnable {
         double offset = amplitude * Math.sin(tickCount * frequency);
         checkDead();
         blockDisplayList.forEach(blockDisplay -> {
+            if (!blockDisplay.isTicking()) {
+                return;
+            }
 
             Transformation transformation = blockDisplay.getTransformation();
 
@@ -38,14 +73,14 @@ public class AnimationBlockDisplay extends BukkitRunnable {
             // Wendet den neuen Offset für die glatte Auf- und Abwärtsbewegung an
             transformation.getTranslation().set(-0.25f, (float) offset + 1, -0.25f);
             blockDisplay.setTransformation(transformation);
-            blockDisplay.getLocation().getWorld().spawnParticle(Particle.PORTAL, blockDisplay.getLocation().add(0,1, 0), 2, 0, 0, 0, .5, null, true);
+            blockDisplay.getLocation().getWorld().spawnParticle(Particle.PORTAL, blockDisplay.getLocation().add(0, 1, 0), 2, 0, 0, 0, .5, null, true);
         });
 
         // Aktualisiert den Zähler für die Sinusbewegung
         tickCount += 1;
     }
 
-    private void killAll(){
+    private void killAll() {
         blockDisplayList.forEach(Entity::remove);
     }
 
@@ -60,7 +95,4 @@ public class AnimationBlockDisplay extends BukkitRunnable {
         blockDisplayList.removeIf(Objects::isNull);
     }
 
-    public static List<BlockDisplay> getBlockDisplayList() {
-        return blockDisplayList;
-    }
 }

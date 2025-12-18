@@ -8,12 +8,8 @@ import eu.goodyfx.system.core.events.PlayerLifecycleListener;
 import eu.goodyfx.system.core.managers.RaspiHookManager;
 import eu.goodyfx.system.core.managers.RaspiModuleManager;
 import eu.goodyfx.system.core.tasks.*;
-import eu.goodyfx.system.core.utils.InHeadSpectator;
-import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiDebugger;
-import eu.goodyfx.system.core.utils.RaspiSubSystem;
+import eu.goodyfx.system.core.utils.*;
 import eu.goodyfx.system.lootchest.LootChestSystem;
-import eu.goodyfx.system.lootchest.tasks.LootChestTimer;
 import eu.goodyfx.system.raspievents.RaspiEventsSystem;
 import eu.goodyfx.system.reise.RaspiReiseSystem;
 import eu.goodyfx.system.trader.TraderSystem;
@@ -29,12 +25,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 @Getter
 public final class McRaspiSystem extends JavaPlugin {
@@ -43,6 +42,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private RaspiHookManager hookManager;
     private RaspiDebugger debugger;
     private DatabaseManager databaseManager;
+    private DiscordBotClient discordBot;
 
     private final Random random = new Random();
 
@@ -57,9 +57,8 @@ public final class McRaspiSystem extends JavaPlugin {
     //private BukkitRunnable playTimeTask;
     private BukkitRunnable tabListTask;
     private final List<BukkitRunnable> tasks = new ArrayList<>();
-    private LootChestTimer lootChestTimer;
 
-    private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(4);
+    private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
@@ -69,6 +68,12 @@ public final class McRaspiSystem extends JavaPlugin {
     @Override
     public void onEnable() {
         init();
+        try {
+            this.discordBot = new DiscordBotClient(new URI("ws://localhost:6969"));
+            discordBot.connect();
+        } catch (URISyntaxException e) {
+            getLogger().log(Level.SEVERE, "Error while init Bot", e);
+        }
         dataMigration();
     }
 
@@ -90,12 +95,16 @@ public final class McRaspiSystem extends JavaPlugin {
             commands.registrar().register(BackCommandContainer.backCommand());
             commands.registrar().register(PlayerInfoCommandContainer.command());
             commands.registrar().register(MuteCommandContainer.muteCommand());
+            commands.registrar().register(UnMuteCommandContainer.command());
+            commands.registrar().register(RaspiCoinsSendCommandContainer.command());
+            commands.registrar().register(CoinStatusCommandContainer.command());
         });
 
     }
 
     private void init() {
         this.databaseManager = new DatabaseManager();
+        new DatabaseUpdate(this); // Update Table if NEEDED!
         this.debugger = new RaspiDebugger(this);
         getLogger().info("Welcome to McRaspiSystem");
         hookManager = new RaspiHookManager(this, this);
@@ -203,6 +212,7 @@ public final class McRaspiSystem extends JavaPlugin {
                 task.cancel();
             }
         }
+        discordBot.closeConnection(0, "Bye Bye RaspiSystem..");
     }
 
     /**
@@ -243,5 +253,15 @@ public final class McRaspiSystem extends JavaPlugin {
     public boolean subSystemExists(String key) {
         return getConfig().contains("raspi.systems." + key);
     }
+
+    public RaspiSubSystem getSubSystem(RaspiSubSystems system) throws NullPointerException {
+        for (RaspiSubSystem all : raspiSubSystems) {
+            if (system.getName().equalsIgnoreCase(all.systemKey())) {
+                return all;
+            }
+        }
+        return null;
+    }
+
 
 }

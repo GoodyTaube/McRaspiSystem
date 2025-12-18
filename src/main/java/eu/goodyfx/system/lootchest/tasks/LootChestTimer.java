@@ -1,11 +1,12 @@
 package eu.goodyfx.system.lootchest.tasks;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.lootchest.utils.LootChest;
 import eu.goodyfx.system.core.utils.RaspiTimes;
+import eu.goodyfx.system.lootchest.utils.LootChest;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.Random;
 @Getter
 public class LootChestTimer extends BukkitRunnable {
 
-    private static final int TIMER_MAX_MINUTES = 5; // Maximale Zeit in Minuten
+    private static final int TIMER_MAX_MINUTES = 120; // Maximale Zeit in Minuten
     private static final long TICKS_PER_SECOND = 20L;
     private static final long SECONDS_PER_MINUTE = 60L;
 
@@ -26,7 +27,7 @@ public class LootChestTimer extends BukkitRunnable {
 
     private long remainingTicks = 0;
     private boolean isInitialized = false;
-    private boolean lootChestReady = false;
+    public boolean lootChestReady = false;
 
     public LootChestTimer(McRaspiSystem plugin) {
         this.plugin = plugin;
@@ -61,10 +62,9 @@ public class LootChestTimer extends BukkitRunnable {
     }
 
     private void textUpdate() {
-        for (LootChest lootChest : lootChestDisplay) {
 
-            lootChest.getTimeDisplay().text(MiniMessage.miniMessage().deserialize("<green>" + remainingTicks + " Sekunde(n)"));
-        }
+        AnimationBlockDisplay.getTextDisplayList().forEach(textDisplay -> textDisplay.text(MiniMessage.miniMessage().deserialize("<green>" + remainingTicks + " Sekunde(n)")));
+
     }
 
     private void initializeTimer() {
@@ -76,14 +76,13 @@ public class LootChestTimer extends BukkitRunnable {
     public void resetTimer() {
         remainingTicks = calculateRandomTicks();
         logNextChestTime(remainingTicks);
-        notifyPlayers(remainingTicks);
         lootChestReady = false;
     }
 
     private void triggerLootChestReady() {
-        plugin.getDebugger().info("LootChest ist bereit zum Öffnen.");
-        for (LootChest lootChest : lootChestDisplay) {
-            lootChest.getTimeDisplay().text(MiniMessage.miniMessage().deserialize("<green>Öffne Mich!"));
+        plugin.getDebugger().info("LootChest ist bereit zum öffnen.");
+        for (TextDisplay lootChest : AnimationBlockDisplay.getTextDisplayList()) {
+            lootChest.text(MiniMessage.miniMessage().deserialize("<green>Öffne Mich!"));
         }
         lootChestReady = true;
     }

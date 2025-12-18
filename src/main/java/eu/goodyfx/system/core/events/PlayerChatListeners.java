@@ -3,7 +3,6 @@ package eu.goodyfx.system.core.events;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.*;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import io.papermc.paper.registry.data.dialog.body.PlainMessageDialogBody;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -63,31 +62,52 @@ public class PlayerChatListeners implements Listener {
 
 
         String finalPlainMessage = plainMessage;
-
         Component checkMessage = MiniMessage.miniMessage().deserialize(finalPlainMessage);
         if (PlainTextComponentSerializer.plainText().serialize(checkMessage).isEmpty()) {
             return;
         }
 
+        if (plugin.getDiscordBot() != null && plugin.getDiscordBot().isEnabled()) {
+            if (finalPlainMessage.startsWith("@mark")) {
+                plugin.getDiscordBot().send(PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+                return;
+            }
+            plugin.getDiscordBot().send(String.format("<%s> %s", player.getPlayer().getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage))));
+        }
+
+
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             RaspiPlayer perPlayer = Raspi.players().get(onlinePlayer);
-
-            if (perPlayer.getUserSettings().isOpt_chat()) {
-                String commandClick = commandClick(String.format("/playerinfo %s", player.getPlayer().getName()));
-                String hoverText = hoverText(String.format("<gray>PlayerInfos<br>Bisher Gespielt: <aqua>%s<br><gray><italic>Klicke um mehr Infos zu bekommen.", RaspiTimes.Ticks.getTimeUnit(player.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE)))); //REPLACE DURCH ONLINE_HOURS
-                String optMessage = String.format("%s%s", commandClick, hoverText);
-                String hoverMessageClock = hoverText(String.format("<aqua>%s", new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())));
-
-                String message = String.format("<%s%s> %s%s", optMessage, player.getDisplayName(), hoverMessageClock, finalPlainMessage);
-
-                perPlayer.sendMessage(message);
-            } else {
-                perPlayer.sendMessage(String.format("<%s> %s", player.getDisplayName(), finalPlainMessage));
-            }
+            send(player.getPlayer(), perPlayer, finalPlainMessage);
         }
         String log = String.format("[RaspiChat] <%s> %s", player.getPlayer().getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
         plugin.getLogger().info(log);
+        //Send Discord Message! 2025
         plugin.getHookManager().getDiscordIntegration().send("<" + player.getPlayer().getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+    }
+
+
+    public void send(Player sendPlayer, RaspiPlayer player, String finalMessage) {
+        RaspiPlayer raspiPlayer = Raspi.players().get(sendPlayer);
+        String team = getTeamMarker(sendPlayer, player, finalMessage);
+        if (player.getUserSettings().isOpt_chat()) {
+            String commandClick = commandClick(String.format("/playerinfo %s", player.getPlayer().getName()));
+            String hoverText = hoverText(String.format("<gray>PlayerInfos<br>Bisher Gespielt: <aqua>%s<br><gray><italic>Klicke um mehr Infos zu bekommen.", RaspiTimes.Ticks.getTimeUnit(player.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE)))); //REPLACE DURCH ONLINE_HOURS
+            String optMessage = String.format("%s%s", commandClick, hoverText);
+            String hoverMessageClock = hoverText(String.format("<aqua>%s", new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())));
+            String message = String.format("%s<%s%s> %s%s", team, optMessage,raspiPlayer.getDisplayName(), hoverMessageClock, finalMessage);
+            player.sendMessage(message);
+            return;
+        }
+        player.sendMessage(String.format("%s<%s> %s", team, raspiPlayer.getDisplayName(), finalMessage));
+
+    }
+
+    private String getTeamMarker(Player sendPlayer, RaspiPlayer player, String message) {
+        if (player.hasPermission(RaspiPermission.TEAM) && plugin.getDiscordBot().isEnabled()) {
+            return String.format("<white><hover:show_text:'<aqua>In Discord Markieren'><click:suggest_command:'@mark <%s> %s'>[<green>⃟<white>]<reset> ", sendPlayer.getName(), message);
+        }
+        return "";
     }
 
     private boolean checkUp(RaspiPlayer player) {

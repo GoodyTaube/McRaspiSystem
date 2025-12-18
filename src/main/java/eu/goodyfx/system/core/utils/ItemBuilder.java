@@ -1,5 +1,7 @@
 package eu.goodyfx.system.core.utils;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
@@ -16,6 +18,7 @@ public class ItemBuilder {
 
     private final ItemStack stack;
     private final ItemMeta meta;
+    private Float modelID = null;
     private List<Component> lore;
 
     public ItemBuilder(Material material) {
@@ -77,20 +80,26 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder setModelID(int modelID) {
-        meta.setCustomModelData(modelID);
+    public ItemBuilder setModelID(float modelID) {
+        this.modelID = modelID;
         return this;
     }
+
 
     public ItemStack build() {
         meta.lore(lore);
         stack.setItemMeta(meta);
+        if (modelID != null) {
+            stack.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addFloat(modelID).build());
+        }
+
         return stack;
     }
 
 
-    public ItemMeta getMeta() {
-        return this.meta;
+    public CustomModelData getMeta() {
+        return stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
+
     }
 
 }

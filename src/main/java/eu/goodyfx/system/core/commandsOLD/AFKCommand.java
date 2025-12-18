@@ -49,7 +49,6 @@ public class AFKCommand implements CommandExecutor {
                 if (player.getUserSettings().isAfk()) {
                     player.getUserSettings().setAfk(false);
                     warteschlangenManager.setHeader();
-                    playerD.setCollidable(true);
                     playerD.setSleepingIgnored(false);
                     playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<red>Du bist nicht mehr AFK"));
                     player.nameController().setPlayerList();
@@ -57,14 +56,12 @@ public class AFKCommand implements CommandExecutor {
 
                 }
                 player.getUserSettings().setAfk(true);
-
                 if (!playerLocation.getWorld().getName().equalsIgnoreCase(locationManager.getWorldName("waiting")) && warteschlangenManager.queueSize() > 0 && !warteschlangenManager.playersQueue.contains(playerD.getUniqueId())) {
                     warteschlangenManager.queue();
                     warteschlangenManager.addToQueue(playerD.getUniqueId(), playerLocation);
                 }
-                playerD.setInvulnerable(false);
-                warteschlangenManager.setHeader();
                 playerD.setSleepingIgnored(true);
+                warteschlangenManager.setHeader();
                 playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Du bist nun AFK"));
                 player.nameController().setPlayerList();
 

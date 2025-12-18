@@ -72,7 +72,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.8-R0.1-SNAPSHOT</version>
+            <version>1.21.10-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -98,11 +98,15 @@
             <version>5.1.0</version> <!-- die aktuelle Version prüfen -->
         </dependency>
         <dependency>
-            <groupId>com.bencodez</groupId>
-            <artifactId>votingplugin</artifactId>
-            <version>LATEST</version>
-            <scope>provided</scope>
+            <groupId>org.java-websocket</groupId>
+            <artifactId>Java-WebSocket</artifactId>
+            <version>1.6.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

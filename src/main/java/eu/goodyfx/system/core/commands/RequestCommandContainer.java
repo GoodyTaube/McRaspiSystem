@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiSuggestions;
 import eu.goodyfx.system.core.database.RaspiUser;
 import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
@@ -36,10 +37,10 @@ public class RequestCommandContainer {
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("request")
                 .executes(RequestCommandContainer::executeCommandHelp)
-                .then(Commands.literal("kick").then(Commands.argument("player", StringArgumentType.string()).executes(RequestCommandContainer::executeKick)))
-                .then(Commands.literal("accept").then(Commands.argument("player", StringArgumentType.string()).executes(RequestCommandContainer::executeRequestAccept)))
-                .then(Commands.literal("deny").then(Commands.argument("player", StringArgumentType.string()).then(Commands.argument("reason", StringArgumentType.string()).suggests(RequestCommandContainer::getReasonSuggest).executes(RequestCommandContainer::executeRequestDeny))))
-                .then(Commands.literal("tp").then(Commands.argument("player", StringArgumentType.string()).executes(RequestCommandContainer::executeTPRequest)))
+                .then(Commands.literal("kick").then(Commands.argument("player", StringArgumentType.string()).suggests((((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder)))).executes(RequestCommandContainer::executeKick)))
+                .then(Commands.literal("accept").then(Commands.argument("player", StringArgumentType.string()).suggests((((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder)))).executes(RequestCommandContainer::executeRequestAccept)))
+                .then(Commands.literal("deny").then(Commands.argument("player", StringArgumentType.string()).suggests((((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder)))).then(Commands.argument("reason", StringArgumentType.string()).suggests(RequestCommandContainer::getReasonSuggest).executes(RequestCommandContainer::executeRequestDeny))))
+                .then(Commands.literal("tp").then(Commands.argument("player", StringArgumentType.string()).suggests((((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder)))).executes(RequestCommandContainer::executeTPRequest)))
                 .then(Commands.literal("--confirm").executes(RequestCommandContainer::executeConfirm)).build();
     }
 

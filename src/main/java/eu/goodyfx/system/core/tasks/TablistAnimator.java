@@ -26,7 +26,7 @@ public class TablistAnimator extends BukkitRunnable {
         Component animated = getAnimatedTitle();
         Component header = Component.empty()
                 .append(animated)
-                .append(Component.text("// Wartende Spieler: 0 / ~").color(NamedTextColor.GRAY));
+                .append(Component.text("// Wartende Spieler: 0 / " + Bukkit.getOnlinePlayers().size()).color(NamedTextColor.GRAY));
         sendPlayer(header);
         index++;
         if (index >= tTA.length()) {

@@ -4,6 +4,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.lootchest.utils.LootChestLoot;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiSounds;
@@ -36,36 +37,11 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
-        lootItemSticks(event);
         villagerInteraction(event);
+        interactLootChest(event);
     }
 
 
-    private void lootItemSticks(PlayerInteractAtEntityEvent event) {
-        Player player = event.getPlayer();
-        Entity entity = event.getRightClicked();
-        if (event.getHand().equals(EquipmentSlot.HAND) && (player.getInventory().getItemInMainHand().getType().equals(Material.STICK))) {
-            ItemStack stack = player.getInventory().getItemInMainHand();
-            if (stack.hasItemMeta() && (stack.getItemMeta().hasCustomModelData()) && entity instanceof Animals animal) {
-                int data = stack.getItemMeta().getCustomModelData();
-                if (data == 2) {
-                    //ADULT
-                    animal.setAdult();
-                    animal.setAgeLock(true);
-                    stack.setAmount(stack.getAmount() - 1);
-                    player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
-                }
-                if (data == 3) {
-                    //BABY
-                    animal.setBaby();
-                    animal.setAgeLock(true);
-                    stack.setAmount(stack.getAmount() - 1);
-                    player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
-                }
-                event.setCancelled(true);
-            }
-        }
-    }
 
     /**
      * Check if Player can Sit on Animal
@@ -81,7 +57,6 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
             }
             entity.addPassenger(player);
         }
-        interactLootChest(event);
     }
 
     /**
@@ -113,7 +88,7 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
             if (interaction.getPersistentDataContainer().has(new NamespacedKey(plugin, "special"))) {
                 event.setCancelled(true);
                 RaspiPlayer player = Raspi.players().get(event.getPlayer());
-                if (plugin.getLootChestTimer().isLootChestReady()) {
+                if (LootChestSystem.getLootChestSubSystem().getLootChestTimer().isLootChestReady()) {
                     new LootChestLoot(plugin).openLoot(player);
                 } else {
                     player.playSound(RaspiSounds.ERROR);

@@ -30,8 +30,8 @@ public class PlayerAFKHandler implements Listener {
 
     public void checkUp(Player player) {
         RaspiPlayer raspiPlayer = Raspi.players().get(player);
-        if (raspiPlayer.getUserSettings().isAfk()) {
-            raspiPlayer.performCommand("/afk");
+        if (raspiPlayer.isInitialized() && raspiPlayer.getUserSettings().isAfk()) {
+            raspiPlayer.performCommand("afk");
         }
     }
 
@@ -56,8 +56,7 @@ public class PlayerAFKHandler implements Listener {
         RaspiPlayer raspiPlayer = Raspi.players().get(player);
         AFKCommand.getPlayerIDLE().remove(player.getUniqueId());
 
-        if (raspiPlayer.getUserSettings().isAfk()) {
-
+        if (raspiPlayer.isInitialized() && raspiPlayer.getUserSettings().isAfk()) {
             if (!changedWorld.contains(player.getUniqueId())) {
                 Location locationStart = Raspi.players().getAfkContainer().get(player.getUniqueId());
                 if (locationStart == null) {
@@ -73,6 +72,5 @@ public class PlayerAFKHandler implements Listener {
         }
 
     }
-
 
 }

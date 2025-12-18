@@ -1,6 +1,10 @@
 package eu.goodyfx.system.lootchest.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.utils.RaspiPlayer;
+import io.papermc.paper.datacomponent.DataComponentType;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,10 +36,13 @@ public class LootSpongeEvents implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
+        RaspiPlayer raspiPlayer =  Raspi.players().get(player);
         Block block = event.getBlock();
         ItemStack stack = event.getItemInHand();
         Location location = event.getBlockPlaced().getLocation();
-        if (block.getType().equals(Material.POLISHED_BLACKSTONE_BUTTON) && stack.getItemMeta() != null && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == 1) {
+
+        /**
+        if (block.getType().equals(Material.POLISHED_BLACKSTONE_BUTTON) && stack.getItemMeta() != null && stack.hasData(DataComponentTypes.CUSTOM_MODEL_DATA) && stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA).equals(String.valueOf(1))) {
 
             if (locationMap.containsKey(player.getUniqueId())) {
                 if (!plugin.getModule().getLootManager().existAndActive(locationMap.get(player.getUniqueId()), location)) {
@@ -52,8 +59,7 @@ public class LootSpongeEvents implements Listener {
             }
             return;
         }
-
-
+         **/
         if (stack.getItemMeta() != null && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == 1) {
             if (block.getType().equals(Material.SPONGE)) {
                 Set<Block> sphere = sphereAround(event.getBlock().getLocation(), plugin.getConfig().getInt("items.sponge.radius")); //List of all Blocks rad = 30
@@ -76,6 +82,10 @@ public class LootSpongeEvents implements Listener {
             }
 
         }
+    }
+
+    private void teleporter(Location location, ItemStack stack, RaspiPlayer raspiPlayer){
+
     }
 
     @EventHandler

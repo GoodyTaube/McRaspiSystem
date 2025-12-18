@@ -4,6 +4,7 @@ package eu.goodyfx.system.core.tasks;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.AFKCommand;
 import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.utils.RaspiSounds;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -29,16 +30,21 @@ public class IdleTask extends BukkitRunnable {
     public void run() {
 
         Raspi.players().getRaspiPlayers().forEach(all -> {
+            if (!all.isInitialized()) {
+                return;
+            }
+
             if (!plugin.getConfig().getBoolean("Utilities.afk.autoAFK")) {
                 //Enable / Disable out of Config
                 return;
             }
 
+
             if (!all.getUserSettings().isAuto_afk()) {
                 //If Player Disabled Auto AFK
                 return;
             }
-            if (!all.getUserSettings().isAfk()) {
+            if (all.getUserSettings().isAfk()) {
                 //Check if Player is already AFK
                 return;
             }
@@ -53,6 +59,7 @@ public class IdleTask extends BukkitRunnable {
             //Check if IDLE time is equal to config
             if (AFKCommand.getPlayerIDLE().get(all.getUUID()) != plugin.getConfig().getInt("Utilities.afk.idleTime")) {
                 return;
+
             }
 
             //Perform Task sync because Bukkit likes that more than async

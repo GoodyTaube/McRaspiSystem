@@ -1,13 +1,13 @@
 package eu.goodyfx.system.core.commandsOLD.subcommands;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.SubCommand;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
+import eu.goodyfx.system.core.utils.SubCommand;
 
 public class AdminWartungCommand extends SubCommand {
     private final McRaspiSystem plugin;
 
-    public AdminWartungCommand(McRaspiSystem plugin){
+    public AdminWartungCommand(McRaspiSystem plugin) {
         this.plugin = plugin;
     }
 
@@ -33,8 +33,8 @@ public class AdminWartungCommand extends SubCommand {
 
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
-        if(args.length == 1){
-
+        if (args.length == 1) {
+            player.sendMessage(player.getUser().getCoins().toString());
         }
         return false;
 

@@ -48,10 +48,10 @@ public class LootChestLoot {
         List<ItemStack> returnList = new ArrayList<>();
         switch (lootChestType) {
             case IMMER:
-                returnList.addAll(getItems(5, 2, avibalItems));
+                returnList.addAll(getItems(3, 2, avibalItems));
                 break;
             case NICHT_SO_SELTEN:
-                returnList.addAll(getItems(3, 1, avibalItems));
+                returnList.addAll(getItems(2, 0, avibalItems));
                 break;
             case SELTEN:
                 returnList.addAll(getItems(1, 0, avibalItems));

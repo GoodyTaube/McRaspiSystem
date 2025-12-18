@@ -32,6 +32,19 @@ public class LocationManager {
         manager.set("Locations." + name + ".toCopy", "/tp " + location.getBlockX() + " " + location.getBlockY() + " " + location.getBlockZ());
     }
 
+    public void set(Location location, String name) {
+        Object[] inserts = new Object[6];
+        inserts[0] = location.getWorld().getName();
+        inserts[1] = location.getX();
+        inserts[2] = location.getY();
+        inserts[3] = location.getZ();
+        inserts[4] = location.getYaw();
+        inserts[5] = location.getPitch();
+        setLocationValue(name, inserts);
+        // Easy Copy out of Config
+        manager.set("Locations." + name + ".toCopy", "/tp " + location.getBlockX() + " " + location.getBlockY() + " " + location.getBlockZ());
+    }
+
 
     public boolean exist(String name) {
         if (Boolean.TRUE.equals(manager.exist())) {

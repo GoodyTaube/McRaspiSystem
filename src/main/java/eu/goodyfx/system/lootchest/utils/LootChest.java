@@ -1,6 +1,8 @@
 package eu.goodyfx.system.lootchest.utils;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.managers.LocationManager;
+import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.lootchest.tasks.AnimationBlockDisplay;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -19,8 +21,11 @@ public class LootChest {
     private final McRaspiSystem plugin;
     private final Location chestLocation;
     private final World world;
+    private LocationManager locationManager;
 
     public LootChest(McRaspiSystem plugin, Location location) {
+        locationManager = plugin.getModule().getLocationManager();
+        locationManager.set(location, "lootchest");
         this.plugin = plugin;
         this.world = location.getWorld();
         this.chestLocation = new Location(world, location.getBlockX(), location.getBlockY(), location.getBlockZ());
@@ -28,7 +33,7 @@ public class LootChest {
         chest();
         display();
         interaction();
-        plugin.getLootChestTimer().getLootChestDisplay().add(this);
+        LootChestSystem.getLootChestSubSystem().getLootChestTimer().getLootChestDisplay().add(this);
     }
 
 
@@ -50,6 +55,7 @@ public class LootChest {
         this.timeDisplay.text(MiniMessage.miniMessage().deserialize("<green>LootChest"));
         this.timeDisplay.setBillboard(Display.Billboard.CENTER);
         this.timeDisplay.setPersistent(true);
+        AnimationBlockDisplay.getTextDisplayList().add(this.timeDisplay);
     }
 
     private void interaction() {
@@ -58,18 +64,6 @@ public class LootChest {
         this.lootInteraction.setInteractionWidth(1f);
         this.lootInteraction.setInteractionHeight(2f);
         this.lootInteraction.setPersistent(true);
-    }
-
-    public TextDisplay getTimeDisplay() {
-        return this.timeDisplay;
-    }
-
-    public Interaction getLootInteraction() {
-        return this.lootInteraction;
-    }
-
-    public BlockDisplay getChestAnimation() {
-        return this.chestAnimation;
     }
 
     public void killAll() {

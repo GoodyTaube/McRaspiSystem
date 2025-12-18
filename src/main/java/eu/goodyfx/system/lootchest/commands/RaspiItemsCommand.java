@@ -35,7 +35,7 @@ public class RaspiItemsCommand implements CommandExecutor {
 
                 AtomicInteger sizer = new AtomicInteger();
                 for (LootItems per : LootItems.values()) {
-                    ItemBuilder builder = new ItemBuilder(per.getMaterial());
+                    ItemBuilder builder = new ItemBuilder(per.getType());
                     builder.displayName(per.getLabel());
                     builder.setModelID(per.getModelID());
                     if (per.getLore() != null) {

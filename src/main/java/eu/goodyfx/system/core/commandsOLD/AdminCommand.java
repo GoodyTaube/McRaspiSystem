@@ -57,6 +57,8 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminReloadSubCommand(plugin));
         subCommands.add(new AdminResetPlayerSubCommand());
         subCommands.add(new AdminPLHideSubCommand());
+        subCommands.add(new AdminRaspiBotSubCommand());
+        subCommands.add(new AdminWartungCommand(plugin));
     }
 
 

@@ -2,6 +2,7 @@ package eu.goodyfx.system.reise;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.RaspiSubSystem;
+import eu.goodyfx.system.core.utils.RaspiSubSystems;
 import eu.goodyfx.system.reise.commands.ReiseCommand;
 import eu.goodyfx.system.reise.commands.ReisePortCommand;
 import eu.goodyfx.system.reise.commands.ReiseSucheCommand;
@@ -26,7 +27,7 @@ public class RaspiReiseSystem implements RaspiSubSystem {
 
     @Override
     public String systemKey() {
-        return "raspiReise";
+        return RaspiSubSystems.REISE.getName();
     }
 
     @Override

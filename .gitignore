@@ -17,4 +17,3 @@ UPLOAD.sh
 Thumbs.db
 .env
 *.key
-src/main/resources/

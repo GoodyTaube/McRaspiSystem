@@ -1,7 +1,9 @@
 package eu.goodyfx.system.lootchest.utils;
 
+import lombok.Getter;
 import org.bukkit.Material;
 
+@Getter
 public enum LootChestMenuItems {
 
     SELTEN("Selten", Material.DIAMOND, "selten"),
@@ -20,14 +22,6 @@ public enum LootChestMenuItems {
 
     public String getDatabaseName() {
         return this.db_Name;
-    }
-
-    public String getTitle() {
-        return this.title;
-    }
-
-    public Material getType() {
-        return this.type;
     }
 
 }

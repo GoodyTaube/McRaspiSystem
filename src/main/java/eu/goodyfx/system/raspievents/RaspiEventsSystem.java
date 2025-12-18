@@ -2,6 +2,7 @@ package eu.goodyfx.system.raspievents;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.RaspiSubSystem;
+import eu.goodyfx.system.core.utils.RaspiSubSystems;
 import eu.goodyfx.system.raspievents.events.CraftingEventListeners;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -14,14 +15,13 @@ public class RaspiEventsSystem implements RaspiSubSystem {
     protected final McRaspiSystem plugin;
     private boolean enabled = false;
     private final List<Listener> events = new ArrayList<>();
-
     public RaspiEventsSystem(McRaspiSystem plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public String systemKey() {
-        return "raspiEvents";
+        return RaspiSubSystems.EVENTS.getName();
     }
 
     @Override

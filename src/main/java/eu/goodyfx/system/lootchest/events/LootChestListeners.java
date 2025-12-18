@@ -5,6 +5,7 @@ import eu.goodyfx.system.core.utils.InventoryBuilder;
 import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiSounds;
+import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.lootchest.utils.LootChestMenuItems;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -44,18 +45,19 @@ public class LootChestListeners implements Listener {
     public void onInventoryOpen(InventoryOpenEvent openEvent) {
         String title = PlainTextComponentSerializer.plainText().serialize(openEvent.getView().title());
         if (title.equalsIgnoreCase("Loot")) {
-            Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
-                if (plugin.getLootChestTimer().isLootChestReady()) {
+            if (LootChestSystem.getLootChestSubSystem().getLootChestTimer().isLootChestReady()) {
+                LootChestSystem.getLootChestSubSystem().getLootChestTimer().resetTimer();
+                Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
                     Bukkit.getScheduler().runTask(plugin, () -> openEvent.getPlayer().closeInventory());
-                    plugin.getLootChestTimer().resetTimer();
-                }
-            }, 20L * 60);
+                    LootChestSystem.getLootChestSubSystem().getLootChestTimer().resetTimer();
+                }, 20L * 60);
+            }
         }
     }
 
     private void gettingLoot(InventoryCloseEvent closeEvent) {
-        if (PlainTextComponentSerializer.plainText().serialize(closeEvent.getView().title()).equalsIgnoreCase("Loot") && plugin.getLootChestTimer().isLootChestReady()) {
-            plugin.getLootChestTimer().resetTimer();
+        if (PlainTextComponentSerializer.plainText().serialize(closeEvent.getView().title()).equalsIgnoreCase("Loot") && LootChestSystem.getLootChestSubSystem().getLootChestTimer().isLootChestReady()) {
+            LootChestSystem.getLootChestSubSystem().getLootChestTimer().resetTimer();
         }
     }
 

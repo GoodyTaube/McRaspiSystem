@@ -62,7 +62,7 @@ public class RaspiPlayers {
     }
 
 
-    private void loadAsync(UUID uuid, boolean offline) { //Lag prävention
+    public void loadAsync(UUID uuid, boolean offline) { //Lag prävention
         RaspiUser raspiUser = new RaspiUser(uuid);
         RaspiManagement management = new RaspiManagement(uuid);
         UserSettings userSettings = new UserSettings(uuid);
