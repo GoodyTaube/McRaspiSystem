@@ -2,7 +2,6 @@ package eu.goodyfx.system.lootchest.events;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.lootchest.utils.LootItems;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Location;
@@ -26,30 +25,34 @@ public class TeleportListeners implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onTeleportPlace(BlockPlaceEvent placeEvent) {
-        RaspiPlayer player = Raspi.players().get(placeEvent.getPlayer());
-        Location location = placeEvent.getBlockPlaced().getLocation();
-        ItemStack stack = placeEvent.getItemInHand();
-        Block block = placeEvent.getBlock();
-        if (!block.getType().equals(item.getType())) {
-            return;
-        }
-        if (!checkStack(stack)) {
-            return;
-        }
+        Raspi.players().withOnlinePlayer(placeEvent.getPlayer(), player -> {
 
-        if (locationMap.containsKey(player.getUUID())) {
-            if (!plugin.getModule().getLootManager().existAndActive(locationMap.get(player.getUUID()), location)) {
-                plugin.getModule().getLootManager().setWarp(player.getPlayer(), locationMap.get(player.getUUID()), location);
-                player.sendActionBar(plugin.getModule().getRaspiMessages().getPrefix() + "Position 2 für Teleport gesetzt!");
-                player.sendMessage(plugin.getModule().getRaspiMessages().getPrefix() + "Der Teleport Nr." + plugin.getModule().getLootManager().size() + " wurde erstellt!");
-                player.getPlayer().playSound(location, Sound.BLOCK_BEACON_ACTIVATE, 1f, 1f);
-                locationMap.remove(player.getUUID());
+            Location location = placeEvent.getBlockPlaced().getLocation();
+            ItemStack stack = placeEvent.getItemInHand();
+            Block block = placeEvent.getBlock();
+            if (!block.getType().equals(item.getType())) {
                 return;
             }
-        } else {
-            locationMap.put(player.getUUID(), location);
-            player.sendActionBar(plugin.getModule().getRaspiMessages().getPrefix() + "Position 1 für Teleport gesetzt!");
-        }
+            if (!checkStack(stack)) {
+                return;
+            }
+
+            if (locationMap.containsKey(player.getUUID())) {
+                if (!plugin.getModule().getLootManager().existAndActive(locationMap.get(player.getUUID()), location)) {
+                    plugin.getModule().getLootManager().setWarp(player.getPlayer(), locationMap.get(player.getUUID()), location);
+                    player.sendActionBar(plugin.getModule().getRaspiMessages().getPrefix() + "Position 2 für Teleport gesetzt!");
+                    player.sendMessage(plugin.getModule().getRaspiMessages().getPrefix() + "Der Teleport Nr." + plugin.getModule().getLootManager().size() + " wurde erstellt!");
+                    player.getPlayer().playSound(location, Sound.BLOCK_BEACON_ACTIVATE, 1f, 1f);
+                    locationMap.remove(player.getUUID());
+                    return;
+                }
+            } else {
+                locationMap.put(player.getUUID(), location);
+                player.sendActionBar(plugin.getModule().getRaspiMessages().getPrefix() + "Position 1 für Teleport gesetzt!");
+            }
+
+        });
+
 
     }
 

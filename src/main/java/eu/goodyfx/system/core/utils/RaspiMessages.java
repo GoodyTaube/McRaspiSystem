@@ -30,13 +30,6 @@ public class RaspiMessages {
         return raw;
     }
 
-    public String getJoin(Player player) {
-        String raw = get("join");
-        raw = prefix(raw);
-        raw = raw.replace("{player}", Raspi.players().get(player).getDisplayName());
-        return raw;
-
-    }
 
     public String getLeave(String player) {
         String raw = get("leave");

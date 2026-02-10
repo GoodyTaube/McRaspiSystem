@@ -4,8 +4,8 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.RandomTeleportCommand;
 import eu.goodyfx.system.core.database.DatabaseTables;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.SubCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -48,7 +48,10 @@ public class AdminResetDailyCommandSubCommand extends SubCommand {
                 player.sendMessage(plugin.getModule().getRaspiMessages().getPrefix() + "<green>" + target.getName() + " Erfolgreich zurückgesetzt!");
                 Player targetPlayer = Bukkit.getPlayer(target.getName());
                 if (targetPlayer.isOnline()) {
-                    Raspi.players().get(targetPlayer).sendActionBar("<green>Du kannst deinen RandomTP Neu setzten.");
+                    Raspi.players().withOnlinePlayer(targetPlayer, raspiPlayer -> {
+                        raspiPlayer.sendActionBar("<green>Du kannst deinen RandomTP Neu setzten.");
+
+                    });
                 }
             } else
                 player.sendMessage(plugin.getModule().getRaspiMessages().playerNotOnline(args[1]));

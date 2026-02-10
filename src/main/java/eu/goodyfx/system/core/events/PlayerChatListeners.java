@@ -1,7 +1,11 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.*;
+import eu.goodyfx.system.core.database.RaspiPlayer;
+import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.utils.RaspiFormatting;
+import eu.goodyfx.system.core.utils.RaspiPermission;
+import eu.goodyfx.system.core.utils.RaspiTimes;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -37,17 +41,22 @@ public class PlayerChatListeners implements Listener {
         chatEvent.setCancelled(true);//Disabled the core funktion of normal Minecraft Chat.
         String[] legacy = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()).split(" ");
         StringBuilder builder = new StringBuilder();
-        Arrays.stream(legacy).forEach(val -> {
-            if (val.startsWith("https://") || val.startsWith("http://")) {
-                builder.append(val.replace("&", "$")).append(" ");
+        Arrays.stream(legacy).forEach(value -> {
+            if (value.startsWith("https://") || value.startsWith("http://")) {
+                builder.append(value.replace("&", "$")).append(" ");
             } else {
-                builder.append(val).append(" ");
+                builder.append(value).append(" ");
             }
         });
+
+        RaspiPlayer player = Raspi.players().getActive(chatEvent.getPlayer());
+        if (player == null) {
+            return;
+        }
+
+
         chatEvent.message(LegacyComponentSerializer.legacyAmpersand().deserialize(builder.toString()));
         String plainMessage = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()); //Message as Plain Message
-        RaspiPlayer player = Raspi.players().get(chatEvent.getPlayer());
-
 
         if (checkUp(player)) {
             return;
@@ -76,31 +85,32 @@ public class PlayerChatListeners implements Listener {
         }
 
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            RaspiPlayer perPlayer = Raspi.players().get(onlinePlayer);
-            send(player.getPlayer(), perPlayer, finalPlainMessage);
+        for (RaspiPlayer active : Raspi.players().getActivePlayers().values()) {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                send(player, active, finalPlainMessage);
+            });
         }
         String log = String.format("[RaspiChat] <%s> %s", player.getPlayer().getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
         plugin.getLogger().info(log);
         //Send Discord Message! 2025
         plugin.getHookManager().getDiscordIntegration().send("<" + player.getPlayer().getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+
     }
 
 
-    public void send(Player sendPlayer, RaspiPlayer player, String finalMessage) {
-        RaspiPlayer raspiPlayer = Raspi.players().get(sendPlayer);
-        String team = getTeamMarker(sendPlayer, player, finalMessage);
-        if (player.getUserSettings().isOpt_chat()) {
+    public void send(RaspiPlayer sendPlayer, RaspiPlayer player, String finalMessage) {
+
+        String team = getTeamMarker(sendPlayer.getPlayer(), player, finalMessage);
+        if (player.settings().isOpt_chat()) {
             String commandClick = commandClick(String.format("/playerinfo %s", player.getPlayer().getName()));
             String hoverText = hoverText(String.format("<gray>PlayerInfos<br>Bisher Gespielt: <aqua>%s<br><gray><italic>Klicke um mehr Infos zu bekommen.", RaspiTimes.Ticks.getTimeUnit(player.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE)))); //REPLACE DURCH ONLINE_HOURS
             String optMessage = String.format("%s%s", commandClick, hoverText);
             String hoverMessageClock = hoverText(String.format("<aqua>%s", new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())));
-            String message = String.format("%s<%s%s> %s%s", team, optMessage,raspiPlayer.getDisplayName(), hoverMessageClock, finalMessage);
+            String message = String.format("%s<%s%s> %s%s", team, optMessage, sendPlayer.getDisplayName(), hoverMessageClock, finalMessage);
             player.sendMessage(message);
             return;
         }
-        player.sendMessage(String.format("%s<%s> %s", team, raspiPlayer.getDisplayName(), finalMessage));
-
+        player.sendMessage(String.format("%s<%s> %s", team, sendPlayer.getDisplayName(), finalMessage));
     }
 
     private String getTeamMarker(Player sendPlayer, RaspiPlayer player, String message) {
@@ -112,7 +122,7 @@ public class PlayerChatListeners implements Listener {
 
     private boolean checkUp(RaspiPlayer player) {
         boolean failed = false;
-        if (player.getManagement().isMuted()) {
+        if (player.userManagement().isMuted()) {
             failed = true;
             player.sendActionBar("<red>Du kannst den Chat nicht benutzen. <yellow>(Stummgeschaltet)");
         }
@@ -157,8 +167,7 @@ public class PlayerChatListeners implements Listener {
 
         if (player.hasPermission(RaspiPermission.TEAM) && message.startsWith("!") && message.length() > 1) {
             isTeam = true;
-            Bukkit.getOnlinePlayers().forEach(all -> {
-                RaspiPlayer mabeTeam = Raspi.players().get(all);
+            Raspi.players().getActivePlayers().values().forEach(mabeTeam -> {
                 if (mabeTeam.hasPermission(RaspiPermission.TEAM)) {
                     if (!lastMessage.startsWith("!")) {
                         mabeTeam.getPlayer().sendPlainMessage(" ");
@@ -169,6 +178,8 @@ public class PlayerChatListeners implements Listener {
                     }
                 }
             });
+
+
         }
         return isTeam;
     }
@@ -182,17 +193,15 @@ public class PlayerChatListeners implements Listener {
         String[] args = rawMessage.split(" ");
         StringBuilder preResult = new StringBuilder();
         for (int i = 0; i < args.length; i++) {
-            int finalI = i;
-
-            Bukkit.getOnlinePlayers().forEach(online -> {
-                RaspiPlayer raspiPlayer = Raspi.players().get(online);
-                if (args[finalI].toLowerCase().contains(online.getName().toLowerCase()) && !args[finalI].startsWith("<blue><underlined><click")) {
-                    args[finalI] = args[finalI].replaceAll(online.getName().toLowerCase(), raspiPlayer.getColorName());
-                    args[finalI] = args[finalI].replaceAll(online.getName(), raspiPlayer.getColorName());
+            for (RaspiPlayer raspiOnlinePlayer : Raspi.players().getActivePlayers().values()) {
+                if (args[i].toLowerCase().contains(raspiOnlinePlayer.getPlayer().getName().toLowerCase()) && !args[i].startsWith("<blue><underlined><click")) {
+                    args[i] = args[i].replaceAll(raspiOnlinePlayer.getPlayer().getName().toLowerCase(), raspiOnlinePlayer.getColorName());
+                    args[i] = args[i].replaceAll(raspiOnlinePlayer.getPlayer().getName(), raspiOnlinePlayer.getColorName());
 
                 }
-            });
-            preResult.append(args[finalI]).append(" ");
+
+            }
+            preResult.append(args[i]).append(" ");
         }
         String result = preResult.toString();
         return result.substring(0, result.length() - 1);

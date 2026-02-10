@@ -5,13 +5,11 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.database.DatabaseTables;
 import eu.goodyfx.system.core.database.RaspiSuggestions;
 import eu.goodyfx.system.core.managers.ExtraInfos;
 import eu.goodyfx.system.core.utils.PlayerInfo;
 import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiPermission;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
@@ -46,11 +44,16 @@ public class PlayerInfoCommandContainer {
         if (!(context.getSource().getSender() instanceof Player player)) {
             return Command.SINGLE_SUCCESS;
         }
-        String info = StringArgumentType.getString(context, "extrainfo");
-        info = info.replace(" ", "@");
-        ExtraInfos extraInfos = new ExtraInfos(player);
-        extraInfos.add(Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player")), info, false);
-        Raspi.players().get(player).sendMessage(String.format("<gray>Die %s<aqua><u>info</hover> <gray>wurde gespeichert.", String.format("<hover:show_text:'<green>Extra Info: <gray>%s'>", info.replace("@", " "))), true);
+
+        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+            String info = StringArgumentType.getString(context, "extrainfo");
+            info = info.replace(" ", "@");
+            ExtraInfos extraInfos = new ExtraInfos(player);
+            extraInfos.add(Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player")), info, false);
+            raspiPlayer.sendMessage(String.format("<gray>Die %s<aqua><u>info</hover> <gray>wurde gespeichert.", String.format("<hover:show_text:'<green>Extra Info: <gray>%s'>", info.replace("@", " "))), true);
+
+        });
+
         return Command.SINGLE_SUCCESS;
     }
 
@@ -58,11 +61,13 @@ public class PlayerInfoCommandContainer {
         if (!(context.getSource().getSender() instanceof Player player)) {
             return Command.SINGLE_SUCCESS;
         }
-        String info = StringArgumentType.getString(context, "extrainfo");
-        info = info.replace(" ", "@");
-        ExtraInfos extraInfos = new ExtraInfos(player);
-        extraInfos.add(Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player")), info, true);
-        Raspi.players().get(player).sendMessage(String.format("<gray>Die Mod %s<aqua><u>info</hover> <gray>wurde gespeichert.", String.format("<hover:show_text:'<green>Extra Info: <gray>%s'>", info.replace("@", " "))), true);
+        Raspi.players().withOnlinePlayer(player, raspiOffPlayer -> {
+            String info = StringArgumentType.getString(context, "extrainfo");
+            info = info.replace(" ", "@");
+            ExtraInfos extraInfos = new ExtraInfos(player);
+            extraInfos.add(Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player")), info, true);
+            raspiOffPlayer.sendMessage(String.format("<gray>Die Mod %s<aqua><u>info</hover> <gray>wurde gespeichert.", String.format("<hover:show_text:'<green>Extra Info: <gray>%s'>", info.replace("@", " "))), true);
+        });
         return Command.SINGLE_SUCCESS;
     }
 
@@ -71,13 +76,14 @@ public class PlayerInfoCommandContainer {
         if (!(context.getSource().getSender() instanceof Player player)) {
             return Command.SINGLE_SUCCESS;
         }
+        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+            String extraInfoID = StringArgumentType.getString(context, "extrainfo");
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player"));
 
-        String extraInfoID = StringArgumentType.getString(context, "extrainfo");
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player"));
-
-        ExtraInfos extraInfos = new ExtraInfos(player);
-        extraInfos.remove(offlinePlayer, extraInfoID, false);
-        Raspi.players().get(player).sendMessage(String.format("<gray>Du hast die %s<aqua><u>info</hover> <gray>entfernt", String.format("<hover:show_text:'<aqua>ID: <gray>%s'>", extraInfoID)), true);
+            ExtraInfos extraInfos = new ExtraInfos(player);
+            extraInfos.remove(offlinePlayer, extraInfoID, false);
+            raspiPlayer.sendMessage(String.format("<gray>Du hast die %s<aqua><u>info</hover> <gray>entfernt", String.format("<hover:show_text:'<aqua>ID: <gray>%s'>", extraInfoID)), true);
+        });
         return Command.SINGLE_SUCCESS;
     }
 
@@ -87,15 +93,17 @@ public class PlayerInfoCommandContainer {
         if (!(context.getSource().getSender() instanceof Player player)) {
             return Command.SINGLE_SUCCESS;
         }
-        RaspiPlayer raspiPlayer = Raspi.players().get(player);
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player"));
-        Raspi.players().getRaspiOfflinePlayer(offlinePlayer).thenAcceptAsync(raspiOfflinePlayer -> {
-            if (raspiOfflinePlayer == null) {
+        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player"));
+
+            if (!offlinePlayer.hasPlayedBefore()) {
                 raspiPlayer.sendMessage("<red>❌ Spieler nicht gefunden", true);
                 return;
             }
-            player.showDialog(new PlayerInfo(raspiOfflinePlayer).buildPlayerInfosDialog(offlinePlayer, player));
-        }, runnable -> Bukkit.getScheduler().runTask(plugin, runnable));
+
+
+            player.showDialog(new PlayerInfo(offlinePlayer).buildPlayerInfosDialog(offlinePlayer, player));
+        });
         return Command.SINGLE_SUCCESS;
     }
 

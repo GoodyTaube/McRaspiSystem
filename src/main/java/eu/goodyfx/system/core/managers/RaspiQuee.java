@@ -1,9 +1,9 @@
 package eu.goodyfx.system.core.managers;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.QueueContainer;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -71,7 +71,7 @@ public class RaspiQuee {
             if (playerContainer.get(per).getQueuePosition() == oldPos) {
                 return;
             }
-            sendQueuePosition(Raspi.players().get(Bukkit.getPlayer(per)));
+            Raspi.players().withOnlinePlayer(Objects.requireNonNull(player.getPlayer()), this::sendQueuePosition);
         }
     }
 

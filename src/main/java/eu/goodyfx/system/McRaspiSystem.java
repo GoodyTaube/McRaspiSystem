@@ -1,6 +1,8 @@
 package eu.goodyfx.system;
 
 import eu.goodyfx.system.core.SystemStartUp;
+import eu.goodyfx.system.core.api.PlayerLifeCycleService;
+import eu.goodyfx.system.core.api.RaspiAccountService;
 import eu.goodyfx.system.core.commands.*;
 import eu.goodyfx.system.core.database.DatabaseManager;
 import eu.goodyfx.system.core.database.RaspiPlayers;
@@ -43,7 +45,8 @@ public final class McRaspiSystem extends JavaPlugin {
     private RaspiDebugger debugger;
     private DatabaseManager databaseManager;
     private DiscordBotClient discordBot;
-
+    private RaspiAccountService raspiAccountService;
+    private PlayerLifeCycleService playerLifeCycleService;
     private final Random random = new Random();
 
 
@@ -80,7 +83,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private void playerInit() {
         RaspiPlayers players = new RaspiPlayers();
         Raspi.init(players, debugger);
-        new PlayerLifecycleListener(players);
+        new PlayerLifecycleListener();
     }
 
 
@@ -119,6 +122,8 @@ public final class McRaspiSystem extends JavaPlugin {
         tasks();
         moduleManager.getMotdManager().set();
         new InHeadSpectator();
+        raspiAccountService = new RaspiAccountService(getAsyncExecutor());
+        this.playerLifeCycleService = new PlayerLifeCycleService(this, raspiAccountService);
     }
 
     private void tasks() {
@@ -144,7 +149,6 @@ public final class McRaspiSystem extends JavaPlugin {
             getServer().getWhitelistedPlayers().clear();
             getServer().setWhitelist(true);
             getConfig().set("Utilities.wartung", true);
-            Raspi.players().checkOldContents();
         } else {
             getServer().setWhitelist(false);
             getDebugger().info("Keine Dateien zur Migration gefunden // SKIP TASK");

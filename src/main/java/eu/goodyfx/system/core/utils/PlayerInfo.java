@@ -31,27 +31,30 @@ import java.util.stream.Collectors;
 public class PlayerInfo {
 
     private final OfflinePlayer player;
-    private final RaspiUser raspiUser;
-    private final RaspiManagement management;
+    private RaspiUser raspiUser;
+    private RaspiManagement management;
 
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
     private final List<String> playerInfoAssets = new ArrayList<>();
 
-    public PlayerInfo(RaspiOfflinePlayer player) {
-
-        this.raspiUser = player.getRaspiUser();
-        this.management = player.getManagement();
+    public PlayerInfo(OfflinePlayer player) {
         this.player = player.getPlayer();
-        //lastNames();
-        firstDocumentation();
-        parseGroups();
-        registration();
-        timePlayed();
-        lastDeath();
-        lastSeen();
-        playerXP();
-        playerServerInfos();
+        Raspi.players().getOrLoadPlayer(player.getUniqueId()).thenAccept(account -> {
+            this.raspiUser = account.getRaspiUser();
+            this.management = account.getRaspiManagement();
+
+            //lastNames();
+            firstDocumentation();
+            parseGroups();
+            registration();
+            timePlayed();
+            lastDeath();
+            lastSeen();
+            playerXP();
+            playerServerInfos();
+
+        });
     }
 
     private void parseValueToInfo(PlayerInfosValues info, String value) {

@@ -1,9 +1,9 @@
 package eu.goodyfx.system.core.commandsOLD.subcommands;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.SubCommand;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.tasks.InventoryBackup;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
+import eu.goodyfx.system.core.utils.SubCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -29,6 +29,7 @@ public class AdminRestoreAdminSubCommand extends SubCommand {
     public String getSyntax() {
         return "/admin " + getLabel() + " <player>";
     }
+
     @Override
     public int length() {
         return 1;

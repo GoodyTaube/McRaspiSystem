@@ -3,8 +3,9 @@ package eu.goodyfx.system.core.events;
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.AFKCommand;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,10 +30,14 @@ public class PlayerAFKHandler implements Listener {
     }
 
     public void checkUp(Player player) {
-        RaspiPlayer raspiPlayer = Raspi.players().get(player);
-        if (raspiPlayer.isInitialized() && raspiPlayer.getUserSettings().isAfk()) {
-            raspiPlayer.performCommand("afk");
-        }
+        Raspi.players().getContextPlayer(player.getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
+            if (context instanceof RaspiPlayer raspiPlayer) {
+                if (raspiPlayer.settings().isAfk()) {
+                    raspiPlayer.performCommand("afk");
+                }
+            }
+        }));
+
     }
 
     @EventHandler
@@ -53,23 +58,30 @@ public class PlayerAFKHandler implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent moveEvent) {
         Player player = moveEvent.getPlayer();
-        RaspiPlayer raspiPlayer = Raspi.players().get(player);
-        AFKCommand.getPlayerIDLE().remove(player.getUniqueId());
 
-        if (raspiPlayer.isInitialized() && raspiPlayer.getUserSettings().isAfk()) {
-            if (!changedWorld.contains(player.getUniqueId())) {
-                Location locationStart = Raspi.players().getAfkContainer().get(player.getUniqueId());
-                if (locationStart == null) {
-                    return;
+        Raspi.players().getContextPlayer(player.getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
+
+            if (context instanceof RaspiPlayer raspiPlayer) {
+                AFKCommand.getPlayerIDLE().remove(player.getUniqueId());
+
+                if (raspiPlayer.settings().isAfk()) {
+                    if (!changedWorld.contains(player.getUniqueId())) {
+                        Location locationStart = Raspi.players().getAfkContainer().get(player.getUniqueId());
+                        if (locationStart == null) {
+                            return;
+                        }
+                        if (locationStart.distance(moveEvent.getTo()) > 2 && !plugin.getModule().getWarteschlangenManager().playersQueue.contains(player.getUniqueId())) {
+                            raspiPlayer.performCommand("afk");
+                        }
+                    } else {
+                        Raspi.players().getAfkContainer().put(player.getUniqueId(), player.getLocation());
+                        changedWorld.remove(player.getUniqueId());
+                    }
                 }
-                if (locationStart.distance(moveEvent.getTo()) > 2 && !plugin.getModule().getWarteschlangenManager().playersQueue.contains(player.getUniqueId())) {
-                    raspiPlayer.performCommand("afk");
-                }
-            } else {
-                Raspi.players().getAfkContainer().put(player.getUniqueId(), player.getLocation());
-                changedWorld.remove(player.getUniqueId());
             }
-        }
+
+        }));
+
 
     }
 

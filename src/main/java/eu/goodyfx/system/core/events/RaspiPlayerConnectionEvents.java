@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.database.RaspiUser;
 import eu.goodyfx.system.core.managers.LocationManager;
 import eu.goodyfx.system.core.managers.RequestManager;
@@ -47,33 +48,37 @@ public class RaspiPlayerConnectionEvents implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onJoined(PlayerJoinEvent playerJoinEvent) {
         Player player = playerJoinEvent.getPlayer();
-        RaspiPlayer raspiPlayer = Raspi.players().get(player);
-        LocationManager manager = plugin.getModule().getLocationManager();
-        checkSystemLocationsExists(player, manager);
+        Raspi.players().getContextPlayer(player.getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!(context instanceof RaspiPlayer raspiPlayer)) {
+                return;
+            }
+            LocationManager manager = plugin.getModule().getLocationManager();
+            checkSystemLocationsExists(player, manager);
 
-        //Check if joining Player joins in Active World
-        settings.join(raspiPlayer);
-        settings.setHeader();
-        //REQUEST
+            //Check if joining Player joins in Active World
+            settings.join(raspiPlayer);
+            settings.setHeader();
+            //REQUEST
 
-        if (!(player.hasPlayedBefore()) || (player.getPersistentDataContainer().has(joinErrorKey))) {
-            spielerNeu(player);
-        }
+            if (!(player.hasPlayedBefore()) || (player.getPersistentDataContainer().has(joinErrorKey))) {
+                spielerNeu(player);
+            }
 
-        raspiRequest(raspiPlayer);
-        playerJoinEvent.joinMessage(null);
-        Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(RaspiFormatting.formattingChatMessage(plugin.getModule().getJoinMessageManager().get(player))));
+            raspiRequest(raspiPlayer);
+            playerJoinEvent.joinMessage(null);
+            Bukkit.getOnlinePlayers().forEach(all -> all.sendRichMessage(RaspiFormatting.formattingChatMessage(plugin.getModule().getJoinMessageManager().get(player))));
 
-        if ((!player.isPermissionSet("system.bypass") && (raspiPlayer.hasTimePlayed(100)))) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + player.getName() + " permission set system.bypass");
-        }
+            if ((!player.isPermissionSet("system.bypass") && (raspiPlayer.hasTimePlayed(100)))) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + player.getName() + " permission set system.bypass");
+            }
 
-        plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
+            plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
 
-        timeContainer.put(player.getUniqueId(), new PlayerTime(player));
+            timeContainer.put(player.getUniqueId(), new PlayerTime(player));
 
-        welcomeMessage(Raspi.players().get(player));
-        plugin.getModule().getItemConverterManager().convert(player.getInventory());
+            welcomeMessage(raspiPlayer);
+            plugin.getModule().getItemConverterManager().convert(player.getInventory());
+        }));
 
     }
 
@@ -138,9 +143,10 @@ public class RaspiPlayerConnectionEvents implements Listener {
 
     private void handleBlocked(RaspiPlayer raspiPlayer) {
         Player player = raspiPlayer.getPlayer();
-        RaspiUser user = Raspi.players().get(player).getUser();
+        RaspiUser user = raspiPlayer.userData();
+
         if (requestManager.isBlocked(user)) {
-            Raspi.players().getRaspiModPlayers().forEach(team -> {
+            Raspi.players().getRaspiPlayers(RaspiPermission.MOD).forEach(team -> {
                 team.sendMessage(String.format("<gray><italic>%s wurde bereits von %s <gray><italic>Abgelehnt!", player.getName(), requestManager.getDeny(user)), true);
                 if (requestManager.isBlocked(user)) {
                     team.sendMessage(String.format("<gray><italic>Grund: <yellow>%s", requestManager.getReason(user).replace("@", " ")), true);
@@ -156,10 +162,10 @@ public class RaspiPlayerConnectionEvents implements Listener {
     }
 
     private void handleNewbie(RaspiPlayer player) {
-        if (player.getUser().getState() == null) {
+        if (player.userData().getState() == null) {
             if (player.hasPermission("group.spieler")) {
                 //Spieler bereits freigeschaltet interne Verarbeitung, freischaltung setzten
-                RaspiUser targetPlayer = player.getUser();
+                RaspiUser targetPlayer = player.userData();
                 targetPlayer.setState(true);
                 targetPlayer.setAllowed_since(new SimpleDateFormat("dd/MM/yyyy").format(new Date(System.currentTimeMillis())));
                 targetPlayer.setAllowed_by("SYSTEM");
@@ -168,7 +174,7 @@ public class RaspiPlayerConnectionEvents implements Listener {
                 plugin.getLogger().info("[PLAYER ALLOW_STATE RECOVER]:: ALLOWED :: " + targetPlayer.getUsername() + " BY SYSTEM");
                 return;
             }
-            List<RaspiPlayer> teams = Raspi.players().getRaspiModPlayers();
+            List<RaspiPlayer> teams = Raspi.players().getRaspiPlayers(RaspiPermission.MOD);
 
 
             if (!teams.isEmpty()) {

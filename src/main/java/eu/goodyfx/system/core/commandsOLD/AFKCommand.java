@@ -5,7 +5,6 @@ import eu.goodyfx.system.core.events.PlayerAFKEvent;
 import eu.goodyfx.system.core.managers.LocationManager;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -42,34 +41,34 @@ public class AFKCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if (sender instanceof Player playerD) {
-            RaspiPlayer player = Raspi.players().get(playerD);
-            if (args.length == 0) {
-                Location playerLocation = playerD.getLocation();
+            Raspi.players().withOnlinePlayer(playerD, player -> {
+                if (args.length == 0) {
+                    Location playerLocation = playerD.getLocation();
 
-                if (player.getUserSettings().isAfk()) {
-                    player.getUserSettings().setAfk(false);
+                    if (player.settings().isAfk()) {
+                        player.settings().setAfk(false);
+                        warteschlangenManager.setHeader();
+                        playerD.setSleepingIgnored(false);
+                        playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<red>Du bist nicht mehr AFK"));
+                        player.nameController.setPlayerList();
+                        return;
+
+                    }
+                    player.settings().setAfk(true);
+                    if (!playerLocation.getWorld().getName().equalsIgnoreCase(locationManager.getWorldName("waiting")) && warteschlangenManager.queueSize() > 0 && !warteschlangenManager.playersQueue.contains(playerD.getUniqueId())) {
+                        warteschlangenManager.queue();
+                        warteschlangenManager.addToQueue(playerD.getUniqueId(), playerLocation);
+                    }
+                    playerD.setSleepingIgnored(true);
                     warteschlangenManager.setHeader();
-                    playerD.setSleepingIgnored(false);
-                    playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<red>Du bist nicht mehr AFK"));
-                    player.nameController().setPlayerList();
-                    return true;
+                    playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Du bist nun AFK"));
+                    player.nameController.setPlayerList();
 
+                    PlayerAFKEvent afkEvent = new PlayerAFKEvent(player);
+                    Bukkit.getPluginManager().callEvent(afkEvent);
                 }
-                player.getUserSettings().setAfk(true);
-                if (!playerLocation.getWorld().getName().equalsIgnoreCase(locationManager.getWorldName("waiting")) && warteschlangenManager.queueSize() > 0 && !warteschlangenManager.playersQueue.contains(playerD.getUniqueId())) {
-                    warteschlangenManager.queue();
-                    warteschlangenManager.addToQueue(playerD.getUniqueId(), playerLocation);
-                }
-                playerD.setSleepingIgnored(true);
-                warteschlangenManager.setHeader();
-                playerD.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Du bist nun AFK"));
-                player.nameController().setPlayerList();
-
-                PlayerAFKEvent afkEvent = new PlayerAFKEvent(Raspi.players().get(playerD));
-                Bukkit.getPluginManager().callEvent(afkEvent);
-                return true;
-            }
-
+            });
+            return true;
         }
         return false;
     }

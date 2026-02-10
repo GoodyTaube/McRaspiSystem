@@ -2,10 +2,10 @@ package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commands.SitCommandContainer;
-import eu.goodyfx.system.core.database.RaspiPlayers;
+import eu.goodyfx.system.core.database.RaspiAccount;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -21,14 +21,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.SimpleDateFormat;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class PlayerLifecycleListener implements Listener {
 
-    private final RaspiPlayers players;
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
-    public PlayerLifecycleListener(RaspiPlayers players) {
-        this.players = players;
+    public PlayerLifecycleListener() {
         McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
         plugin.setListeners(this);
     }
@@ -43,35 +42,42 @@ public class PlayerLifecycleListener implements Listener {
         if (!player.isCollidable()) {
             player.setCollidable(true);
         }
+        Raspi.players().getContextPlayer(player.getUniqueId()).thenAccept(context -> {
+            if (context instanceof RaspiPlayer online) {
+                online.sendMessage("JOIN MESSAGE");
+            }
+        });
 
-        Raspi.players().loadAsync(player.getUniqueId(), false);
-        Raspi.debugger().info("[Lifecycle] Async preload done for " + player.getName());
-        Raspi.players().initPlayer(player);
         banCheck(player.getUniqueId());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player bukkitPlayer = event.getPlayer();
+
         SitCommandContainer.endSitting(bukkitPlayer); //Falls der Spieler gesessen hat.
-        RaspiPlayer player = Raspi.players().get(event.getPlayer());
+        RaspiPlayer player = Raspi.players().getActive(event.getPlayer());
         if (plugin.getConfig().getBoolean("Utilities.afk.autoAFK")) {
-            player.getUserSettings().setAuto_afk(true);
+            player.settings().setAuto_afk(true);
         }
-        player.getUser().setLastSeen(System.currentTimeMillis());
-        if (player.getUserSettings().isAfk()) {
-            Bukkit.dispatchCommand(player.getPlayer
-                    (), "afk");
+        player.userData().setLastSeen(System.currentTimeMillis());
+        if (player.settings().isAfk()) {
+            Bukkit.dispatchCommand(player.getPlayer(), "afk");
             plugin.getLogger().info(player.getPlayer().getName() + "  was AFK while Disconnecting! Removed AFK status!");
         }
-        player.nameController().resetRandom();
-
+        player.nameController.resetRandom();
         if (plugin.getConfig().getBoolean("Utilities.leaveMessage")) {
             event.quitMessage(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getLeave(player.getColorName())));
         }
-
         warteschlange(bukkitPlayer); //ALT UND MUSS GETAUSCHT WERDEN
-        players.saveAndRemove(event.getPlayer().getUniqueId());
+
+
+        Raspi.players().getActivePlayers().remove(bukkitPlayer.getUniqueId());
+
+        RaspiAccount raspiAccount = Raspi.players().getAccountsCache().get(bukkitPlayer.getUniqueId());
+        if (raspiAccount != null) {
+            CompletableFuture.runAsync(raspiAccount::save, plugin.getAsyncExecutor());
+        }
         plugin.getDebugger().info(String.format("[Lifecycle] Removed %s from RaspiPLayers!", bukkitPlayer.getName()));
         plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> hat uns verlassen.`", bukkitPlayer.getName()));
     }
@@ -105,7 +111,6 @@ public class PlayerLifecycleListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
-        UUID uuid = event.getUniqueId();
         //Check if UserMigration is Running
         if (Bukkit.getServer().hasWhitelist()) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize("<dark_red>User Migration Läuft! <red><br>Warte auf Abschluss...."));
@@ -116,19 +121,19 @@ public class PlayerLifecycleListener implements Listener {
     }
 
     private void banCheck(UUID uuid) {
-        RaspiPlayer raspiPlayer = Raspi.players().get(uuid);
-        if (raspiPlayer.getManagement().isBanned()) {
-            if (System.currentTimeMillis() < raspiPlayer.getManagement().getBan_expire()) {
-                raspiPlayer.getPlayer().kick(MiniMessage.miniMessage().deserialize(String.format("<red>McRaspi.com <gray><b>-</b> <red>Disconnect<br><br><red><b>Du wurdest temporär gesperrt!</b><br>" +
-                                "<gray>Du wurdest von: <red>%s <gray>für folgendes gesperrt:<br>" +
-                                "<yellow>'%s'<br><br>" +
-                                "<gray>Du wirst am <red>%s <gray>entsperrt.",
-                        raspiPlayer.getManagement().getBan_owner(), raspiPlayer.getManagement().getBan_message(), new SimpleDateFormat("dd-MM-yyyy HH:mm").format(raspiPlayer.getManagement().getBan_expire()))), PlayerKickEvent.Cause.BANNED);
-            } else {
-                raspiPlayer.getManagement().performUnban();
-                plugin.getLogger().info(plugin.getModule().getRaspiMessages().getPrefix() + " " + raspiPlayer.getPlayer().getName() + " wurde Entsperrt weil seine sperrzeit abgelaufen ist.");
+
+        Raspi.players().getContextPlayer(uuid).thenAccept(context -> {
+            if (context instanceof RaspiPlayer player) {
+                if (context.userManagement().isBanned()) {
+                    if (System.currentTimeMillis() < context.userManagement().getBan_expire()) {
+                        player.getPlayer().kick(MiniMessage.miniMessage().deserialize(String.format("<red>McRaspi.com <gray><b>-</b> <red>Disconnect<br><br><red><b>Du wurdest temporär gesperrt!</b><br>" + "<gray>Du wurdest von: <red>%s <gray>für folgendes gesperrt:<br>" + "<yellow>'%s'<br><br>" + "<gray>Du wirst am <red>%s <gray>entsperrt.", context.userManagement().getBan_owner(), context.userManagement().getBan_message(), new SimpleDateFormat("dd-MM-yyyy HH:mm").format(context.userManagement().getBan_expire()))), PlayerKickEvent.Cause.BANNED);
+                    } else {
+                        context.userManagement().performUnban();
+                        plugin.getLogger().info(plugin.getModule().getRaspiMessages().getPrefix() + " " + player.getPlayer().getName() + " wurde Entsperrt weil seine sperrzeit abgelaufen ist.");
+                    }
+                }
             }
-        }
+        });
     }
 
 }

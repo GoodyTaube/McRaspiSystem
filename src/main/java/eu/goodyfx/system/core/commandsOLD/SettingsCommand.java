@@ -1,9 +1,9 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.database.UserSettings;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.Settings;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -38,19 +38,24 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player dummy && (args.length == 1)) {
-            RaspiPlayer raspiPlayer = Raspi.players().get(dummy);
+
             // settings chat
-            switch (args[0]) {
-                case "chat":
-                    perform(Settings.MESSAGES, raspiPlayer);
-                    break;
-                case "afk":
-                    perform(Settings.AUTO_AFK, raspiPlayer);
-                    break;
-                case "opt-chat":
-                    perform(Settings.ADVANCED_CHAT, raspiPlayer);
-                    break;
-            }
+            Raspi.players().withOnlinePlayer(dummy, raspiPlayer -> {
+
+                switch (args[0]) {
+                    case "chat":
+                        perform(Settings.MESSAGES, raspiPlayer);
+                        break;
+                    case "afk":
+                        perform(Settings.AUTO_AFK, raspiPlayer);
+                        break;
+                    case "opt-chat":
+                        perform(Settings.ADVANCED_CHAT, raspiPlayer);
+                        break;
+                }
+
+            });
+
             return true;
         }
         return false;
@@ -65,18 +70,8 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
     }
 
 
-    public Boolean hasSetting(Settings settings, RaspiPlayer player) {
-        return switch (settings) {
-            case ADVANCED_CHAT -> player.getUserSettings().isOpt_chat();
-            case AUTO_AFK -> player.getUserSettings().isAuto_afk();
-            case MESSAGES -> player.getUserSettings().isServer_messages();
-        };
-
-    }
-
-
     private void perform(Settings settings, RaspiPlayer player) {
-        UserSettings userSettings = player.getUserSettings();
+        UserSettings userSettings = player.settings();
         switch (settings) {
             case ADVANCED_CHAT:
                 if (userSettings.isOpt_chat()) {

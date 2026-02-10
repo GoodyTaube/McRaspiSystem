@@ -1,9 +1,9 @@
 package eu.goodyfx.system.lootchest.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.InventoryBuilder;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiSounds;
 import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.lootchest.utils.LootChestMenuItems;
@@ -92,11 +92,14 @@ public class LootChestListeners implements Listener {
 
     private void lootChest(InventoryClickEvent clickEvent) {
         Player player = (Player) clickEvent.getWhoClicked();
-        RaspiPlayer raspiPlayer = Raspi.players().get(player);
-        if (isLootChest(clickEvent.getView())) {
-            handleLootChestMenuClick(clickEvent, raspiPlayer);
-            handleBackItem(clickEvent, raspiPlayer);
-        }
+        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+            if (isLootChest(clickEvent.getView())) {
+                handleLootChestMenuClick(clickEvent, raspiPlayer);
+                handleBackItem(clickEvent, raspiPlayer);
+            }
+
+        });
+
     }
 
     private void handleBackItem(InventoryClickEvent clickEvent, RaspiPlayer player) {

@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.utils;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.java_websocket.client.WebSocketClient;
@@ -27,7 +28,7 @@ public class DiscordBotClient extends WebSocketClient {
     @Override
     public void onMessage(String s) {
         plugin.getLogger().info("Nachricht empfangen! " + s);
-        for (RaspiPlayer raspiPlayer : Raspi.players().getRaspiPlayers()) {
+        for (RaspiPlayer raspiPlayer : Raspi.players().getActivePlayers().values()) {
             raspiPlayer.sendMessage("<white>[<aqua>Discord<white>] <gray>" + s);
         }
     }

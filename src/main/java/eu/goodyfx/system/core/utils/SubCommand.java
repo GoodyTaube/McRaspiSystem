@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.utils;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 

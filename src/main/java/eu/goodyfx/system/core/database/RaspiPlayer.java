@@ -1,11 +1,9 @@
-package eu.goodyfx.system.core.utils;
-
+package eu.goodyfx.system.core.database;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.database.RaspiManagement;
-import eu.goodyfx.system.core.database.RaspiUser;
-import eu.goodyfx.system.core.database.RaspiUsernames;
-import eu.goodyfx.system.core.database.UserSettings;
+import eu.goodyfx.system.core.utils.PlayerNameController;
+import eu.goodyfx.system.core.utils.RaspiPermission;
+import eu.goodyfx.system.core.utils.RaspiSounds;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -21,61 +19,46 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-@SuppressWarnings("unused")
-@Getter
-public class RaspiPlayer {
+public class RaspiPlayer implements RaspiUserContext {
 
-    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
+    @Getter
     private final Player player;
-    private RaspiUser user;
-    private RaspiManagement management;
-    private UserSettings userSettings;
-    private PlayerNameController nameController;
-    private RaspiUsernames usernames;
-    private volatile boolean initialized;
+    private final RaspiAccount raspiAccount;
+    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
+    public final PlayerNameController nameController;
 
-    public RaspiPlayer(Player player) {
+
+    public RaspiPlayer(Player player, RaspiAccount account) {
         this.player = player;
-    }
-
-    public void initData(RaspiUser raspiUser, RaspiManagement raspiManagement, UserSettings settings, RaspiUsernames usernames) {
-        if (initialized) return;
-        this.user = Raspi.players().getRaspiUser(getUUID());
-        this.management = Raspi.players().getManagement(getUUID());
-        this.userSettings = Raspi.players().getUserSettings(getUUID());
+        this.raspiAccount = account;
         this.nameController = new PlayerNameController(this);
-        this.usernames = Raspi.players().getUserNameCache(getUUID());
-        this.initialized = true;
-        Raspi.debugger().info(player.getName() + " INIT FINISHED");
     }
 
-    public void openInventory(Inventory inventory) {
-        player.openInventory(inventory);
+    @Override
+    public UUID getUUID() {
+        return player.getUniqueId();
     }
 
-    public void ban(Player banOwner, String reason) {
-        management.performBan(banOwner, reason);
+    @Override
+    public RaspiAccount account() {
+        return this.raspiAccount;
     }
 
-    public void unBan() {
-        management.performUnban();
+    @Override
+    public boolean isOnline() {
+        return true;
     }
-
-    public void mute(Player muteOwner, String reason) {
-        management.performMute(muteOwner, reason);
-    }
-
-    public void unMute() {
-        management.performUnMute();
-    }
-
 
     public void openInventory(InventoryView view) {
         player.openInventory(view);
     }
 
+    public void openInventory(Inventory view) {
+        player.openInventory(view);
+    }
+
     public String getPrefix() {
-        String prefix = user.getPrefix();
+        String prefix = userData().getPrefix();
         if (prefix != null) {
             prefix = prefix.replace("@", " ");
         }
@@ -83,18 +66,13 @@ public class RaspiPlayer {
     }
 
     public void setPrefix(String db_prefix) {
-        user.setPrefix(db_prefix);
-        nameController().setPlayerList();
-    }
-
-    public void removePrefix() {
-        user.setPrefix(null);
+        account().getRaspiUser().setPrefix(db_prefix);
         nameController.setPlayerList();
     }
 
-
-    public PlayerNameController nameController() {
-        return nameController;
+    public void removePrefix() {
+        account().getRaspiUser().setPrefix(null);
+        nameController.setPlayerList();
     }
 
 
@@ -104,7 +82,7 @@ public class RaspiPlayer {
      * @return The current Color String
      */
     public String getColor() {
-        return user.getColor();
+        return account().getRaspiUser().getColor();
     }
 
     /**
@@ -113,11 +91,11 @@ public class RaspiPlayer {
      * @return Name Display with Prefix if set
      */
     public String getDisplayName() {
-        return nameController().getColorDisplayName();
+        return nameController.getColorDisplayName();
     }
 
     public String getColorName() {
-        return nameController().getColorName();
+        return nameController.getColorName();
     }
 
 
@@ -125,9 +103,6 @@ public class RaspiPlayer {
         return Bukkit.getOfflinePlayer(player.getUniqueId());
     }
 
-    public UUID getUUID() {
-        return player.getUniqueId();
-    }
 
     /**
      * Send player a Message with Component API
@@ -271,7 +246,4 @@ public class RaspiPlayer {
     }
 
 
-    public Object getUZs() {
-        return null;
-    }
 }

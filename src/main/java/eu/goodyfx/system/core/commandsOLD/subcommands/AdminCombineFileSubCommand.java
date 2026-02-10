@@ -1,8 +1,8 @@
 package eu.goodyfx.system.core.commandsOLD.subcommands;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.SubCommand;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AdminCombineFileSubCommand extends SubCommand{
+public class AdminCombineFileSubCommand extends SubCommand {
 
     private final McRaspiSystem plugin;
 
@@ -41,7 +41,6 @@ public class AdminCombineFileSubCommand extends SubCommand{
     public int length() {
         return 3;
     }
-
 
 
     @Override

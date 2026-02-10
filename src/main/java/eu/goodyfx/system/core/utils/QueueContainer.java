@@ -1,5 +1,6 @@
 package eu.goodyfx.system.core.utils;
 
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import org.bukkit.Location;
 
 import java.util.Queue;
@@ -17,19 +18,19 @@ public class QueueContainer {
         this.queuePosition = getQueuePosition(queue);
     }
 
-    public void setPosition(Queue<UUID> current){
+    public void setPosition(Queue<UUID> current) {
         this.queuePosition = getQueuePosition(current);
     }
 
-    public Integer getQueuePosition(){
+    public Integer getQueuePosition() {
         return queuePosition;
     }
 
-    private Integer getQueuePosition(Queue<UUID> current){
+    private Integer getQueuePosition(Queue<UUID> current) {
         int id = 0;
-        for(UUID users : current){
+        for (UUID users : current) {
             id++;
-            if(users.equals(player.getUUID())){
+            if (users.equals(player.getUUID())) {
                 return id;
             }
         }

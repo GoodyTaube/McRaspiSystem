@@ -2,7 +2,6 @@ package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
-import eu.goodyfx.system.core.utils.Raspi;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -43,7 +42,9 @@ public class PlayerListeners implements Listener {
 
     @EventHandler
     public void onHunger(FoodLevelChangeEvent event) {
-        if (event.getEntity() instanceof Player player && Raspi.players().get(player).isDefault()) {
+
+
+        if (event.getEntity() instanceof Player player && !player.isPermissionSet("group.spieler")) {
             event.setCancelled(true);
         }
     }

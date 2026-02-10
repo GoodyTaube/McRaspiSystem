@@ -1,10 +1,8 @@
 package eu.goodyfx.system.lootchest.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
-import io.papermc.paper.datacomponent.DataComponentType;
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,29 +34,28 @@ public class LootSpongeEvents implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
-        RaspiPlayer raspiPlayer =  Raspi.players().get(player);
         Block block = event.getBlock();
         ItemStack stack = event.getItemInHand();
         Location location = event.getBlockPlaced().getLocation();
 
         /**
-        if (block.getType().equals(Material.POLISHED_BLACKSTONE_BUTTON) && stack.getItemMeta() != null && stack.hasData(DataComponentTypes.CUSTOM_MODEL_DATA) && stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA).equals(String.valueOf(1))) {
+         if (block.getType().equals(Material.POLISHED_BLACKSTONE_BUTTON) && stack.getItemMeta() != null && stack.hasData(DataComponentTypes.CUSTOM_MODEL_DATA) && stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA).equals(String.valueOf(1))) {
 
-            if (locationMap.containsKey(player.getUniqueId())) {
-                if (!plugin.getModule().getLootManager().existAndActive(locationMap.get(player.getUniqueId()), location)) {
-                    plugin.getModule().getLootManager().setWarp(player, locationMap.get(player.getUniqueId()), location);
-                    player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "Position 2 für Teleport gesetzt!"));
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "Der Teleport Nr." + plugin.getModule().getLootManager().size() + " wurde erstellt!"));
-                    player.playSound(location, Sound.BLOCK_BEACON_ACTIVATE, 1f, 1f);
-                    locationMap.remove(player.getUniqueId());
-                    return;
-                }
-            } else {
-                locationMap.put(player.getUniqueId(), location);
-                player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "Position 1 für Teleport gesetzt!"));
-            }
-            return;
-        }
+         if (locationMap.containsKey(player.getUniqueId())) {
+         if (!plugin.getModule().getLootManager().existAndActive(locationMap.get(player.getUniqueId()), location)) {
+         plugin.getModule().getLootManager().setWarp(player, locationMap.get(player.getUniqueId()), location);
+         player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "Position 2 für Teleport gesetzt!"));
+         player.sendMessage(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "Der Teleport Nr." + plugin.getModule().getLootManager().size() + " wurde erstellt!"));
+         player.playSound(location, Sound.BLOCK_BEACON_ACTIVATE, 1f, 1f);
+         locationMap.remove(player.getUniqueId());
+         return;
+         }
+         } else {
+         locationMap.put(player.getUniqueId(), location);
+         player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "Position 1 für Teleport gesetzt!"));
+         }
+         return;
+         }
          **/
         if (stack.getItemMeta() != null && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == 1) {
             if (block.getType().equals(Material.SPONGE)) {
@@ -82,10 +79,6 @@ public class LootSpongeEvents implements Listener {
             }
 
         }
-    }
-
-    private void teleporter(Location location, ItemStack stack, RaspiPlayer raspiPlayer){
-
     }
 
     @EventHandler

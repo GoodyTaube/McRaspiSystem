@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.core.database.RaspiSuggestions;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
@@ -28,29 +27,22 @@ public class MuteCommandContainer {
             return Command.SINGLE_SUCCESS;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player"));
+        String targetName = StringArgumentType.getString(context, "player");
         String reason = StringArgumentType.getString(context, "reason");
         String formatted = reason.replace(" ", "@");
-        if (target.isOnline()) {
-            RaspiPlayer targetOnline = Raspi.players().get(target.getPlayer());
-            targetOnline.getManagement().performMute(player, reason);
+
+
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
+
+        Raspi.players().getOrLoadPlayer(target.getUniqueId()).thenAccept(account -> {
+
+            if (account.getRaspiManagement().isMuted()) {
+                player.sendRichMessage("Bereits stumm.");
+                return;
+            }
+
+            account.getRaspiManagement().performMute(player, formatted);
             player.sendRichMessage("Du hast den Spieler erfolgreich muted.");
-            return Command.SINGLE_SUCCESS;
-        }
-        Raspi.players().getRaspiOfflinePlayer(target).thenAcceptAsync(raspiOfflinePlayer -> {
-            RaspiPlayer raspiPlayer = Raspi.players().get(player);
-            if(raspiOfflinePlayer == null){
-                player.sendRichMessage("<red>Der Spieler spielte nicht ;I ");
-                return;
-            }
-            if(raspiOfflinePlayer.getManagement().isMuted()){
-                raspiPlayer.sendMessage("<red>Der Spieler ist bereits stummgeschaltet!", true);
-                return;
-            }
-            raspiOfflinePlayer.getManagement().setMuted(true);
-            raspiOfflinePlayer.getManagement().setMute_owner(player.getName());
-            raspiOfflinePlayer.getManagement().setMute_message(formatted);
-            raspiPlayer.sendMessage(String.format("Du hast %s erfolgreich stummgeschaltet!", raspiOfflinePlayer.getRaspiUser().getColor() +raspiOfflinePlayer.getRaspiUser().getUsername()), true);
         });
         return Command.SINGLE_SUCCESS;
     }

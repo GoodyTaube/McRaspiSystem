@@ -1,8 +1,8 @@
 package eu.goodyfx.system.lootchest.utils;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.InventoryBuilder;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;

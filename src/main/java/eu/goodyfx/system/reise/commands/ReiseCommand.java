@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReiseCommand implements CommandExecutor, TabCompleter {
 
@@ -56,15 +57,18 @@ public class ReiseCommand implements CommandExecutor, TabCompleter {
         if (sender instanceof Player player) {
             for (SubCommand subCommand : subCommands) {
                 if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                    if (subCommand.commandPerform(Raspi.players().get(player), args)) {
-                        return true;
-                    } else {
-                        if (subCommand.getDescription() != null && subCommand.getSyntax() != null) {
-                            player.sendRichMessage("<italic><gray>" + subCommand.getDescription() + "<hover:show_text:'" + subCommand.getSyntax() + "'> <green>SHOW");
+                    AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+                    Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+                        if (subCommand.commandPerform(raspiPlayer, args)) {
+                            atomicBoolean.set(true);
+                        } else {
+                            if (subCommand.getDescription() != null && subCommand.getSyntax() != null) {
+                                player.sendRichMessage("<italic><gray>" + subCommand.getDescription() + "<hover:show_text:'" + subCommand.getSyntax() + "'> <green>SHOW");
+                            }
+                            player.sendRichMessage("Error in reise " + subCommand.getLabel() + "!");
                         }
-                        player.sendRichMessage("Error in reise " + subCommand.getLabel() + "!");
-                    }
-                    break;
+                    });
+                    return atomicBoolean.get();
                 }
             }
         }

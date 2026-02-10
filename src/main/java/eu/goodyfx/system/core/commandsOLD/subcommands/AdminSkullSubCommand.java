@@ -1,8 +1,8 @@
 package eu.goodyfx.system.core.commandsOLD.subcommands;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.SubCommand;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

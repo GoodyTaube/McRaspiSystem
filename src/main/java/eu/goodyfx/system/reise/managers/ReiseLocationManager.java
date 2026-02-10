@@ -1,8 +1,8 @@
 package eu.goodyfx.system.reise.managers;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.exceptions.ValueNotFoundException;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.reise.utils.ReiseDisplayBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

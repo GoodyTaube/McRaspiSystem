@@ -5,12 +5,13 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.core.database.RaspiSuggestions;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import java.util.Objects;
 
 public class UnMuteCommandContainer {
 
@@ -24,19 +25,19 @@ public class UnMuteCommandContainer {
 
             OfflinePlayer taget = Bukkit.getOfflinePlayer(context.getArgument("player", String.class));
             if (taget.isOnline()) {
-                RaspiPlayer targetOnline = Raspi.players().get(taget.getPlayer());
-                targetOnline.getManagement().performUnMute();
-                player.sendRichMessage("<green>Die Anfrage wurde ausgeführt");
-                return Command.SINGLE_SUCCESS;
-
+                Raspi.players().withOnlinePlayer(Objects.requireNonNull(taget.getPlayer()), targetOnline -> {
+                    targetOnline.userManagement().performUnMute();
+                    player.sendRichMessage("<green>Die Anfrage wurde ausgeführt");
+                });
             } else {
-                Raspi.players().getRaspiOfflinePlayer(taget).thenAcceptAsync(raspiOfflinePlayer -> {
-                    if (raspiOfflinePlayer == null) {
-                        player.sendRichMessage("Der Spieler nix gibt.");
-                        return;
-                    }
-                    raspiOfflinePlayer.getManagement().performUnMute();
+                if (!taget.hasPlayedBefore()) {
+                    player.sendRichMessage("Der Spieler nix gibt.");
+                    return 1;
+                }
+                Raspi.players().getOrLoadPlayer(taget.getUniqueId()).thenAccept(account -> {
+                    account.getRaspiManagement().performUnMute();
                     player.sendRichMessage("<green>Du hast den Spieler zum Reden Animiert.");
+
                 });
             }
             return Command.SINGLE_SUCCESS;

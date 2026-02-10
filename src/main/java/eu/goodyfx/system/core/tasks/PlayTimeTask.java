@@ -34,7 +34,12 @@ public class PlayTimeTask extends BukkitRunnable {
                 score = score - HOUR_IN_TICK;
                 time.getScore(player).setScore(score);
                 onlineHours = onlineHours + 1;
-                Raspi.players().get(player).getUser().setOnlineHours(onlineHours);
+
+                int finalOnlineHours = onlineHours;
+                Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+                    raspiPlayer.userData().setOnlineHours(finalOnlineHours);
+
+                });
                 player.sendActionBar(MiniMessage.miniMessage().deserialize("<green> +1 Onlinestunde"));
                 objective.getScore(player).setScore(objective.getScore(player).getScore() + 1);
             }

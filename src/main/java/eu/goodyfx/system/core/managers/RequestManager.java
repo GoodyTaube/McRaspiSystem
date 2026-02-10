@@ -1,11 +1,9 @@
 package eu.goodyfx.system.core.managers;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiAccount;
 import eu.goodyfx.system.core.database.RaspiUser;
-import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiOfflinePlayer;
 import org.apache.commons.lang3.Validate;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -68,7 +66,7 @@ public class RequestManager {
     }
 
 
-    public void set(RaspiOfflinePlayer denyPlayer, String reason, Player player) {
+    public void set(RaspiAccount denyPlayer, String reason, Player player) {
         remove(denyPlayer.getRaspiUser());
         denyPlayer.getRaspiUser().setDenied_by(player.getName());
         denyPlayer.getRaspiUser().setState(false);
@@ -96,7 +94,7 @@ public class RequestManager {
 
     public String getDeny(RaspiUser player) {
         if (isBlocked(player)) {
-            return Raspi.players().get(Bukkit.getPlayer(player.getDenied_by())).getColorName();
+            return player.getColor() + player.getDenied_by();
         }
         return null;
     }

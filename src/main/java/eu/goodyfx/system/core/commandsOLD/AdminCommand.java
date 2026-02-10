@@ -5,7 +5,6 @@ import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.commandsOLD.subcommands.*;
 import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiMessages;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import eu.goodyfx.system.core.utils.SubCommand;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -110,7 +109,10 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 syntaxCheck(player, args);
                 for (SubCommand subCommand : subCommands) {
                     if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                        return subCommand.commandPerform(Raspi.players().get(player), args);
+                        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+                            subCommand.commandPerform(raspiPlayer, args);
+                        });
+                        return true;
                     }
                 }
             } else {
@@ -216,16 +218,18 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             return false;
         }
 
-        RaspiPlayer raspiPlayer = Raspi.players().get(player);
+        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+            Raspi.players().getActivePlayers().values().forEach(all -> {
+                if (all.settings().isServer_messages()) {
+                    String output = String.format("%s hat Teleport %s benutzt.", raspiPlayer.getColorName(), location);
+                    all.sendMessage(output, true);
+                }
+            });
+            String log = String.format("Raspi-Teleport: %s hat Teleport %s benutzt", player.getName(), location);
+            plugin.getLogger().info(log);
 
-        Raspi.players().getRaspiPlayers().forEach(all -> {
-            if (all.getUserSettings().isServer_messages()) {
-                String output = String.format("%s hat Teleport %s benutzt.", raspiPlayer.getColorName(), location);
-                all.sendMessage(output, true);
-            }
         });
-        String log = String.format("Raspi-Teleport: %s hat Teleport %s benutzt", player.getName(), location);
-        plugin.getLogger().info(log);
+
         return true;
     }
 

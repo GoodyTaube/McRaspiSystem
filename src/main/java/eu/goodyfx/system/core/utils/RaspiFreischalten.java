@@ -2,6 +2,7 @@ package eu.goodyfx.system.core.utils;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import io.papermc.paper.ban.BanListType;
 import lombok.Getter;
 import lombok.Setter;

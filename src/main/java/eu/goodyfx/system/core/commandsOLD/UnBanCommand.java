@@ -26,19 +26,19 @@ public class UnBanCommand implements CommandExecutor {
         if (args.length == 1) {
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
-            Raspi.players().getRaspiOfflinePlayer(offlinePlayer).thenAcceptAsync(raspiOfflinePlayer -> {
-                if (raspiOfflinePlayer == null) {
-                    sender.sendRichMessage("<red>Der Spieler spielte noch nicht.");
-                    return;
-                }
-                if (raspiOfflinePlayer.getManagement().isBanned()) {
-                    raspiOfflinePlayer.getManagement().performUnban();
-                    sender.sendRichMessage(data.getPrefix() + "<green>" + raspiOfflinePlayer.getPlayer().getName() + " wurde von dir entsperrt.");
-                    return;
-                }
-                sender.sendRichMessage(data.getPrefix() + "<green>" + raspiOfflinePlayer.getPlayer().getName() + " ist nicht gesperrt.");
 
-            }, runnable -> Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(McRaspiSystem.class), runnable));
+            if(offlinePlayer.hasPlayedBefore()){
+                Raspi.players().getOrLoadPlayer(offlinePlayer.getUniqueId()).thenAccept(account -> {
+
+                    if (account.getRaspiManagement().isBanned()) {
+                        account.getRaspiManagement().performUnban();
+                        sender.sendRichMessage(data.getPrefix() + "<green>" + account.getRaspiUser().getUsername() + " wurde von dir entsperrt.");
+                        return;
+                    }
+                    sender.sendRichMessage(data.getPrefix() + "<green>" + account.getRaspiUser().getUsername() + " ist nicht gesperrt.");
+                });
+            }
+
             return true;
 
         }

@@ -1,7 +1,7 @@
 package eu.goodyfx.system.core.managers;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -115,8 +115,8 @@ public class CommandManager {
         return classType.cast(config.get(String.format(path.getPath(), group)));
     }
 
-    public Set<String> getPlayerGroups(RaspiPlayer player){
-        return getAllGroups().stream().filter(s -> player.hasPermission("group." +s)).collect(Collectors.toSet());
+    public Set<String> getPlayerGroups(RaspiPlayer player) {
+        return getAllGroups().stream().filter(s -> player.hasPermission("group." + s)).collect(Collectors.toSet());
     }
 
     /**

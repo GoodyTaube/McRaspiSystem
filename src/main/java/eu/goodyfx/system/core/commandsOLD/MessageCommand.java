@@ -102,7 +102,8 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
      * @return ClickAble Target Name
      */
     private String getName(Player target) {
-        return "<click:suggest_command:'/msg " + target.getName() + " '><hover:show_text:'<green>Antworten'>" + Raspi.players().get(target).getColorName() + "<reset>";
+
+        return "<click:suggest_command:'/msg " + target.getName() + " '><hover:show_text:'<green>Antworten'>" +target.getName() + "<reset>";
     }
 
 }

@@ -4,7 +4,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.Raspi;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.entity.Entity;
@@ -22,24 +21,26 @@ public class VoteCommandContainer {
             if (!(entity instanceof Player player)) {
                 return Command.SINGLE_SUCCESS;
             }
-            RaspiPlayer raspiPlayer = Raspi.players().get(player);
+            Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+                if (plugin.getConfig().contains(VOTE_LINK_PATH)) {
+                    List<String> voteLinks = plugin.getConfig().getStringList(VOTE_LINK_PATH);
+                    raspiPlayer.sendMessage("<green>McRaspi braucht deine Unterstützung!", true);
+                    String linkMessage = "<dark_gray> - <blue>%s";
 
-            if (plugin.getConfig().contains(VOTE_LINK_PATH)) {
-                List<String> voteLinks = plugin.getConfig().getStringList(VOTE_LINK_PATH);
-                raspiPlayer.sendMessage("<green>McRaspi braucht deine Unterstützung!", true);
-                String linkMessage = "<dark_gray> - <blue>%s";
-
-                for (String voteLink : voteLinks) {
-                    if (voteLink.contains(" ")) {
-                        String[] voteLinkComp = voteLink.split(" ");
-                        raspiPlayer.sendMessage(String.format(linkMessage, raspiPlayer.convertLink(voteLinkComp[1], voteLinkComp[0])));
-                        continue;
+                    for (String voteLink : voteLinks) {
+                        if (voteLink.contains(" ")) {
+                            String[] voteLinkComp = voteLink.split(" ");
+                            raspiPlayer.sendMessage(String.format(linkMessage, raspiPlayer.convertLink(voteLinkComp[1], voteLinkComp[0])));
+                            continue;
+                        }
+                        raspiPlayer.sendMessage(String.format(linkMessage, raspiPlayer.convertLink(voteLink)));
                     }
-                    raspiPlayer.sendMessage(String.format(linkMessage, raspiPlayer.convertLink(voteLink)));
+                } else {
+                    raspiPlayer.sendMessage("<red>Momentan gibt es keine Vote Links.", true);
                 }
-            } else {
-                raspiPlayer.sendMessage("<red>Momentan gibt es keine Vote Links.", true);
-            }
+
+            });
+
 
             return Command.SINGLE_SUCCESS;
         }).build();

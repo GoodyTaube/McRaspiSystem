@@ -1,9 +1,9 @@
 package eu.goodyfx.system.core.commandsOLD.subcommands;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.SubCommand;
 import eu.goodyfx.system.reise.managers.ReiseLocationManager;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 
 public class ReiseSearchSubCommand extends SubCommand {
 
@@ -35,7 +35,7 @@ public class ReiseSearchSubCommand extends SubCommand {
 
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
-        if ( args.length == 2) {
+        if (args.length == 2) {
             ReiseLocationManager.checkUser(player, args[1], plugin);
             return true;
         }

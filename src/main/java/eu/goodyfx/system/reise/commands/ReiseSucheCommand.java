@@ -44,7 +44,10 @@ public class ReiseSucheCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (sender instanceof Player player && args.length == 1) {
-            ReiseLocationManager.checkUser(Raspi.players().get(player), args[0], system);
+            Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+                ReiseLocationManager.checkUser(raspiPlayer, args[0], system);
+
+            });
             return true;
         }
         return false;

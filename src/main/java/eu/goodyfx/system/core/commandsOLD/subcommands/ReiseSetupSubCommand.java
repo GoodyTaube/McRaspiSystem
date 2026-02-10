@@ -1,9 +1,9 @@
 package eu.goodyfx.system.core.commandsOLD.subcommands;
 
-import eu.goodyfx.system.core.utils.SubCommand;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.exceptions.ValueNotFoundException;
+import eu.goodyfx.system.core.utils.SubCommand;
 import eu.goodyfx.system.reise.managers.ReiseLocationManager;
-import eu.goodyfx.system.core.utils.RaspiPlayer;
 
 public class ReiseSetupSubCommand extends SubCommand {
     @Override
@@ -28,7 +28,7 @@ public class ReiseSetupSubCommand extends SubCommand {
 
     @Override
     public boolean commandPerform(RaspiPlayer player, String[] args) {
-        if ( args.length >= 2) {
+        if (args.length >= 2) {
             try {
                 if (args.length == 3) {
                     int id = Integer.parseInt(args[2]);

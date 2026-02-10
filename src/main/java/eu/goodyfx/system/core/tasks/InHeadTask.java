@@ -46,7 +46,9 @@ public class InHeadTask extends BukkitRunnable {
                     public void run() {
                         OfflinePlayer target = Bukkit.getOfflinePlayer(inHeadContainer.get(uuid));
                         player.performCommand("inhead");
-                        Raspi.players().get(player).sendMessage(String.format("%s ist offline gegangen. InHead beendet!", target.getName()), true);
+                        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
+                            raspiPlayer.sendMessage(String.format("%s ist offline gegangen. InHead beendet!", target.getName()), true);
+                        });
                     }
                 }.runTask(plugin);
             }
