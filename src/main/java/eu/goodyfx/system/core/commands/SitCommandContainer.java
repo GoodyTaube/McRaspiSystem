@@ -51,12 +51,12 @@ public class SitCommandContainer {
         sitBase.setGravity(false);
         sitBase.addPassenger(player);
         sitContainer.put(player.getUniqueId(), sitBase);
-        JavaPlugin.getPlugin(McRaspiSystem.class).getDebugger().info(String.format("%s::SITTING_STATE_CHANGE::ADDED", player.getName()));
+        JavaPlugin.getPlugin(McRaspiSystem.class).getDebugger().debug(String.format("%s::SITTING_STATE_CHANGE::ADDED", player.getName()));
     }
 
     public static void endSitting(Player player) {
         if (sitContainer.containsKey(player.getUniqueId())) {
-            JavaPlugin.getPlugin(McRaspiSystem.class).getDebugger().info(String.format("%s::SITTING_STATE_CHANGE::REMOVED", player.getName()));
+            JavaPlugin.getPlugin(McRaspiSystem.class).getDebugger().debug(String.format("%s::SITTING_STATE_CHANGE::REMOVED", player.getName()));
             Entity entity = sitContainer.get(player.getUniqueId());
             if(entity != null){
                 entity.remove();

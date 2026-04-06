@@ -2,7 +2,7 @@ package eu.goodyfx.system.lootchest.tasks;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.managers.LocationManager;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.api.Raspi;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -26,16 +26,16 @@ public class AnimationBlockDisplay extends BukkitRunnable {
             @Override
             public void run() {
                 if (locationManager.exist("lootchest")) {
-                    Raspi.debugger().info("FOUND LOCATION LOOTCHEST!");
+                    Raspi.debugger().debug("FOUND LOCATION LOOTCHEST!");
                     Location location = locationManager.get("lootchest");
                     location.getChunk().load();
                     location.getNearbyEntities(4, 4, 4).forEach(entity -> {
-                        Raspi.debugger().info("FOUND: " + entity.getType().name());
+                        Raspi.debugger().debug("FOUND: " + entity.getType().name());
                         if (entity.getType().equals(EntityType.BLOCK_DISPLAY)) {
                             blockDisplayList.add((BlockDisplay) entity);
                         }
                         if (entity.getType().equals(EntityType.TEXT_DISPLAY)) {
-                            Raspi.debugger().info("Added TEXT DISPLAY TO LIST");
+                            Raspi.debugger().debug("Added TEXT DISPLAY TO LIST");
                             textDisplayList.add((TextDisplay) entity);
                         }
                     });

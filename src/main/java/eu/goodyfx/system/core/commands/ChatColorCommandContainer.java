@@ -3,8 +3,9 @@ package eu.goodyfx.system.core.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.commands.arguments.ChatColorCommandArgument;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiFormatting;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -23,26 +24,21 @@ public class ChatColorCommandContainer {
                             }
                             McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
+                            RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
 
-                            Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
-                                String colorString = "";
+                            String colorString = "";
 
-                                //Testen ob wir ein HEX HABEN
-
-                                switch (colors) {
-                                    case HEX ->
-                                            colorString = String.format(colors.getValue(), context.getInput().replace("chatcolor ", ""));
-                                    case RANDOM -> raspiPlayer.nameController.resetRandom();
-                                    default -> colorString = colors.getValue();
-                                }
-
-
-                                //Speichern
-                                raspiPlayer.nameController.setPlayerColor(colorString);
-                                //User senden
-                                raspiPlayer.sendMessage(String.format("<gray>Deine Neue Chat Farbe ist jetzt: %s▆▇ %s %s▇▆", raspiPlayer.getColor(), raspiPlayer.getColorName(), raspiPlayer.getColor()), true);
-
-                            });
+                            //Testen ob wir ein HEX HABEN
+                            switch (colors) {
+                                case HEX ->
+                                        colorString = String.format(colors.getValue(), context.getInput().replace("chatcolor ", ""));
+                                case RANDOM -> raspiPlayer.nameController.resetRandom();
+                                default -> colorString = colors.getValue();
+                            }
+                            //Speichern
+                            raspiPlayer.nameController.setPlayerColor(colorString);
+                            //User senden
+                            raspiPlayer.sendMessage(String.format("<gray>Deine Neue Chat Farbe ist jetzt: %s▆▇ %s %s▇▆", raspiPlayer.getColor(), raspiPlayer.getColorName(), raspiPlayer.getColor()), true);
                             return Command.SINGLE_SUCCESS;
                         })).build();
     }

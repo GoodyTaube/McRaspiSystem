@@ -1,17 +1,16 @@
 package eu.goodyfx.system.core.events;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.vexsoftware.votifier.model.Vote;
+import com.vexsoftware.votifier.model.VotifierEvent;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
-import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiFormatting;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.*;
@@ -41,27 +40,48 @@ public class ServerListeners implements Listener {
         plugin.setListeners(this);
     }
 
+    @EventHandler
+    public void onVote(VotifierEvent event) {
+        Vote vote = event.getVote();
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(vote.getUsername());
+        if (offlinePlayer.hasPlayedBefore()) {
+
+            if (offlinePlayer.isOnline()) {
+                Player player = offlinePlayer.getPlayer();
+                RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+                raspiPlayer.userData().setVoting(raspiPlayer.userData().getVoting() +1);
+                raspiPlayer.sendActionBar("<green>+1 Vote!");
+                return;
+            }
+
+            Raspi.playerLifeCycleService().getRaspiOffPlayer(offlinePlayer).thenAccept(raspiAccount -> {
+                int votes = raspiAccount.getRaspiUser().getVoting();
+                votes = votes + 1;
+                raspiAccount.getRaspiUser().setVoting(votes);
+                raspiAccount.save();
+                Raspi.debugger().debug("Added Vote for %s", "VOTE");
+            });
+
+        }
+    }
 
     @EventHandler
     public void onPrimeTNT(TNTPrimeEvent tntPrimeEvent) {
         Entity entity = tntPrimeEvent.getPrimingEntity();
         if (entity instanceof Player player) {
-            Raspi.players().getContextPlayer(player.getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-                if (context instanceof RaspiPlayer raspiPlayer) {
-                    int hours = 100;
-                    if (!player.getWorld().equals(Bukkit.getWorld("world"))) {
-                        return;
-                    }
-                    if (plugin.getConfig().contains("Utilities.tnt_hours")) {
-                        hours = plugin.getConfig().getInt("Utilities.tnt_hours");
-                    }
-                    if (!raspiPlayer.hasTimePlayed(hours)) {
-                        tntPrimeEvent.setCancelled(true);
-                        player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "<red>TNT gibt es erst ab: <gray>" + hours + " <red>Spielstunden."));
-                    }
-                }
+            RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+            int hours = 100;
+            if (!player.getWorld().equals(Bukkit.getWorld("world"))) {
+                return;
+            }
+            if (plugin.getConfig().contains("Utilities.tnt_hours")) {
+                hours = plugin.getConfig().getInt("Utilities.tnt_hours");
+            }
+            if (!raspiPlayer.hasTimePlayed(hours)) {
+                tntPrimeEvent.setCancelled(true);
+                player.sendActionBar(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix() + "<red>TNT gibt es erst ab: <gray>" + hours + " <red>Spielstunden."));
+            }
 
-            }));
         }
     }
 
@@ -144,44 +164,36 @@ public class ServerListeners implements Listener {
             return;
         }
         if (block.getType().equals(Material.TNT)) {
+            RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
 
+            int hours = 100;
 
-            Raspi.players().getContextPlayer(player.getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-                if (!(context instanceof RaspiPlayer raspiPlayer)) {
+            if (plugin.getConfig().contains("Utilities.tnt_hours")) {
+                hours = plugin.getConfig().getInt("Utilities.tnt_hours");
+            }
+
+            if (!raspiPlayer.hasTimePlayed(hours)) {
+                placeEvent.setCancelled(true);
+
+                if (!location.getNearbyEntities(0.1, 0.1, 0.1).isEmpty()) {
+
                     return;
                 }
-                int hours = 100;
+                BlockDisplay blockDisplay = (BlockDisplay) location.getWorld().spawnEntity(location, EntityType.BLOCK_DISPLAY);
+                blockDisplay.setBlock(placeEvent.getBlock().getBlockData());
+                blockDisplay.setGlowing(true);
+                TextDisplay display = (TextDisplay) location.getWorld().spawnEntity(location.add(0.5, 1.4, 0.5), EntityType.TEXT_DISPLAY);
+                display.text(MiniMessage.miniMessage().deserialize("<red>TNT = NONO"));
+                display.setAlignment(TextDisplay.TextAlignment.CENTER);
+                display.setBillboard(Display.Billboard.CENTER);
+                display.setRotation(-player.getEyeLocation().getYaw(), 0);
+                display.setDefaultBackground(false);
 
-                if (plugin.getConfig().contains("Utilities.tnt_hours")) {
-                    hours = plugin.getConfig().getInt("Utilities.tnt_hours");
-                }
-
-                if (!raspiPlayer.hasTimePlayed(hours)) {
-                    placeEvent.setCancelled(true);
-
-                    if (!location.getNearbyEntities(0.1, 0.1, 0.1).isEmpty()) {
-
-                        return;
-                    }
-                    BlockDisplay blockDisplay = (BlockDisplay) location.getWorld().spawnEntity(location, EntityType.BLOCK_DISPLAY);
-                    blockDisplay.setBlock(placeEvent.getBlock().getBlockData());
-                    blockDisplay.setGlowing(true);
-                    TextDisplay display = (TextDisplay) location.getWorld().spawnEntity(location.add(0.5, 1.4, 0.5), EntityType.TEXT_DISPLAY);
-                    display.text(MiniMessage.miniMessage().deserialize("<red>TNT = NONO"));
-                    display.setAlignment(TextDisplay.TextAlignment.CENTER);
-                    display.setBillboard(Display.Billboard.CENTER);
-                    display.setRotation(-player.getEyeLocation().getYaw(), 0);
-                    display.setDefaultBackground(false);
-
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                        display.remove();
-                        blockDisplay.remove();
-                    }, 20L * 5);
-
-
-                }
-            }));
-
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    display.remove();
+                    blockDisplay.remove();
+                }, 20L * 5);
+            }
         }
     }
 

@@ -1,11 +1,12 @@
 package eu.goodyfx.system.reise.commands;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.commandsOLD.subcommands.ReiseListSubCommand;
 import eu.goodyfx.system.core.commandsOLD.subcommands.ReiseRemoveSubCommand;
 import eu.goodyfx.system.core.commandsOLD.subcommands.ReiseResetSubCommand;
 import eu.goodyfx.system.core.commandsOLD.subcommands.ReiseSetupSubCommand;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.SubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -58,16 +59,15 @@ public class ReiseCommand implements CommandExecutor, TabCompleter {
             for (SubCommand subCommand : subCommands) {
                 if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
                     AtomicBoolean atomicBoolean = new AtomicBoolean(false);
-                    Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
-                        if (subCommand.commandPerform(raspiPlayer, args)) {
-                            atomicBoolean.set(true);
-                        } else {
-                            if (subCommand.getDescription() != null && subCommand.getSyntax() != null) {
-                                player.sendRichMessage("<italic><gray>" + subCommand.getDescription() + "<hover:show_text:'" + subCommand.getSyntax() + "'> <green>SHOW");
-                            }
-                            player.sendRichMessage("Error in reise " + subCommand.getLabel() + "!");
+                    RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+                    if (subCommand.commandPerform(raspiPlayer, args)) {
+                        atomicBoolean.set(true);
+                    } else {
+                        if (subCommand.getDescription() != null && subCommand.getSyntax() != null) {
+                            player.sendRichMessage("<italic><gray>" + subCommand.getDescription() + "<hover:show_text:'" + subCommand.getSyntax() + "'> <green>SHOW");
                         }
-                    });
+                        player.sendRichMessage("Error in reise " + subCommand.getLabel() + "!");
+                    }
                     return atomicBoolean.get();
                 }
             }

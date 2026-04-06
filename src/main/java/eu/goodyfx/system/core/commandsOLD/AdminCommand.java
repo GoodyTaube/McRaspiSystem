@@ -2,8 +2,9 @@ package eu.goodyfx.system.core.commandsOLD;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.commandsOLD.subcommands.*;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiMessages;
 import eu.goodyfx.system.core.utils.SubCommand;
 import lombok.Getter;
@@ -52,11 +53,9 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new AdminLootChestSubCommand(plugin));
         subCommands.add(new AdminCombineFileSubCommand(plugin));
         subCommands.add(new AdminRestoreAdminSubCommand(plugin));
-        subCommands.add(new AdminResetDailyCommandSubCommand(plugin));
         subCommands.add(new AdminReloadSubCommand(plugin));
         subCommands.add(new AdminResetPlayerSubCommand());
         subCommands.add(new AdminPLHideSubCommand());
-        subCommands.add(new AdminRaspiBotSubCommand());
         subCommands.add(new AdminWartungCommand(plugin));
     }
 
@@ -109,9 +108,9 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 syntaxCheck(player, args);
                 for (SubCommand subCommand : subCommands) {
                     if (args[0].equalsIgnoreCase(subCommand.getLabel())) {
-                        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
-                            subCommand.commandPerform(raspiPlayer, args);
-                        });
+                        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+
+                        subCommand.commandPerform(raspiPlayer, args);
                         return true;
                     }
                 }
@@ -217,19 +216,16 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             plugin.getLogger().severe(log);
             return false;
         }
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
 
-        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
-            Raspi.players().getActivePlayers().values().forEach(all -> {
-                if (all.settings().isServer_messages()) {
-                    String output = String.format("%s hat Teleport %s benutzt.", raspiPlayer.getColorName(), location);
-                    all.sendMessage(output, true);
-                }
-            });
-            String log = String.format("Raspi-Teleport: %s hat Teleport %s benutzt", player.getName(), location);
-            plugin.getLogger().info(log);
-
+        Raspi.playerLifeCycleService().getCachedRaspiPlayers().forEach(all -> {
+            if (all.settings().isServer_messages()) {
+                String output = String.format("%s hat Teleport %s benutzt.", raspiPlayer.getColorName(), location);
+                all.sendMessage(output, true);
+            }
         });
-
+        String log = String.format("Raspi-Teleport: %s hat Teleport %s benutzt", player.getName(), location);
+        plugin.getLogger().info(log);
         return true;
     }
 

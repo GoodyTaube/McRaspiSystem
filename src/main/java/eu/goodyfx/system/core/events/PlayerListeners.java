@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -108,12 +109,18 @@ public class PlayerListeners implements Listener {
 
 
     private void summonSign(Entity entity, Location location) {
+        if ((entity instanceof Player player) && !(player.isPermissionSet("group.spieler"))) {
+            Raspi.debugger().debug(String.format("DEAD_SIGN_CREATION aborted. Player is NEW! (%s)", player.getName()));
+            return;
+        }
         location.getBlock().setType(Material.OAK_SIGN);
         Sign sign = (Sign) location.getBlock().getState();
+        sign.setWaxed(true);
         sign.getSide(Side.FRONT).line(0, MiniMessage.miniMessage().deserialize(" || R.I.P || "));
         sign.getSide(Side.FRONT).line(1, MiniMessage.miniMessage().deserialize(entity.getName()));
         sign.getSide(Side.FRONT).line(2, Component.text(new SimpleDateFormat("dd/MM/yyyy").format(new Date(System.currentTimeMillis()))));
         sign.getSide(Side.FRONT).line(3, Component.text(Objects.requireNonNull(entity.getLastDamageCause()).getCause().name()));
         sign.update();
+        Raspi.debugger().debug(String.format("New Dead Sign @%s", Raspi.debugger().formatLocation(location)));
     }
 }

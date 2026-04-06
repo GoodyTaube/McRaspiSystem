@@ -1,8 +1,6 @@
 package eu.goodyfx.system.lootchest.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.database.RaspiPlayer;
-import eu.goodyfx.system.core.utils.Raspi;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;

@@ -33,7 +33,6 @@ public class SystemStartUp {
     private void addCommands(McRaspiSystem plugin) {
         //Main System
         new AdminCommand();
-        new AFKCommand(plugin);
         new MessageCommand(plugin);
         new PrefixCommand();
         //new RequestCommand(plugin);
@@ -42,8 +41,7 @@ public class SystemStartUp {
         new TempBanCommand(plugin);
         new UnBanCommand(plugin);
         new WarteschlangeCommand(plugin);
-        new RandomTeleportCommand(plugin);
-        new InHeadCommand();
+        //new InHeadCommand(); //REPLACED BY NEW CONTAINER
     }
 
 
@@ -64,6 +62,7 @@ public class SystemStartUp {
         new InventoryListeners();
         new PlayerAFKHandler();
         new RaspiCoinsEvents();
+        new RaspiWorldEvents(plugin);
     }
 
 

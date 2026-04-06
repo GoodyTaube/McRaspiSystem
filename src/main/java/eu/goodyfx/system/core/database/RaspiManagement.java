@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.database;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.utils.MojangPlayerWrapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,7 +51,7 @@ public class RaspiManagement {
         ban_owner = performer.getName();
         ban_message = reason;
         ban_expire = null;
-        plugin.getDebugger().info(String.format(PERFORM_MESSAGE, BAN, userName, performer.getName(), reason));
+        plugin.getDebugger().debug(String.format(PERFORM_MESSAGE, BAN, userName, performer.getName(), reason));
     }
 
     /**
@@ -64,7 +65,7 @@ public class RaspiManagement {
         ban_owner = performer.getName();
         ban_message = reason;
         ban_expire = expire;
-        plugin.getDebugger().info(String.format(PERFORM_MESSAGE, BAN, userName, performer.getName(), reason));
+        plugin.getDebugger().debug(String.format(PERFORM_MESSAGE, BAN, userName, performer.getName(), reason));
     }
 
     /**
@@ -75,7 +76,7 @@ public class RaspiManagement {
         ban_owner = null;
         ban_message = null;
         ban_expire = null;
-        plugin.getDebugger().info(String.format(REVOKE_MESSAGE, BAN, userName));
+        plugin.getDebugger().debug(String.format(REVOKE_MESSAGE, BAN, userName));
     }
 
     /**
@@ -88,14 +89,14 @@ public class RaspiManagement {
         muted = true;
         mute_message = reason;
         mute_owner = performer.getName();
-        plugin.getDebugger().info(String.format(PERFORM_MESSAGE, MUTE, userName, performer.getName(), reason));
+        plugin.getDebugger().debug(String.format(PERFORM_MESSAGE, MUTE, userName, performer.getName(), reason));
     }
 
     public void performUnMute() {
         muted = false;
         mute_owner = null;
         mute_message = null;
-        plugin.getDebugger().info(String.format(REVOKE_MESSAGE, MUTE, userName));
+        plugin.getDebugger().debug(String.format(REVOKE_MESSAGE, MUTE, userName));
     }
 
     /**
@@ -129,6 +130,7 @@ public class RaspiManagement {
             statement.setObject(7, ban_expire, Types.BIGINT);
             statement.setString(8, uuid);
             statement.executeUpdate();
+            Raspi.debugger().debug(String.format("Updated Management entry's for %s", userName), "MYSQL");
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("Error while writing user data for %s", userName), e);
         }
@@ -146,7 +148,7 @@ public class RaspiManagement {
                 this.ban_owner = resultSet.getString("ban_performer");
                 this.mute_owner = resultSet.getString("mute_performer");
                 this.ban_expire = resultSet.getObject("ban_expire", Long.class);
-                plugin.getDebugger().info(String.format("[UserManagement] Fetched userManagement for %s successfully.", userName));
+                plugin.getDebugger().debug(String.format("[UserManagement] Fetched userManagement for %s successfully.", userName));
             }
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("Error while Fetching user_management for %s", userName), e);

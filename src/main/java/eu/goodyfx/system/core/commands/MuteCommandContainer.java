@@ -4,8 +4,8 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiSuggestions;
-import eu.goodyfx.system.core.utils.Raspi;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
@@ -34,13 +34,15 @@ public class MuteCommandContainer {
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
 
-        Raspi.players().getOrLoadPlayer(target.getUniqueId()).thenAccept(account -> {
-
-            if (account.getRaspiManagement().isMuted()) {
-                player.sendRichMessage("Bereits stumm.");
+        Raspi.playerLifeCycleService().getRaspiOffPlayer(target).thenAccept(account -> {
+            if (account == null) {
+                player.sendMessage("<red>Der Spieler existiert nicht.");
                 return;
             }
-
+            if (account.getRaspiManagement().isMuted()) {
+                player.sendRichMessage("Der Spieler ist bereits stumm.");
+                return;
+            }
             account.getRaspiManagement().performMute(player, formatted);
             player.sendRichMessage("Du hast den Spieler erfolgreich muted.");
         });

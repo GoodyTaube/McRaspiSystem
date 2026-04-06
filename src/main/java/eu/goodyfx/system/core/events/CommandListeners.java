@@ -1,10 +1,9 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.managers.CommandManager;
-import eu.goodyfx.system.core.utils.Raspi;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -31,81 +30,66 @@ public class CommandListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onCommandSend(PlayerCommandSendEvent event) {
-
-        Raspi.players().getContextPlayer(event.getPlayer().getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-            if (context instanceof RaspiPlayer raspiPlayer) {
-                Collection<String> commandCollections = event.getCommands(); //die liste der commands auf dem server
-                commandHide(event);
-                if (raspiPlayer.hasPermission("group.default") && !raspiPlayer.hasPermission("group.spieler")) { // Checken ob der Spieler schon registriert ist
-                    plugin.getDebugger().info("CLEARING ALL COMMANDS");
-                    commandCollections.clear();
-                }
-            }
-        }));
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(event.getPlayer());
+        if (raspiPlayer == null) {
+            return;
+        }
+        Collection<String> commandCollections = event.getCommands(); //die liste der commands auf dem server
+        commandHide(event);
+        if (raspiPlayer.hasPermission("group.default") && !raspiPlayer.hasPermission("group.spieler")) { // Checken ob der Spieler schon registriert ist
+            plugin.getDebugger().debug("CLEARING ALL COMMANDS");
+            commandCollections.clear();
+        }
     }
 
-
     private void commandHide(PlayerCommandSendEvent event) {
-
-        Raspi.players().getContextPlayer(event.getPlayer().getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-            if (context instanceof RaspiPlayer player) {
-                if (player.hasPermission("*")) {
-                    return;
+        RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(event.getPlayer());
+        if (player.hasPermission("*")) {
+            return;
+        }
+        Set<String> command = new HashSet<>();
+        CommandManager manager = plugin.getModuleManager().getCommandManager();
+        plugin.getModule().getCommandManager().getAllGroups().forEach(group -> {
+            if (player.hasPermission(String.format("group.%s", group))) {
+                command.addAll(manager.getList(group, CommandManager.CommandManagerPaths.TAB_COMPLETE_COMMANDS));
+                if (manager.get(group, CommandManager.CommandManagerPaths.TAB_COMPLETE_IMPLEMENT, Boolean.class)) {
+                    plugin.getDebugger().debug("IMPLEMENT ALL COMMANDS");
+                    command.addAll(manager.getList(group, CommandManager.CommandManagerPaths.COMMANDS));
                 }
-                Set<String> command = new HashSet<>();
-                CommandManager manager = plugin.getModuleManager().getCommandManager();
-                plugin.getModule().getCommandManager().getAllGroups().forEach(group -> {
-                    if (player.hasPermission(String.format("group.%s", group))) {
-                        command.addAll(manager.getList(group, CommandManager.CommandManagerPaths.TAB_COMPLETE_COMMANDS));
-                        if (manager.get(group, CommandManager.CommandManagerPaths.TAB_COMPLETE_IMPLEMENT, Boolean.class)) {
-                            plugin.getDebugger().info("IMPLEMENT ALL COMMANDS");
-                            command.addAll(manager.getList(group, CommandManager.CommandManagerPaths.COMMANDS));
-                        }
-                    }
-                });
-                event.getCommands().removeIf(cmd -> !command.contains(cmd));
             }
-        }));
+        });
+        event.getCommands().removeIf(cmd -> !command.contains(cmd));
 
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onCommand(PlayerCommandPreprocessEvent commandEvent) {
-
-        Raspi.players().getContextPlayer(commandEvent.getPlayer().getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-
-            if (context instanceof RaspiPlayer player) {
-                String[] command = commandEvent.getMessage().split(" ");
-                commandControlUnit(commandEvent);
-                checkMuted(commandEvent, command); //Wichtig
-            }
-        }));
+        String[] command = commandEvent.getMessage().split(" ");
+        commandControlUnit(commandEvent);
+        checkMuted(commandEvent, command); //Wichtig
     }
 
 
     public void commandControlUnit(PlayerCommandPreprocessEvent event) {
 
-        Raspi.players().getContextPlayer(event.getPlayer().getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-            if (context instanceof RaspiPlayer player) {
-                if ((player.hasPermission("*")) || (player.getPlayer().isOp())) {
-                    return;
-                }
+        RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(event.getPlayer());
 
-                String[] command = event.getMessage().split(" ");
-                String commandStarter = command[0].replace("/", "");
-                CommandManager commandManager = plugin.getModule().getCommandManager();
-                Set<String> availableCommands = new HashSet<>();
-                commandManager.getPlayerGroups(player).forEach(group -> {
-                    availableCommands.addAll(commandManager.getList(group, CommandManager.CommandManagerPaths.COMMANDS));
-                });
+        if ((player.hasPermission("*")) || (player.getPlayer().isOp())) {
+            return;
+        }
 
-                if (!availableCommands.contains(commandStarter)) {
-                    event.setCancelled(true);
-                    player.sendMessage("Der Command Existiert nicht", true);
-                }
+        String[] command = event.getMessage().split(" ");
+        String commandStarter = command[0].replace("/", "");
+        CommandManager commandManager = plugin.getModule().getCommandManager();
+        Set<String> availableCommands = new HashSet<>();
+        commandManager.getPlayerGroups(player).forEach(group -> {
+            availableCommands.addAll(commandManager.getList(group, CommandManager.CommandManagerPaths.COMMANDS));
+        });
 
-            }
-        }));
+        if (!availableCommands.contains(commandStarter)) {
+            event.setCancelled(true);
+            player.sendMessage("Der Command Existiert nicht", true);
+        }
 
     }
 
@@ -113,15 +97,12 @@ public class CommandListeners implements Listener {
      * Check if PLayer is Muted and Tried to use forbidden Commands.
      */
     private void checkMuted(PlayerCommandPreprocessEvent commandEvent, String[] command) {
+        RaspiPlayer context = Raspi.playerLifeCycleService().getRaspiPlayer(commandEvent.getPlayer());
 
-        Raspi.players().getContextPlayer(commandEvent.getPlayer().getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-            if (context instanceof RaspiPlayer player) {
-                if ((command[0].equalsIgnoreCase("/msg") || command[0].equalsIgnoreCase("/tell")
-                        || command[0].equalsIgnoreCase("/me")) && (context.userManagement().isMuted())) {
-                    commandEvent.getPlayer().sendRichMessage("<red><hover:show_text:'<red>Sei einfach Leise bitte.<gray> Kuss'>Du bist Stumm. Das geht so nicht..");
-                    commandEvent.setCancelled(true);
-                }
-            }
-        }));
+        if ((command[0].equalsIgnoreCase("/msg") || command[0].equalsIgnoreCase("/tell")
+                || command[0].equalsIgnoreCase("/me")) && (context.userManagement().isMuted())) {
+            commandEvent.getPlayer().sendRichMessage("<red><hover:show_text:'<red>Sei einfach Leise bitte.<gray> Kuss'>Du bist Stumm. Das geht so nicht..");
+            commandEvent.setCancelled(true);
+        }
     }
 }

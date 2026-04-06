@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.database;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.utils.MojangPlayerWrapper;
 import eu.goodyfx.system.core.utils.Settings;
 import lombok.Getter;
@@ -51,7 +52,7 @@ public class UserSettings {
                 auto_afk = resultSet.getBoolean("auto_afk");
                 opt_chat = resultSet.getBoolean("opt_chat");
                 server_messages = resultSet.getBoolean("server_messages");
-                plugin.getDebugger().info(String.format("[UserSettings] Fetched userSettings for %s successfully.", username));
+                plugin.getDebugger().debug(String.format("[UserSettings] Fetched userSettings for %s successfully.", username));
             }
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("[UserSetting] Failed to Fetch userSettings for %s in %s", username, table), e);
@@ -82,6 +83,7 @@ public class UserSettings {
             statement.setBoolean(4, server_messages);
             statement.setString(5, uuid);
             statement.executeUpdate();
+            Raspi.debugger().debug(String.format("Updated User Settings for %s", username), "MYSQL");
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("Failed to update Data in %s for %s", table, username), e);
         }

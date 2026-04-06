@@ -50,7 +50,6 @@ public class RaspiReiseSystem implements RaspiSubSystem {
 
     @Override
     public void events() {
-
     }
 
     @Override

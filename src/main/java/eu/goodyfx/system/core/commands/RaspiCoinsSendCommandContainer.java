@@ -5,9 +5,10 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.system.core.api.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.database.RaspiSuggestions;
 import eu.goodyfx.system.core.events.RaspiCoinsEvents;
-import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiSounds;
 import eu.goodyfx.system.core.utils.Transaction;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -28,30 +29,28 @@ public class RaspiCoinsSendCommandContainer {
             return Command.SINGLE_SUCCESS;
         }
 
-        Raspi.players().withOnlinePlayer(dummy, player -> {
+        RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(dummy);
 
-            long coins = player.userData().getCoins();
-            String target = context.getArgument("player", String.class);
-            int value = context.getArgument("value", Integer.class);
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(target);
+        long coins = player.userData().getCoins();
+        String target = context.getArgument("player", String.class);
+        int value = context.getArgument("value", Integer.class);
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(target);
 
-            if (coins < value) {
-                player.sendMessage("<red>Hallo Du, Du bist eine Sonne, Du bist mein Stern. Aber Du hast nicht genug Geld um dies zu Tuän.", true);
-                return;
-            }
+        if (coins < value) {
+            player.sendMessage("<red>Hallo Du, Du bist eine Sonne, Du bist mein Stern. Aber Du hast nicht genug Geld um dies zu Tuän.", true);
+            return 1;
+        }
 
-            if (!offlinePlayer.hasPlayedBefore()) {
-                player.sendMessage("Der Spieler hat noch nicht gespielt.");
-                player.playSound(RaspiSounds.ERROR);
-                return;
-            }
+        if (!offlinePlayer.hasPlayedBefore()) {
+            player.sendMessage("Der Spieler hat noch nicht gespielt.");
+            player.playSound(RaspiSounds.ERROR);
+            return 1;
+        }
 
-            Transaction transaction = new Transaction(player.getUUID(), offlinePlayer.getUniqueId(), context.getArgument("value", Integer.class), 5);
-            RaspiCoinsEvents.getTransactions().add(transaction);
-            player.sendMessage(String.format("<green>Du hast eine Transaction in höhe von: <aqua>%s RC <green>an: <aqua>%s <green>gesendet.<br><gray><italic>Diese Transaction kostet dich %s RC!", value, target, transaction.getCost()), true);
-            player.playSound(RaspiSounds.SUCCESS);
-
-        });
+        Transaction transaction = new Transaction(player.getUUID(), offlinePlayer.getUniqueId(), context.getArgument("value", Integer.class), 5);
+        RaspiCoinsEvents.getTransactions().add(transaction);
+        player.sendMessage(String.format("<green>Du hast eine Transaction in höhe von: <aqua>%s RC <green>an: <aqua>%s <green>gesendet.<br><gray><italic>Diese Transaction kostet dich %s RC!", value, target, transaction.getCost()), true);
+        player.playSound(RaspiSounds.SUCCESS);
         return Command.SINGLE_SUCCESS;
 
     }

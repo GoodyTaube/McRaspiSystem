@@ -66,7 +66,7 @@ public class CommandManager {
     }
 
     public void reload(RaspiPlayer player) {
-        plugin.getDebugger().info("Reloaded pl-hide.yml");
+        plugin.getDebugger().debug("Reloaded pl-hide.yml");
         reload();
         player.sendMessage("<green>Reload von pl-hide.yml Erfolgreich", true);
     }

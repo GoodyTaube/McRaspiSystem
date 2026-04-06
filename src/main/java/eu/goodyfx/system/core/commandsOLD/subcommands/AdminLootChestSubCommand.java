@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.commandsOLD.subcommands;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.ItemBuilder;
 import eu.goodyfx.system.core.utils.SubCommand;
@@ -11,6 +12,7 @@ import eu.goodyfx.system.lootchest.utils.LootChestLoot;
 import eu.goodyfx.system.lootchest.utils.LootChestMenuItems;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -63,6 +65,20 @@ public class AdminLootChestSubCommand extends SubCommand {
             }
             LootChestSystem.getLootChestSubSystem().getLootChestTimer().getLootChestDisplay().clear();
             AnimationBlockDisplay.getBlockDisplayList().clear();
+
+            player.getPlayer().getNearbyEntities(5, 5, 5).forEach(entity -> {
+                if(entity.getType().equals(EntityType.INTERACTION)){
+                    entity.remove();
+                }
+                if(entity.getType().equals(EntityType.BLOCK_DISPLAY)){
+                    entity.remove();
+                }
+                if(entity.getType().equals(EntityType.TEXT_DISPLAY)){
+                    entity.remove();
+                }
+                Raspi.debugger().debug("Removed OLD_Lootchest!");
+            });
+
         }
 
         return true;

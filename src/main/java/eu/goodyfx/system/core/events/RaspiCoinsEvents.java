@@ -2,7 +2,7 @@ package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.database.RaspiPlayer;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.utils.Transaction;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -37,37 +37,34 @@ public class RaspiCoinsEvents implements Listener {
     public void onBreak(BlockBreakEvent breakEvent) {
         Block block = breakEvent.getBlock();
         Player player = breakEvent.getPlayer();
-        Raspi.players().getContextPlayer(player.getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-            if (!(context instanceof RaspiPlayer raspiPlayer)) {
-                return;
-            }
 
-            if (!block.getType().equals(Material.DIAMOND_ORE)) {
-                return;
-            }
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
 
-            if (transactions.isEmpty()) {
-                return;
-            }
-            int size = transactions.size();
-            long provision = 0;
+        if (!block.getType().equals(Material.DIAMOND_ORE)) {
+            return;
+        }
 
-            for (Transaction transaction : transactions) {
-                if (transaction.getCanceled().get()) {
-                    Raspi.debugger().info("Transaction Canceled");
-                    continue;
-                }
-                provision = provision + transaction.getCost();
-                transaction.complete();
+        if (transactions.isEmpty()) {
+            return;
+        }
+        int size = transactions.size();
+        long provision = 0;
+
+        for (Transaction transaction : transactions) {
+            if (transaction.getCanceled().get()) {
+                Raspi.debugger().debug("Transaction Canceled");
+                continue;
             }
-            transactions.clear();
-            if (provision == 0) {
-                return;
-            }
-            raspiPlayer.userData().setCoins(raspiPlayer.userData().getCoins() + provision);
-            raspiPlayer.sendMessage(String.format("<green>Du hast %s Transaktionen beendet und dafür %s RC erhalten.", size, provision));
-            raspiPlayer.sendActionBar(String.format("<gray>Neuer Kontostand <white>// <aqua>%s<gray> RC", raspiPlayer.userData().getCoins()));
-        }));
+            provision = provision + transaction.getCost();
+            transaction.complete();
+        }
+        transactions.clear();
+        if (provision == 0) {
+            return;
+        }
+        raspiPlayer.userData().setCoins(raspiPlayer.userData().getCoins() + provision);
+        raspiPlayer.sendMessage(String.format("<green>Du hast %s Transaktionen beendet und dafür %s RC erhalten.", size, provision));
+        raspiPlayer.sendActionBar(String.format("<gray>Neuer Kontostand <white>// <aqua>%s<gray> RC", raspiPlayer.userData().getCoins()));
 
     }
 

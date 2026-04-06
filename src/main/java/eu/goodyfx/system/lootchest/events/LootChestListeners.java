@@ -1,25 +1,29 @@
 package eu.goodyfx.system.lootchest.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.InventoryBuilder;
-import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiSounds;
 import eu.goodyfx.system.lootchest.LootChestSystem;
+import eu.goodyfx.system.lootchest.tasks.AnimationBlockDisplay;
 import eu.goodyfx.system.lootchest.utils.LootChestMenuItems;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,13 +96,12 @@ public class LootChestListeners implements Listener {
 
     private void lootChest(InventoryClickEvent clickEvent) {
         Player player = (Player) clickEvent.getWhoClicked();
-        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
-            if (isLootChest(clickEvent.getView())) {
-                handleLootChestMenuClick(clickEvent, raspiPlayer);
-                handleBackItem(clickEvent, raspiPlayer);
-            }
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
 
-        });
+        if (isLootChest(clickEvent.getView())) {
+            handleLootChestMenuClick(clickEvent, raspiPlayer);
+            handleBackItem(clickEvent, raspiPlayer);
+        }
 
     }
 
@@ -148,5 +151,33 @@ public class LootChestListeners implements Listener {
             clickEvent.setCancelled(true);
         }
     }
+
+    @EventHandler
+    public void loadLootChestAnimation(ChunkLoadEvent loadEvent) {
+        Entity[] entities = loadEvent.getChunk().getEntities();
+        for (Entity entity : entities) {
+
+            PersistentDataContainer container = entity.getPersistentDataContainer();
+            if (container.has(new NamespacedKey(plugin, "special"))) {
+                if (entity.getType().equals(EntityType.BLOCK_DISPLAY)) {
+                    Raspi.debugger().debug("FOUND LOOTCHEST CHEST. CHECKING IF ENABLED");
+                    if (!AnimationBlockDisplay.getBlockDisplayList().contains((BlockDisplay) entity)) {
+                        AnimationBlockDisplay.getBlockDisplayList().add((BlockDisplay) entity);
+                    }
+
+                }
+                if (entity.getType().equals(EntityType.TEXT_DISPLAY)) {
+                    Raspi.debugger().debug("FOUND LOOTCHEST CHEST. CHECKING IF ENABLED");
+
+                    if (!AnimationBlockDisplay.getTextDisplayList().contains((TextDisplay) entity)) {
+                        AnimationBlockDisplay.getTextDisplayList().add((TextDisplay) entity);
+                    }
+
+                }
+            }
+
+        }
+    }
+
 
 }

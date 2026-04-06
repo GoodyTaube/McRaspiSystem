@@ -3,7 +3,8 @@ package eu.goodyfx.system.core.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.api.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -23,19 +24,18 @@ public class ItemConverterCommandContainer {
             }
             McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
-            Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
-                ItemStack convertRequest = player.getInventory().getItemInMainHand().clone();
-                if (convertRequest.getType().equals(Material.AIR)) {
-                    raspiPlayer.sendMessage("<gradient:red:yellow>Du musst schon ein Item in der Hand haben... lol", true);
-                    return;
-                }
-                convertRequest.setAmount(1);
-                plugin.getModule().getItemConverterManager().set(convertRequest);
-                raspiPlayer.sendMessage(String.format("Du hast %s:%s:%s als convert Item Festgelegt!", convertRequest.getType().name().toLowerCase(),
-                        LegacyComponentSerializer.legacyAmpersand().serialize(convertRequest.displayName()),
-                        "AMOUNT:" + convertRequest.getAmount()), true);
+            RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
 
-            });
+            ItemStack convertRequest = player.getInventory().getItemInMainHand().clone();
+            if (convertRequest.getType().equals(Material.AIR)) {
+                raspiPlayer.sendMessage("<gradient:red:yellow>Du musst schon ein Item in der Hand haben... lol", true);
+                return Command.SINGLE_SUCCESS;
+            }
+            convertRequest.setAmount(1);
+            plugin.getModule().getItemConverterManager().set(convertRequest);
+            raspiPlayer.sendMessage(String.format("Du hast %s:%s:%s als convert Item Festgelegt!", convertRequest.getType().name().toLowerCase(),
+                    LegacyComponentSerializer.legacyAmpersand().serialize(convertRequest.displayName()),
+                    "AMOUNT:" + convertRequest.getAmount()), true);
 
             return Command.SINGLE_SUCCESS;
         }).build();

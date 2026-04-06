@@ -3,7 +3,8 @@ package eu.goodyfx.system.lootchest.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.api.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.entity.Player;
@@ -18,12 +19,8 @@ public class LootChestCommand {
         if (!(context.getSource().getSender() instanceof Player player)) {
             return Command.SINGLE_SUCCESS;
         }
-
-        Raspi.players().withOnlinePlayer(player, raspiPlayer1 -> {
-            raspiPlayer1.sendDebugMessage("Eine Hilfeliste kommt bald.");
-
-        });
-
+        RaspiPlayer raspiPlayer1 = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+        raspiPlayer1.sendDebugMessage("Eine Hilfeliste kommt bald.");
         return Command.SINGLE_SUCCESS;
     }
 

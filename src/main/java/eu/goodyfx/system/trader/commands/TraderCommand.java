@@ -1,11 +1,11 @@
 package eu.goodyfx.system.trader.commands;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.exceptions.AllReadyExistException;
 import eu.goodyfx.system.core.utils.InventoryBuilder;
 import eu.goodyfx.system.core.utils.ItemBuilder;
-import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.trader.managers.TraderDB;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -70,26 +70,25 @@ public class TraderCommand implements CommandExecutor, TabCompleter {
             sender.sendRichMessage("ONLY _ PLAYER _ COMMAND");
             return true;
         }
-        Raspi.players().withOnlinePlayer(dummy, player -> {
+        RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(dummy);
 
-            if (args.length == 1) {
-                String name = args[0];
+        if (args.length == 1) {
+            String name = args[0];
 
-                //INIT DB
-                try {
-                    traderDB.create(name);
-                    //SPAWN VILLAGER
-                    spawnVillager(player.getLocation(), name, traderDB.getUUID(name));
-                } catch (AllReadyExistException e) {
-                    player.sendMessage(String.format("%s<red>Der Trader: <yellow>%s <red>existiert bereits.", plugin.getModule().getRaspiMessages().getPrefix(), name));
-                }
-                return;
+            //INIT DB
+            try {
+                traderDB.create(name);
+                //SPAWN VILLAGER
+                spawnVillager(player.getLocation(), name, traderDB.getUUID(name));
+            } catch (AllReadyExistException e) {
+                player.sendMessage(String.format("%s<red>Der Trader: <yellow>%s <red>existiert bereits.", plugin.getModule().getRaspiMessages().getPrefix(), name));
             }
-            edit(args, player);
-            spawn(args, player);
-            remove(args, player);
+            return true;
+        }
+        edit(args, player);
+        spawn(args, player);
+        remove(args, player);
 
-        });
         return false;
     }
 

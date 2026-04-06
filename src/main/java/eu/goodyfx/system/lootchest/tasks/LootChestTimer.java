@@ -68,7 +68,7 @@ public class LootChestTimer extends BukkitRunnable {
     }
 
     private void initializeTimer() {
-        plugin.getDebugger().info("Initialisiere LootChest-Timer.");
+        plugin.getDebugger().debug("Initialisiere LootChest-Timer.");
         resetTimer();
         isInitialized = true;
     }
@@ -80,7 +80,7 @@ public class LootChestTimer extends BukkitRunnable {
     }
 
     private void triggerLootChestReady() {
-        plugin.getDebugger().info("LootChest ist bereit zum öffnen.");
+        plugin.getDebugger().debug("LootChest ist bereit zum öffnen.");
         for (TextDisplay lootChest : AnimationBlockDisplay.getTextDisplayList()) {
             lootChest.text(MiniMessage.miniMessage().deserialize("<green>Öffne Mich!"));
         }
@@ -94,7 +94,7 @@ public class LootChestTimer extends BukkitRunnable {
     private void logNextChestTime(long ticks) {
         String timeMessage = String.format("DEBUGGER: Nächste LootChest in %s.",
                 RaspiTimes.Ticks.getTimeUnit(ticks * 20));
-        plugin.getDebugger().info(timeMessage);
+        plugin.getDebugger().debug(timeMessage);
     }
 
     private void notifyPlayers(long ticks) {

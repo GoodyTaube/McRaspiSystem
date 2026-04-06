@@ -2,7 +2,7 @@ package eu.goodyfx.system.lootchest;
 
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.utils.RaspiSubSystem;
 import eu.goodyfx.system.core.utils.RaspiSubSystems;
 import eu.goodyfx.system.lootchest.commands.LootChestCommand;

@@ -1,50 +1,63 @@
 package eu.goodyfx.system.core.tasks;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.Raspi;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import eu.goodyfx.system.core.api.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Objective;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayTimeTask extends BukkitRunnable {
 
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
     public PlayTimeTask() {
-        this.runTaskTimerAsynchronously(plugin, 0, 1);
+        this.runTaskTimer(plugin, 0, 20 * 60);
     }
+
+    @Getter
+    private static final Map<UUID, Long> joinCache = new ConcurrentHashMap<>();
+
+    private final long millis = 3600000;
 
     @Override
     public void run() {
-        Bukkit.getOnlinePlayers().forEach(this::check);
-    }
+        long current = System.currentTimeMillis();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            UUID uuid = player.getUniqueId();
+            long lastChek = getJoinCache().get(uuid);
 
-    public void check(Player player) {
-        int onlineHours = 0;
-        Objective objective = player.getScoreboard().getObjective("Onlinestunden");
-        Objective time = player.getScoreboard().getObjective("time");
 
-        if (objective != null && time != null) {
-            int score = time.getScore(player).getScore();
-            int HOUR_IN_TICK = 20 * 60 * 60;
-            while (score / HOUR_IN_TICK >= 1) {
-                score = score - HOUR_IN_TICK;
-                time.getScore(player).setScore(score);
-                onlineHours = onlineHours + 1;
+            long diff = current - lastChek;
 
-                int finalOnlineHours = onlineHours;
-                Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
-                    raspiPlayer.userData().setOnlineHours(finalOnlineHours);
-
-                });
-                player.sendActionBar(MiniMessage.miniMessage().deserialize("<green> +1 Onlinestunde"));
-                objective.getScore(player).setScore(objective.getScore(player).getScore() + 1);
+            if (diff >= millis) {
+                long hours = diff / millis;
+                addPlaytime(player, hours);
+                joinCache.put(player.getUniqueId(), lastChek + (hours * millis));
             }
 
         }
     }
+
+    private void addPlaytime(Player player, long hoursToAdd) {
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+
+        int old = raspiPlayer.userData().getOnlineHours();
+
+        // deine eigene Speicherung passiert woanders
+        int updated = old + (int) hoursToAdd;
+
+        if (updated > old) {
+            raspiPlayer.userData().setOnlineHours(updated);
+            raspiPlayer.sendActionBar("<green>+1 OnlineStunde");
+        }
+    }
+
 
 }

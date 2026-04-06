@@ -1,9 +1,9 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.database.UserSettings;
-import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.Settings;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -24,7 +24,7 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (command.getName().equals("settings") && (args.length == 1)) {
             List<String> results = new ArrayList<>();
             results.add("afk");
@@ -36,26 +36,21 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (sender instanceof Player dummy && (args.length == 1)) {
-
             // settings chat
-            Raspi.players().withOnlinePlayer(dummy, raspiPlayer -> {
-
-                switch (args[0]) {
-                    case "chat":
-                        perform(Settings.MESSAGES, raspiPlayer);
-                        break;
-                    case "afk":
-                        perform(Settings.AUTO_AFK, raspiPlayer);
-                        break;
-                    case "opt-chat":
-                        perform(Settings.ADVANCED_CHAT, raspiPlayer);
-                        break;
-                }
-
-            });
-
+            RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(dummy);
+            switch (args[0]) {
+                case "chat":
+                    perform(Settings.MESSAGES, raspiPlayer);
+                    break;
+                case "afk":
+                    perform(Settings.AUTO_AFK, raspiPlayer);
+                    break;
+                case "opt-chat":
+                    perform(Settings.ADVANCED_CHAT, raspiPlayer);
+                    break;
+            }
             return true;
         }
         return false;

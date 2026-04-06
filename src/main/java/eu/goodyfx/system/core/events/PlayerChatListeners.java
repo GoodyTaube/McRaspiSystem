@@ -1,8 +1,8 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
-import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiFormatting;
 import eu.goodyfx.system.core.utils.RaspiPermission;
 import eu.goodyfx.system.core.utils.RaspiTimes;
@@ -49,7 +49,7 @@ public class PlayerChatListeners implements Listener {
             }
         });
 
-        RaspiPlayer player = Raspi.players().getActive(chatEvent.getPlayer());
+        RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(chatEvent.getPlayer());
         if (player == null) {
             return;
         }
@@ -76,16 +76,8 @@ public class PlayerChatListeners implements Listener {
             return;
         }
 
-        if (plugin.getDiscordBot() != null && plugin.getDiscordBot().isEnabled()) {
-            if (finalPlainMessage.startsWith("@mark")) {
-                plugin.getDiscordBot().send(PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
-                return;
-            }
-            plugin.getDiscordBot().send(String.format("<%s> %s", player.getPlayer().getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage))));
-        }
 
-
-        for (RaspiPlayer active : Raspi.players().getActivePlayers().values()) {
+        for (RaspiPlayer active : Raspi.playerLifeCycleService().getCachedRaspiPlayers()) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 send(player, active, finalPlainMessage);
             });
@@ -100,24 +92,17 @@ public class PlayerChatListeners implements Listener {
 
     public void send(RaspiPlayer sendPlayer, RaspiPlayer player, String finalMessage) {
 
-        String team = getTeamMarker(sendPlayer.getPlayer(), player, finalMessage);
+        //String team = getTeamMarker(sendPlayer.getPlayer(), player, finalMessage);
         if (player.settings().isOpt_chat()) {
-            String commandClick = commandClick(String.format("/playerinfo %s", player.getPlayer().getName()));
+            String commandClick = commandClick(String.format("/playerinfo %s", sendPlayer.getPlayer().getName()));
             String hoverText = hoverText(String.format("<gray>PlayerInfos<br>Bisher Gespielt: <aqua>%s<br><gray><italic>Klicke um mehr Infos zu bekommen.", RaspiTimes.Ticks.getTimeUnit(player.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE)))); //REPLACE DURCH ONLINE_HOURS
             String optMessage = String.format("%s%s", commandClick, hoverText);
             String hoverMessageClock = hoverText(String.format("<aqua>%s", new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())));
-            String message = String.format("%s<%s%s> %s%s", team, optMessage, sendPlayer.getDisplayName(), hoverMessageClock, finalMessage);
+            String message = String.format("<%s%s> %s%s", optMessage, sendPlayer.getDisplayName(), hoverMessageClock, finalMessage);
             player.sendMessage(message);
             return;
         }
-        player.sendMessage(String.format("%s<%s> %s", team, sendPlayer.getDisplayName(), finalMessage));
-    }
-
-    private String getTeamMarker(Player sendPlayer, RaspiPlayer player, String message) {
-        if (player.hasPermission(RaspiPermission.TEAM) && plugin.getDiscordBot().isEnabled()) {
-            return String.format("<white><hover:show_text:'<aqua>In Discord Markieren'><click:suggest_command:'@mark <%s> %s'>[<green>⃟<white>]<reset> ", sendPlayer.getName(), message);
-        }
-        return "";
+        player.sendMessage(String.format("<%s> %s", sendPlayer.getDisplayName(), finalMessage));
     }
 
     private boolean checkUp(RaspiPlayer player) {
@@ -167,7 +152,7 @@ public class PlayerChatListeners implements Listener {
 
         if (player.hasPermission(RaspiPermission.TEAM) && message.startsWith("!") && message.length() > 1) {
             isTeam = true;
-            Raspi.players().getActivePlayers().values().forEach(mabeTeam -> {
+            Raspi.playerLifeCycleService().getCachedRaspiPlayers().forEach(mabeTeam -> {
                 if (mabeTeam.hasPermission(RaspiPermission.TEAM)) {
                     if (!lastMessage.startsWith("!")) {
                         mabeTeam.getPlayer().sendPlainMessage(" ");
@@ -193,7 +178,7 @@ public class PlayerChatListeners implements Listener {
         String[] args = rawMessage.split(" ");
         StringBuilder preResult = new StringBuilder();
         for (int i = 0; i < args.length; i++) {
-            for (RaspiPlayer raspiOnlinePlayer : Raspi.players().getActivePlayers().values()) {
+            for (RaspiPlayer raspiOnlinePlayer : Raspi.playerLifeCycleService().getCachedRaspiPlayers()) {
                 if (args[i].toLowerCase().contains(raspiOnlinePlayer.getPlayer().getName().toLowerCase()) && !args[i].startsWith("<blue><underlined><click")) {
                     args[i] = args[i].replaceAll(raspiOnlinePlayer.getPlayer().getName().toLowerCase(), raspiOnlinePlayer.getColorName());
                     args[i] = args[i].replaceAll(raspiOnlinePlayer.getPlayer().getName(), raspiOnlinePlayer.getColorName());

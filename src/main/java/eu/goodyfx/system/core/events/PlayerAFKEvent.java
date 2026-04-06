@@ -1,7 +1,7 @@
 package eu.goodyfx.system.core.events;
 
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
-import eu.goodyfx.system.core.utils.Raspi;
 import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -18,9 +18,9 @@ public class PlayerAFKEvent extends Event {
     public PlayerAFKEvent(RaspiPlayer player) {
         this.player = player;
         if (player.settings().isAfk()) {
-            Raspi.players().getAfkContainer().put(player.getUUID(), player.getLocation());
+            Raspi.playerLifeCycleService().getAfkContainer().put(player.getUUID(), player.getLocation());
         } else {
-            Raspi.players().getAfkContainer().remove(player.getUUID());
+            Raspi.playerLifeCycleService().getAfkContainer().remove(player.getUUID());
         }
     }
 

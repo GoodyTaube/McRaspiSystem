@@ -1,8 +1,8 @@
 package eu.goodyfx.system.core.managers;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
-import eu.goodyfx.system.core.utils.Raspi;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -99,29 +99,31 @@ public class WarteschlangenManager {
     }
 
     public void addToQueue(UUID uuid, Location location) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) {
+            return;
+        }
 
-        Raspi.players().getContextPlayer(uuid).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-            if (!(context instanceof RaspiPlayer player)) {
-                return;
-            }
-            String world = Objects.requireNonNull(location.getWorld()).getName();
-            Location waiting = plugin.getModule().getLocationManager().get("waiting");
-            if (!world.equalsIgnoreCase(Objects.requireNonNull(waiting.getWorld()).getName())) {
-                locationHashMap.put(uuid, location);
-            }
-            if (!this.playersQueue.isEmpty() && player.settings().isAfk()) {
-                UUID afkUUID = playersQueue.peek();
-                this.playersQueue.remove(afkUUID);
-                this.playersQueue.add(uuid);
-                this.playersQueue.add(afkUUID);
-                Objects.requireNonNull(Bukkit.getPlayer(uuid)).teleport(waiting, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                sendQueuePosition(Bukkit.getPlayer(uuid));
-                return;
-            }
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+
+
+        String world = Objects.requireNonNull(location.getWorld()).getName();
+        Location waiting = plugin.getModule().getLocationManager().get("waiting");
+        if (!world.equalsIgnoreCase(Objects.requireNonNull(waiting.getWorld()).getName())) {
+            locationHashMap.put(uuid, location);
+        }
+        if (!this.playersQueue.isEmpty() && raspiPlayer.settings().isAfk()) {
+            UUID afkUUID = playersQueue.peek();
+            this.playersQueue.remove(afkUUID);
             this.playersQueue.add(uuid);
-            Bukkit.getPlayer(uuid).teleport(waiting);
-            sendQueuePosition(Bukkit.getPlayer(uuid));
-        }));
+            this.playersQueue.add(afkUUID);
+            Objects.requireNonNull(player).teleport(waiting, PlayerTeleportEvent.TeleportCause.PLUGIN);
+            sendQueuePosition(player);
+            return;
+        }
+        this.playersQueue.add(uuid);
+        player.teleport(waiting);
+        sendQueuePosition(player);
     }
 
     public void removeFromQueue(UUID uuid) {
@@ -134,11 +136,11 @@ public class WarteschlangenManager {
     public void setHeader() {
 
         AtomicInteger afk = new AtomicInteger();
-        Raspi.players().getActivePlayers().values().forEach(all -> {
+        Raspi.playerLifeCycleService().getCachedRaspiPlayers().forEach(all -> {
             if (all.settings().isAfk()) {
                 afk.getAndIncrement();
             }
-            if (!Raspi.players().getAfkContainer().isEmpty()) {
+            if (!Raspi.playerLifeCycleService().getAfkContainer().isEmpty()) {
                 all.getPlayer().sendPlayerListHeaderAndFooter(Component.text("Spieler Online: " + Bukkit.getOnlinePlayers().size()
                         + "/" + getMaxPlayers() + " wartende Spieler " + plugin.getModule().getWarteschlangenManager().queueSize()).append(Component.newline()).append(Component.text("Spieler Abwesend: "
                         + afk)), Component.empty());

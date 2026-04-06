@@ -2,16 +2,17 @@ package eu.goodyfx.system;
 
 import eu.goodyfx.system.core.SystemStartUp;
 import eu.goodyfx.system.core.api.PlayerLifeCycleService;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.api.RaspiAccountService;
 import eu.goodyfx.system.core.commands.*;
 import eu.goodyfx.system.core.database.DatabaseManager;
-import eu.goodyfx.system.core.database.RaspiPlayers;
 import eu.goodyfx.system.core.events.PlayerLifecycleListener;
 import eu.goodyfx.system.core.managers.RaspiHookManager;
 import eu.goodyfx.system.core.managers.RaspiModuleManager;
 import eu.goodyfx.system.core.tasks.*;
 import eu.goodyfx.system.core.utils.*;
 import eu.goodyfx.system.lootchest.LootChestSystem;
+import eu.goodyfx.system.pvp.PvPSubSystem;
 import eu.goodyfx.system.raspievents.RaspiEventsSystem;
 import eu.goodyfx.system.reise.RaspiReiseSystem;
 import eu.goodyfx.system.trader.TraderSystem;
@@ -27,15 +28,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
 
 @Getter
 public final class McRaspiSystem extends JavaPlugin {
@@ -44,7 +42,6 @@ public final class McRaspiSystem extends JavaPlugin {
     private RaspiHookManager hookManager;
     private RaspiDebugger debugger;
     private DatabaseManager databaseManager;
-    private DiscordBotClient discordBot;
     private RaspiAccountService raspiAccountService;
     private PlayerLifeCycleService playerLifeCycleService;
     private final Random random = new Random();
@@ -55,9 +52,8 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable weeklyTimer;
     private BukkitRunnable animation;
     private BukkitRunnable restoreInv;
-    private BukkitRunnable dailyCommand;
     private BukkitRunnable inHeadTask;
-    //private BukkitRunnable playTimeTask;
+    private BukkitRunnable playTimeTask;
     private BukkitRunnable tabListTask;
     private final List<BukkitRunnable> tasks = new ArrayList<>();
 
@@ -66,23 +62,17 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
 
-    private final List<RaspiSubSystem> raspiSubSystems = List.of(new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSystem(this));
+    private final List<RaspiSubSystem> raspiSubSystems = List.of(new PvPSubSystem(this), new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSystem(this));
 
     @Override
     public void onEnable() {
         init();
-        try {
-            this.discordBot = new DiscordBotClient(new URI("ws://localhost:6969"));
-            discordBot.connect();
-        } catch (URISyntaxException e) {
-            getLogger().log(Level.SEVERE, "Error while init Bot", e);
-        }
         dataMigration();
     }
 
+
     private void playerInit() {
-        RaspiPlayers players = new RaspiPlayers();
-        Raspi.init(players, debugger);
+        Raspi.init(debugger, raspiAccountService, playerLifeCycleService);
         new PlayerLifecycleListener();
     }
 
@@ -94,13 +84,17 @@ public final class McRaspiSystem extends JavaPlugin {
             commands.registrar().register(ItemConverterCommandContainer.command());
             commands.registrar().register(RequestCommandContainer.command());
             commands.registrar().register(new RaspiGiveCommandContainer().command());
-            commands.registrar().register(ChatCommandContainer.runCommand());
             commands.registrar().register(BackCommandContainer.backCommand());
             commands.registrar().register(PlayerInfoCommandContainer.command());
             commands.registrar().register(MuteCommandContainer.muteCommand());
             commands.registrar().register(UnMuteCommandContainer.command());
             commands.registrar().register(RaspiCoinsSendCommandContainer.command());
-            commands.registrar().register(CoinStatusCommandContainer.command());
+            commands.registrar().register(CoinCommandContainer.command());
+            commands.registrar().register(ChatColorCommandContainer.chatColorCommand());
+            commands.registrar().register(new InHeadCommandContainer(this).command());
+            commands.registrar().register(new AFKCommandContainer(this).command());
+            commands.registrar().register(new RandomTeleportCommandContainer(this).command());
+            commands.registrar().register(new PrefixCommandContainer(this).command());
         });
 
     }
@@ -113,15 +107,18 @@ public final class McRaspiSystem extends JavaPlugin {
         hookManager = new RaspiHookManager(this, this);
         setupConfigs();
         moduleManager = new RaspiModuleManager(this);
+        services();
         playerInit();
 
         new SystemStartUp();
-
         paperCommandsRegister();
         systemsActivation();
         tasks();
         moduleManager.getMotdManager().set();
-        new InHeadSpectator();
+        new BookBanFix(this);
+    }
+
+    private void services() {
         raspiAccountService = new RaspiAccountService(getAsyncExecutor());
         this.playerLifeCycleService = new PlayerLifeCycleService(this, raspiAccountService);
     }
@@ -133,12 +130,11 @@ public final class McRaspiSystem extends JavaPlugin {
         tasks.add(weeklyTimer);
         this.restoreInv = new InventoryBackup(this);
         tasks.add(restoreInv);
-        this.dailyCommand = new CommandResetTask(this);
-        tasks.add(dailyCommand);
-        this.inHeadTask = new InHeadTask();
+
+        //this.inHeadTask = new InHeadTask();
         tasks.add(inHeadTask);
-        //this.playTimeTask = new PlayTimeTask();
-        //tasks.add(playTimeTask);
+        this.playTimeTask = new PlayTimeTask();
+        tasks.add(playTimeTask);
         this.tabListTask = new TablistAnimator();
         tasks.add(tabListTask);
     }
@@ -216,7 +212,7 @@ public final class McRaspiSystem extends JavaPlugin {
                 task.cancel();
             }
         }
-        discordBot.closeConnection(0, "Bye Bye RaspiSystem..");
+        debugger.shutdown();
     }
 
     /**
@@ -248,6 +244,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private void checkDefaults() {
         if (!getConfig().contains("raspi")) {
             getConfig().addDefault("raspi.systems.raspiLoot", true);
+            getConfig().addDefault("raspi.systems.pvp", true);
             getConfig().addDefault("raspi.systems.raspiTrader", true);
             getConfig().addDefault("raspi.systems.raspiReise", true);
             getConfig().addDefault("raspi.systems.raspiVoting", false);

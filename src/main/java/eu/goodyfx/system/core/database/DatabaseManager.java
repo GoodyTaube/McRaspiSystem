@@ -3,7 +3,7 @@ package eu.goodyfx.system.core.database;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.api.Raspi;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -74,12 +74,12 @@ public class DatabaseManager {
             }
         }
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(String.format("SELECT 1 FROM %s WHERE uuid = ? LIMIT 1", table.getTableName()))) {
-            Raspi.debugger().info(String.format("[ExistCheck] for %s in %s", uuid, table.name()));
+            Raspi.debugger().debug(String.format("[ExistCheck] for %s in %s", uuid, table.name()));
             statement.setString(1, uuid.toString());
             ResultSet re = statement.executeQuery();
             boolean exist = re.next();
             userExistCacheUserData.put(uuid, exist);
-            Raspi.debugger().info(String.format("[ExistCheck] %s exist value: %s", uuid, exist));
+            Raspi.debugger().debug(String.format("[ExistCheck] %s exist value: %s", uuid, exist));
             return exist;
         } catch (SQLException e) {
             String name = Bukkit.getOfflinePlayer(uuid).getName();

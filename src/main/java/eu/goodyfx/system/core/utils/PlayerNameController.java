@@ -90,7 +90,7 @@ public class PlayerNameController {
     }
 
     public void resetRandom() {
-        JavaPlugin.getPlugin(McRaspiSystem.class).getDebugger().info("NameController::RESET RANDOM");
+        JavaPlugin.getPlugin(McRaspiSystem.class).getDebugger().debug("NameController::RESET RANDOM");
         randomContainer.remove(player.getUUID());
     }
 

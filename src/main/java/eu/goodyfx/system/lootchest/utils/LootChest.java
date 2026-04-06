@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.*;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Transformation;
 import org.joml.Vector3f;
 
@@ -53,6 +54,7 @@ public class LootChest {
     private void display() {
         this.timeDisplay = (TextDisplay) world.spawnEntity(chestLocation.clone().add(0, 2, 0), EntityType.TEXT_DISPLAY);
         this.timeDisplay.text(MiniMessage.miniMessage().deserialize("<green>LootChest"));
+        this.timeDisplay.getPersistentDataContainer().set(new NamespacedKey(plugin, "special"), PersistentDataType.INTEGER, 1);
         this.timeDisplay.setBillboard(Display.Billboard.CENTER);
         this.timeDisplay.setPersistent(true);
         AnimationBlockDisplay.getTextDisplayList().add(this.timeDisplay);

@@ -1,6 +1,7 @@
 package eu.goodyfx.system.core.database;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.utils.MojangPlayerWrapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,7 +62,7 @@ public class RaspiUser {
                 prefix = resultSet.getObject("prefix", String.class);
                 voting = resultSet.getObject("voting", Integer.class);
                 coins = resultSet.getObject("coins", Long.class);
-                plugin.getDebugger().info(String.format("[RaspiUser] Fetched userData for %s successfully.", username));
+                plugin.getDebugger().debug(String.format("[RaspiUser] Fetched userData for %s successfully.", username));
             }
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("Error while Fetching user Data for %s in %s", username, table), e);
@@ -74,7 +75,7 @@ public class RaspiUser {
             statement.setString(2, username);
             statement.setLong(3, System.currentTimeMillis());
             statement.executeUpdate();
-            plugin.getDebugger().info(String.format("Created Data for %s", username));
+            plugin.getDebugger().debug(String.format("Created Data for %s", username));
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("Error while Writing data for %s in %s", username, table), e);
         }
@@ -104,6 +105,7 @@ public class RaspiUser {
             statement.setObject(12, coins, JDBCType.BIGINT);
             statement.setObject(13, uuid, JDBCType.VARCHAR);
             statement.executeUpdate();
+            Raspi.debugger().debug("UserData Updated for " + username, "MYSQL");
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("Error while Updating data for %s in %s", username, table), e);
         }

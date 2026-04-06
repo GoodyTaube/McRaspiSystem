@@ -1,7 +1,8 @@
 package eu.goodyfx.system.raspievents.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.utils.Raspi;
+import eu.goodyfx.system.core.api.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.raspievents.craftings.CanabolaCraftging;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -23,24 +24,22 @@ public class CraftingEventListeners implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-        Raspi.players().withOnlinePlayer(event.getPlayer(), player -> {
-            ItemStack stack = event.getItem();
-            if (stack == null) {
-                return;
-            }
-            if (compareStack(stack)) {
-                Location location = player.getLocation();
-                location.getWorld().spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, player.getLocation().add(0, 1, 0), 150, 0, 0.5, 0, 0.05, null, true);
-                player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, CanabolaCraftging.duration, 1, false, false, false));
-                player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, CanabolaCraftging.duration, 1, false, false, false));
-                player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, CanabolaCraftging.duration, 1, false, false, false));
+        RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(event.getPlayer());
 
-                stack.setAmount(stack.getAmount() - 1);
-                event.setCancelled(true);
-            }
+        ItemStack stack = event.getItem();
+        if (stack == null) {
+            return;
+        }
+        if (compareStack(stack)) {
+            Location location = player.getLocation();
+            location.getWorld().spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, player.getLocation().add(0, 1, 0), 150, 0, 0.5, 0, 0.05, null, true);
+            player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, CanabolaCraftging.duration, 1, false, false, false));
+            player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, CanabolaCraftging.duration, 1, false, false, false));
+            player.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, CanabolaCraftging.duration, 1, false, false, false));
 
-        });
-
+            stack.setAmount(stack.getAmount() - 1);
+            event.setCancelled(true);
+        }
 
     }
 

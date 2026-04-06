@@ -62,7 +62,7 @@ public class RaspiUsernames {
             while (set.next()) {
                 usernames.add(set.getString("username"));
             }
-            plugin.getDebugger().info(String.format("[UserNames] Fetched userNames for %s successfully.", userName));
+            plugin.getDebugger().debug(String.format("[UserNames] Fetched userNames for %s successfully.", userName));
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "[UserName] Failed to Fetch userNames for " + userName, e);
         }

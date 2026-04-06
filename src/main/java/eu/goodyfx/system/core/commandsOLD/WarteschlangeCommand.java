@@ -1,10 +1,11 @@
 package eu.goodyfx.system.core.commandsOLD;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.commandsOLD.subcommands.WarteschlangeCommandReload;
 import eu.goodyfx.system.core.commandsOLD.subcommands.WarteschlangeCommandSet;
+import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.managers.LocationManager;
-import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.SubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -61,11 +62,8 @@ public class WarteschlangeCommand implements CommandExecutor, TabCompleter {
             if (args.length > 0) {
                 for (SubCommand subCommand : subCommands) {
                     if (args[0].startsWith(subCommand.getLabel())) {
-                        Raspi.players().withOnlinePlayer(player, raspiPlayer -> {
-
-                            subCommand.commandPerform(raspiPlayer, args);
-                        });
-
+                        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+                        subCommand.commandPerform(raspiPlayer, args);
                         return true;
                     }
                 }

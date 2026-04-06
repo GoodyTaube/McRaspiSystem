@@ -2,6 +2,7 @@ package eu.goodyfx.system.core.utils;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiManagement;
 import eu.goodyfx.system.core.database.RaspiUser;
 import eu.goodyfx.system.core.managers.ExtraInfos;
@@ -40,7 +41,7 @@ public class PlayerInfo {
 
     public PlayerInfo(OfflinePlayer player) {
         this.player = player.getPlayer();
-        Raspi.players().getOrLoadPlayer(player.getUniqueId()).thenAccept(account -> {
+        Raspi.playerLifeCycleService().getRaspiOffPlayer(player).thenAccept(account -> {
             this.raspiUser = account.getRaspiUser();
             this.management = account.getRaspiManagement();
 

@@ -1,9 +1,9 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.commands.BackCommandContainer;
 import eu.goodyfx.system.core.commands.SitCommandContainer;
-import eu.goodyfx.system.core.utils.Raspi;
 import org.bukkit.Location;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
@@ -13,11 +13,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDismountEvent;
+import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public record TeleportListeners(McRaspiSystem plugin) implements Listener {
 
@@ -26,19 +31,21 @@ public record TeleportListeners(McRaspiSystem plugin) implements Listener {
         plugin.setListeners(this);
     }
 
+    private static final Map<UUID, Entity> cache = new HashMap<>();
+
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityTeleport(EntityTeleportEvent teleportEvent) {
         if (teleportEvent.getEntity() instanceof Animals animals) {
             animals.getNearbyEntities(5, 5, 5).forEach(enemy -> {
                 if (enemy instanceof Player) {
-                    if (animals.getPassengers().contains(enemy)) {
+                    if (animals.getPassengers().contains(enemy) && !animals.getType().equals(EntityType.HORSE)) {
                         new BukkitRunnable() {
                             @Override
                             public void run() {
                                 animals.addPassenger(enemy);
                             }
-                        }.runTaskLaterAsynchronously(plugin, 7L);
+                        }.runTaskLater(plugin, 7L);
 
                     }
                 }
@@ -46,13 +53,43 @@ public record TeleportListeners(McRaspiSystem plugin) implements Listener {
         }
     }
 
+    public double distance(Location location1, Location location2) {
+        if (!location1.getWorld().getName().equalsIgnoreCase(location2.getWorld().getName())) {
+            return 100.0D;
+        }
+        return location1.distanceSquared(location2);
+    }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent teleportEvent) {
         Player player = teleportEvent.getPlayer();
         Location to = teleportEvent.getTo();
         BackCommandContainer.getLocationsCache().put(player.getUniqueId(), teleportEvent.getFrom());
-        Raspi.debugger().info(String.format("[BackCommand] saved %s location. CAUSE::TELEPORT", player.getName()));
+        Raspi.debugger().debug(String.format("[BackCommand] saved %s location. CAUSE::TELEPORT", player.getName()));
+
+
+        double distance = distance(teleportEvent.getFrom(), to);
+        if (distance > 25) {
+            if (cache.containsKey(player.getUniqueId())) {
+                Entity mount = cache.get(player.getUniqueId());
+
+                if (mount != null) {
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            Location target = teleportEvent.getTo().clone().add(0, 0.1, 0);
+                            mount.teleport(teleportEvent.getTo(), PlayerTeleportEvent.TeleportCause.PLUGIN);
+                            mount.setVelocity(new Vector(0, 0, 0));
+                            mount.addPassenger(player);
+
+                        }
+                    }.runTask(plugin);
+
+                }
+                cache.remove(player.getUniqueId());
+            }
+        }
         player.getNearbyEntities(8, 8, 8).forEach(entity -> {
             if (entity instanceof Animals animal) {
                 if (animal.isLeashed()) {
@@ -63,26 +100,14 @@ public record TeleportListeners(McRaspiSystem plugin) implements Listener {
                             public void run() {
                                 animal.teleport(Objects.requireNonNull(to), PlayerTeleportEvent.TeleportCause.PLUGIN);
                                 animal.setLeashHolder(player);
+                                Raspi.debugger().debug("TELEPORT HORSE");
                             }
                         }.runTaskLater(plugin, 2L);
 
                     }
                 }
             }
-            // Teleport Player and Entity Player sits on
-            if (!entity.getPassengers().isEmpty()) {
-                for (Entity passenger : entity.getPassengers()) {
-                    if (passenger.equals(player)) {
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                entity.teleport(Objects.requireNonNull(to), PlayerTeleportEvent.TeleportCause.PLUGIN);
-                                entity.addPassenger(player);
-                            }
-                        }.runTaskLater(plugin, 2L);
-                    }
-                }
-            }
+
         });
     }
 
@@ -93,7 +118,18 @@ public record TeleportListeners(McRaspiSystem plugin) implements Listener {
             SitCommandContainer.endSitting(player);
             dismountEvent.getDismounted().remove();
             player.teleport(player.getLocation().add(0, 1, 0));
+        }
 
+        if (dismountEvent.getEntity() instanceof Player player) {
+            cache.remove(player.getUniqueId());
+        }
+
+    }
+
+    @EventHandler
+    public void onMount(EntityMountEvent mountEven) {
+        if (mountEven.getEntity() instanceof Player player) {
+            cache.put(player.getUniqueId(), mountEven.getMount());
         }
     }
 

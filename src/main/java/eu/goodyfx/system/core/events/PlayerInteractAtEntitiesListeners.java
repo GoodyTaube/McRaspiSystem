@@ -3,12 +3,11 @@ package eu.goodyfx.system.core.events;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import eu.goodyfx.system.McRaspiSystem;
+import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
-import eu.goodyfx.system.core.utils.Raspi;
 import eu.goodyfx.system.core.utils.RaspiSounds;
 import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.lootchest.utils.LootChestLoot;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.*;
@@ -85,19 +84,16 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
             Interaction interaction = (Interaction) event.getRightClicked();
             if (interaction.getPersistentDataContainer().has(new NamespacedKey(plugin, "special"))) {
                 event.setCancelled(true);
+                RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(event.getPlayer());
 
-                Raspi.players().getContextPlayer(event.getPlayer().getUniqueId()).thenAccept(context -> Bukkit.getScheduler().runTask(plugin, () -> {
-                    if (context instanceof RaspiPlayer player) {
 
-                        if (LootChestSystem.getLootChestSubSystem().getLootChestTimer().isLootChestReady()) {
-                            new LootChestLoot(plugin).openLoot(player);
-                        } else {
-                            player.playSound(RaspiSounds.ERROR);
-                            player.sendActionBar("<red>LootChest ist noch nicht Offen!");
-                        }
+                if (LootChestSystem.getLootChestSubSystem().getLootChestTimer().isLootChestReady()) {
+                    new LootChestLoot(plugin).openLoot(player);
+                } else {
+                    player.playSound(RaspiSounds.ERROR);
+                    player.sendActionBar("<red>LootChest ist noch nicht Offen!");
+                }
 
-                    }
-                }));
             }
         }
     }
