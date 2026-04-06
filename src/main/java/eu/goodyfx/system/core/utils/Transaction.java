@@ -3,6 +3,7 @@ package eu.goodyfx.system.core.utils;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
+import eu.goodyfx.system.core.tasks.OpenTransactionsTask;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -29,6 +30,7 @@ public class Transaction {
         this.amount = amount;
         this.fee_percent = fee_percent;
         this.cost = Math.max(1, amount * fee_percent / 100);
+        OpenTransactionsTask.getOpen_transactions().add(this);
     }
 
     public void complete() {

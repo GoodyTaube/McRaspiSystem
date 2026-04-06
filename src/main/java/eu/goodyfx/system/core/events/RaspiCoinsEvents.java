@@ -1,11 +1,11 @@
 package eu.goodyfx.system.core.events;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.api.Raspi;
+import eu.goodyfx.system.core.database.RaspiPlayer;
+import eu.goodyfx.system.core.tasks.OpenTransactionsTask;
 import eu.goodyfx.system.core.utils.Transaction;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ public class RaspiCoinsEvents implements Listener {
 
     private final List<Material> transactionKeys = new ArrayList<>();
     @Getter
-    private static final List<Transaction> transactions = new ArrayList<>();
+    private static final List<Transaction> transactions = OpenTransactionsTask.getOpen_transactions();
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
     public RaspiCoinsEvents() {
