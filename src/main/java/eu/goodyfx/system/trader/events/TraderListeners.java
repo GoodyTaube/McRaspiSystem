@@ -3,8 +3,10 @@ package eu.goodyfx.system.trader.events;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
+import eu.goodyfx.system.trader.TraderSubSystem;
 import eu.goodyfx.system.trader.commands.TraderCommand;
 import eu.goodyfx.system.trader.managers.TraderDB;
+import eu.goodyfx.system.trader.utils.TraderInventories;
 import io.papermc.paper.event.player.PlayerNameEntityEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -31,10 +33,11 @@ import java.util.List;
 public class TraderListeners implements Listener {
 
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
-    private final TraderDB traderDB = plugin.getModuleManager().getTraderDB();
+    private final TraderDB traderDB;
     private static final String TRADER_NAME = "trader";
 
-    public TraderListeners() {
+    public TraderListeners(TraderSubSystem subSystem) {
+        this.traderDB = subSystem.getTraderDB();
         plugin.setListeners(this);
     }
 
@@ -72,6 +75,13 @@ public class TraderListeners implements Listener {
                 String traderUID = container.get(plugin.getNameSpaced(TRADER_NAME), PersistentDataType.STRING);
                 String traderName = String.format("<green>%s", traderDB.getTraderName(traderDB.getTraderByID(traderUID)));
                 //Generate Merchant and OPEN by Type
+
+                if (traderDB.isBanker(traderName)) {
+                    entityEvent.setCancelled(true);
+                    player.openInventory(MenuType.CRAFTING.builder().location(player.getLocation()).build(player.getPlayer()));
+                    return;
+                }
+
                 entityEvent.setCancelled(true);
                 player.openInventory(MenuType.MERCHANT.builder().merchant(generateMerchant(traderDB.getTraderByID(traderUID))).title(MiniMessage.miniMessage().deserialize(traderName)).build(player.getPlayer()));
             }
@@ -96,6 +106,7 @@ public class TraderListeners implements Listener {
             clickEvent.setCancelled(true);
             addItem(player, clickEvent);
             clickedRandom(player, clickEvent);
+            clickedBanker(player, clickEvent);
             clickedRecipe(player, clickEvent);
         }
 
@@ -111,7 +122,7 @@ public class TraderListeners implements Listener {
             int id = clickEvent.getCurrentItem().getItemMeta().getCustomModelData();
             String trader = TraderCommand.traderEditContainer.get(player.getUUID());
             TraderCommand.traderSAVEContainer.put(player.getUUID(), id);
-            Inventory inventory = TraderCommand.getEditInventory();
+            Inventory inventory = TraderInventories.createRecipeInventory();
             inventory.setItem(9, traderDB.getItemStack(trader, TraderDB.DB_SHOP_ITEM_1, id));
             inventory.setItem(10, traderDB.getItemStack(trader, TraderDB.DB_SHOP_ITEM_2, id));
             inventory.setItem(12, traderDB.getItemStack(trader, TraderDB.DB_SHOP_RES, id));
@@ -124,7 +135,7 @@ public class TraderListeners implements Listener {
 
         if (isItem(clickEvent.getCurrentItem(), -1)) {
             player.getPlayer().closeInventory();
-            player.openInventory(TraderCommand.getEditInventory());
+            player.openInventory(TraderInventories.createRecipeInventory());
         }
     }
 
@@ -142,6 +153,24 @@ public class TraderListeners implements Listener {
             traderDB.setRandom(TraderCommand.traderEditContainer.get(player.getUUID()), false);
             player.getPlayer().closeInventory();
             player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt nicht mehr Random.");
+            TraderCommand.traderEditContainer.remove(player.getUUID());
+        }
+    }
+
+    public void clickedBanker(RaspiPlayer player, InventoryClickEvent clickEvent) {
+        if (isItem(clickEvent.getCurrentItem(), -26)) {
+            //Banker MACHEN
+            traderDB.setBanker(TraderCommand.traderEditContainer.get(player.getUUID()), true);
+            player.getPlayer().closeInventory();
+            player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt Banker!");
+            TraderCommand.traderEditContainer.remove(player.getUUID());
+        }
+
+        if (isItem(clickEvent.getCurrentItem(), -25)) {
+            //Banker REVOKE
+            traderDB.setBanker(TraderCommand.traderEditContainer.get(player.getUUID()), false);
+            player.getPlayer().closeInventory();
+            player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt nicht mehr Banker.");
             TraderCommand.traderEditContainer.remove(player.getUUID());
         }
     }

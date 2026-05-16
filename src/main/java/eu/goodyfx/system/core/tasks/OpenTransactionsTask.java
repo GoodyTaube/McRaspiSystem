@@ -25,7 +25,7 @@ public class OpenTransactionsTask extends BukkitRunnable {
     public void run() {
         Bukkit.getOnlinePlayers().forEach(player -> {
             if (!open_transactions.isEmpty()) {
-                player.sendPlayerListFooter(MiniMessage.miniMessage().deserialize(String.format("Offene Transaktionen: %s", open_transactions.size())));
+                player.sendPlayerListFooter(MiniMessage.miniMessage().deserialize(String.format("<gray>Offene Transaktionen: <aqua>%s", open_transactions.size())));
             } else {
                 player.sendPlayerListFooter(Component.empty());
             }

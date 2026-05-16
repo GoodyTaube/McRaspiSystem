@@ -29,10 +29,10 @@ public class DatabaseManager {
 
 
     public List<String> getAllUsernamesCache() {
-        if(dataSource != null && allUsernamesCache.isEmpty()){
-            try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT username FROM user_data")){
+        if (dataSource != null && allUsernamesCache.isEmpty()) {
+            try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT username FROM user_data")) {
                 ResultSet resultSet = statement.executeQuery();
-                while (resultSet.next()){
+                while (resultSet.next()) {
                     allUsernamesCache.add(resultSet.getString("username"));
                 }
             } catch (SQLException e) {
@@ -64,23 +64,29 @@ public class DatabaseManager {
 
     }
 
-    private final Map<UUID, Boolean> userExistCacheUserData = new ConcurrentHashMap<>();
+    @Getter
+    private static final Map<UUID, Boolean> userExistCacheUserData = new ConcurrentHashMap<>(); //TODO SAVE CURRENT STATUS
 
 
     public boolean userExistInTable(UUID uuid, DatabaseTables table) {
-        if (table.equals(DatabaseTables.USER_DATA)) {
-            if (userExistCacheUserData.containsKey(uuid)) {
-                return userExistCacheUserData.get(uuid);
+        if (table == DatabaseTables.USER_DATA) {
+            if (userExistCacheUserData.getOrDefault(uuid, false)) {
+                return true;
             }
         }
+
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(String.format("SELECT 1 FROM %s WHERE uuid = ? LIMIT 1", table.getTableName()))) {
             Raspi.debugger().debug(String.format("[ExistCheck] for %s in %s", uuid, table.name()));
             statement.setString(1, uuid.toString());
-            ResultSet re = statement.executeQuery();
-            boolean exist = re.next();
-            userExistCacheUserData.put(uuid, exist);
-            Raspi.debugger().debug(String.format("[ExistCheck] %s exist value: %s", uuid, exist));
-            return exist;
+            try (ResultSet re = statement.executeQuery()) {
+                boolean exist = re.next();
+                if (table == DatabaseTables.USER_DATA && exist) {
+                    userExistCacheUserData.put(uuid, true);
+                }
+                Raspi.debugger().debug(String.format("[ExistCheck] %s exist value: %s", uuid, exist));
+                return exist;
+            }
+
         } catch (SQLException e) {
             String name = Bukkit.getOfflinePlayer(uuid).getName();
             plugin.getLogger().log(Level.SEVERE, String.format("[ExistCheck] failed to check %s in %s", name != null ? name : uuid, table.getTableName()));

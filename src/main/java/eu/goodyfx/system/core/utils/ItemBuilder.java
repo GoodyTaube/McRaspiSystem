@@ -1,13 +1,18 @@
 package eu.goodyfx.system.core.utils;
 
+import eu.goodyfx.system.core.api.Raspi;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.apache.http.annotation.Experimental;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,12 +72,13 @@ public class ItemBuilder {
         return this;
     }
 
-    public void addEnchantment(Enchantment enchantment, int level, boolean ignoreLimit) {
+    public ItemBuilder addEnchantment(Enchantment enchantment, int level, boolean ignoreLimit) {
         if (ignoreLimit) {
             stack.addUnsafeEnchantment(enchantment, level);
         } else {
             stack.addEnchantment(enchantment, level);
         }
+        return this;
     }
 
     public ItemBuilder addEnchantments(Map<Enchantment, Integer> enchantmentIntegerMap) {
@@ -80,6 +86,15 @@ public class ItemBuilder {
         return this;
     }
 
+
+    /**
+     * Set the custom Model ID
+     *
+     * @param modelID the id
+     * @return This Item Builder
+     * @deprecated Please use {@link #setIdentifier(int)}
+     */
+    @Deprecated()
     public ItemBuilder setModelID(float modelID) {
         this.modelID = modelID;
         return this;
@@ -96,10 +111,13 @@ public class ItemBuilder {
         return stack;
     }
 
-
-    public CustomModelData getMeta() {
-        return stack.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
-
+    @Experimental
+    public ItemBuilder setIdentifier(int id) {
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        NamespacedKey itemKey = Raspi.pluginKeys().getITEM_KEY();
+        container.set(itemKey, PersistentDataType.INTEGER, id);
+        return this;
     }
+
 
 }

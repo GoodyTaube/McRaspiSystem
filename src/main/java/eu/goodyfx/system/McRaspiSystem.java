@@ -1,7 +1,9 @@
 package eu.goodyfx.system;
 
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.core.SystemStartUp;
 import eu.goodyfx.system.core.api.PlayerLifeCycleService;
+import eu.goodyfx.system.core.api.PluginKeys;
 import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.api.RaspiAccountService;
 import eu.goodyfx.system.core.commands.*;
@@ -15,7 +17,8 @@ import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.pvp.PvPSubSystem;
 import eu.goodyfx.system.raspievents.RaspiEventsSystem;
 import eu.goodyfx.system.reise.RaspiReiseSystem;
-import eu.goodyfx.system.trader.TraderSystem;
+import eu.goodyfx.system.trader.TraderSubSystem;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -41,10 +44,15 @@ public final class McRaspiSystem extends JavaPlugin {
     private RaspiModuleManager moduleManager;
     private RaspiHookManager hookManager;
     private RaspiDebugger debugger;
+    private PluginKeys pluginKeys;
+
+
     private DatabaseManager databaseManager;
     private RaspiAccountService raspiAccountService;
     private PlayerLifeCycleService playerLifeCycleService;
     private final Random random = new Random();
+
+    public final List<LiteralCommandNode<CommandSourceStack>> commandContainer = new ArrayList<>();
 
 
     private BukkitTask raspiItemsRunner;
@@ -55,6 +63,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable inHeadTask;
     private BukkitRunnable playTimeTask;
     private BukkitRunnable tabListTask;
+    private BukkitRunnable transactionsTask;
     private final List<BukkitRunnable> tasks = new ArrayList<>();
 
     private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -62,7 +71,7 @@ public final class McRaspiSystem extends JavaPlugin {
 
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
 
-    private final List<RaspiSubSystem> raspiSubSystems = List.of(new PvPSubSystem(this), new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSystem(this));
+    private final List<RaspiSubSystem> raspiSubSystems = List.of(new PvPSubSystem(this), new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSubSystem(this));
 
     @Override
     public void onEnable() {
@@ -72,7 +81,7 @@ public final class McRaspiSystem extends JavaPlugin {
 
 
     private void playerInit() {
-        Raspi.init(debugger, raspiAccountService, playerLifeCycleService);
+        Raspi.init(debugger, raspiAccountService, playerLifeCycleService, pluginKeys);
         new PlayerLifecycleListener();
     }
 
@@ -88,13 +97,18 @@ public final class McRaspiSystem extends JavaPlugin {
             commands.registrar().register(PlayerInfoCommandContainer.command());
             commands.registrar().register(MuteCommandContainer.muteCommand());
             commands.registrar().register(UnMuteCommandContainer.command());
-            commands.registrar().register(RaspiCoinsSendCommandContainer.command());
             commands.registrar().register(CoinCommandContainer.command());
             commands.registrar().register(ChatColorCommandContainer.chatColorCommand());
             commands.registrar().register(new InHeadCommandContainer(this).command());
             commands.registrar().register(new AFKCommandContainer(this).command());
             commands.registrar().register(new RandomTeleportCommandContainer(this).command());
             commands.registrar().register(new PrefixCommandContainer(this).command());
+            commands.registrar().register(new AdminCommandContainer().command());
+
+            commandContainer.forEach(command -> {
+                commands.registrar().register(command);
+            });
+
         });
 
     }
@@ -103,13 +117,13 @@ public final class McRaspiSystem extends JavaPlugin {
         this.databaseManager = new DatabaseManager();
         new DatabaseUpdate(this); // Update Table if NEEDED!
         this.debugger = new RaspiDebugger(this);
+        this.pluginKeys = new PluginKeys(this);
         getLogger().info("Welcome to McRaspiSystem");
         hookManager = new RaspiHookManager(this, this);
         setupConfigs();
         moduleManager = new RaspiModuleManager(this);
         services();
         playerInit();
-
         new SystemStartUp();
         paperCommandsRegister();
         systemsActivation();
@@ -137,6 +151,9 @@ public final class McRaspiSystem extends JavaPlugin {
         tasks.add(playTimeTask);
         this.tabListTask = new TablistAnimator();
         tasks.add(tabListTask);
+
+        this.transactionsTask = new OpenTransactionsTask(this);
+        tasks.add(transactionsTask);
     }
 
     private void dataMigration() {

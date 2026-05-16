@@ -13,7 +13,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -85,8 +84,10 @@ public class PlayerChatListeners implements Listener {
         String log = String.format("[RaspiChat] <%s> %s", player.getPlayer().getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
         plugin.getLogger().info(log);
         //Send Discord Message! 2025
-        plugin.getHookManager().getDiscordIntegration().send("<" + player.getPlayer().getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
-
+        try {
+            plugin.getHookManager().getDiscordIntegration().send("<" + player.getPlayer().getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+        } catch (Exception ignore) {
+        }
     }
 
 
@@ -95,7 +96,7 @@ public class PlayerChatListeners implements Listener {
         //String team = getTeamMarker(sendPlayer.getPlayer(), player, finalMessage);
         if (player.settings().isOpt_chat()) {
             String commandClick = commandClick(String.format("/playerinfo %s", sendPlayer.getPlayer().getName()));
-            String hoverText = hoverText(String.format("<gray>PlayerInfos<br>Bisher Gespielt: <aqua>%s<br><gray><italic>Klicke um mehr Infos zu bekommen.", RaspiTimes.Ticks.getTimeUnit(player.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE)))); //REPLACE DURCH ONLINE_HOURS
+            String hoverText = hoverText(String.format("<gray>PlayerInfos<br>Bisher Gespielt: <aqua>%s<br><gray><italic>Klicke um mehr Infos zu bekommen.", RaspiTimes.Ticks.getTimeUnit(sendPlayer.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE)))); //REPLACE DURCH ONLINE_HOURS
             String optMessage = String.format("%s%s", commandClick, hoverText);
             String hoverMessageClock = hoverText(String.format("<aqua>%s", new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())));
             String message = String.format("<%s%s> %s%s", optMessage, sendPlayer.getDisplayName(), hoverMessageClock, finalMessage);

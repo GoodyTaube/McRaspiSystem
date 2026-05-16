@@ -4,7 +4,6 @@ import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.RaspiMessages;
 import eu.goodyfx.system.lootchest.managers.LootChestManager;
 import eu.goodyfx.system.lootchest.managers.LootManager;
-import eu.goodyfx.system.trader.managers.TraderDB;
 import lombok.Getter;
 
 @Getter
@@ -21,7 +20,6 @@ public class RaspiModuleManager {
     private final TimeDBManager timeDBManager;
     private final LootChestManager lootChestManager;
     private final MOTDManager motdManager;
-    private final TraderDB traderDB = new TraderDB();
     private final CommandManager commandManager = new CommandManager();
     private final ItemConverterManager itemConverterManager = new ItemConverterManager();
     private final RaspiGiveManager raspiGiveManager = new RaspiGiveManager();

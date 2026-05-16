@@ -40,7 +40,6 @@ public class AdminReloadSubCommand extends SubCommand {
             plugin.reloadConfig();
             plugin.getModule().getMotdManager().reload();
             plugin.getModule().getRaspiGiveManager().reload();
-            plugin.getModule().getTraderDB().reload();
             player.sendMessage("Die RaspiConfigs wurden neu Geladen.", true);
             plugin.getDebugger().info(plugin.getConfig().getString("Utilities.vote"));
             Bukkit.getOnlinePlayers().forEach(Player::updateCommands);

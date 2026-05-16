@@ -25,4 +25,10 @@ public class RaspiSuggestions {
         return builder.buildFuture();
     }
 
+    public static CompletableFuture<Suggestions> suggestStringList(SuggestionsBuilder builder, List<String> listOf) {
+        listOf.stream().filter(val -> val.toLowerCase().startsWith(builder.getRemaining().toLowerCase())).limit(20).forEach(builder::suggest);
+        return builder.buildFuture();
+    }
+
+
 }

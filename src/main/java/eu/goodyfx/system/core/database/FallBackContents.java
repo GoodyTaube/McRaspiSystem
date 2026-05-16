@@ -17,7 +17,7 @@ public enum FallBackContents {
     REQUEST_STATE("User.%s.state") {
         @Override
         public void apply(RaspiUser user, String path, FallBackManager manager) {
-            fetch(manager, path, Boolean.class, user::setState);
+            fetch(manager, path, Boolean.class, user::setAllowed);
         }
     },
     REQUEST_ACCEPTED_BY("User.%s.accepted_By") {

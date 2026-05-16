@@ -10,15 +10,16 @@ import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.database.RaspiSuggestions;
 import eu.goodyfx.system.core.managers.ExtraInfos;
 import eu.goodyfx.system.core.utils.PlayerInfo;
-import eu.goodyfx.system.core.utils.RaspiPermission;
+import eu.goodyfx.system.core.utils.RaspiMessages;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Objects;
+import java.util.UUID;
 
 public class PlayerInfoCommandContainer {
 
@@ -88,16 +89,32 @@ public class PlayerInfoCommandContainer {
     private static int targetPlayerInfo(CommandContext<CommandSourceStack> context) {
         McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
         if (!(context.getSource().getSender() instanceof Player player)) {
-            return Command.SINGLE_SUCCESS;
-        }
-        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(StringArgumentType.getString(context, "player"));
-
-        if (!offlinePlayer.hasPlayedBefore()) {
-            raspiPlayer.sendMessage("<red>❌ Spieler nicht gefunden", true);
             return 1;
         }
-        player.showDialog(new PlayerInfo(offlinePlayer).buildPlayerInfosDialog(offlinePlayer, player));
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player); //CommandSender
+
+        String targetName = context.getArgument("player", String.class);
+        UUID targetUUID = Bukkit.getPlayerUniqueId(targetName);
+
+        if (targetUUID == null) {
+            raspiPlayer.sendMessage(String.format(RaspiMessages.PLAYER_NOT_FOUND_NAME, targetName));
+            return 0;
+        }
+        Raspi.playerLifeCycleService().getRaspiAccount(targetUUID, false).thenAcceptAsync(raspiAccount -> {
+            if (raspiAccount == null) {
+                raspiPlayer.sendMessage(String.format(RaspiMessages.PLAYER_NOT_FOUND_NAME, targetName), true);
+                return;
+            }
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    player.sendRichMessage(new PlayerInfo(Bukkit.getOfflinePlayer(targetUUID), raspiAccount).buildPlayerInfos());
+                    ExtraInfos extraInfos = new ExtraInfos(player);
+                    extraInfos.getExtraInfos(player);
+                }
+            }.runTask(plugin);
+        });
+
         return Command.SINGLE_SUCCESS;
     }
 

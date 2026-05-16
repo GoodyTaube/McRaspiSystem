@@ -5,6 +5,7 @@ import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.database.RaspiUser;
 import eu.goodyfx.system.core.managers.RequestManager;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -20,10 +21,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class PlayerJoinTasks {
@@ -33,15 +31,66 @@ public class PlayerJoinTasks {
     private final NamespacedKey joinErrorKey = plugin.getNameSpaced("joinError");
     private final RequestManager requestManager = plugin.getModule().getRequestManager();
 
+    private final List<UUID> unverifiedPlayers = new ArrayList<>();
 
-    public void perform(RaspiPlayer raspiPlayer, Map<UUID, PlayerTime> container) {
+    private static final String REQUEST_MESSSAGE = """
+            
+            <red>⚠ %2$s <gray>ist noch nicht freigeschaltet.
+            
+            <green>➤ <click:run_command:'/request accept %1$s'><hover:show_text:'<gray>Freischaltung bestätigen <gray><i>(1 Click)'><green>Freischalten</hover></click>
+            
+            <red>➤ <click:suggest_command:'/request deny %1$s '><hover:show_text:'<gray>Anfrage ablehnen <gray><i>(Grund angeben)'><red>Ablehnen</hover></click>
+            """;
+
+    private static final String REQUEST_MESSSAGE_DENIED = """
+            
+            <red>⚠ %2$s <gray>wurde bereits Abgelehnt.
+            
+            <green>➤ <click:run_command:'/request accept %1$s'><hover:show_text:'<gray>%1$s Freischalten <gray><i>(1 Click)'><green>Doch Freischalten</hover></click>
+            
+            <red>➤ <click:run_command:'/request kick %1$s'><hover:show_text:'<gray>%1$s Kicken<gray><i> (1 Click)'><red>Spieler Kicken</hover></click>
+            
+            <gold>➤ <click:suggest_command:'/request ban %1$s '><hover:show_text:'<gray>%1$s 3h Sperren<gray><i> (Grund Angeben)'>Spieler Sperren</hover></click>
+            """;
+
+
+    private static final String NO_TEAM_MESSAGE = "Schön, dass du da bist!<br> Momentan ist kein Teammitglied verfügbar. Wir bemühen uns, deine Anfrage zeitnah zu bearbeiten.";
+
+    private static final String BAN_MESSAGE = """
+            <dark_red><b>Du wurdest auf mcraspi.com gesperrt!<reset>
+            
+            <gray>Grund: <red>' %1$s '
+            
+            <gray>Entsperrung: <red>%2$s
+            
+            <gray><i>Bitte beachte, dass diese Entscheidung <underlined>nicht</underlined> angefochten werden kann.
+            
+            """;
+
+
+    public boolean perform(RaspiPlayer raspiPlayer, Map<UUID, PlayerTime> container) {
 
         Player player = raspiPlayer.getPlayer();
 
-        if (!(player.hasPlayedBefore()) || (player.getPersistentDataContainer().has(joinErrorKey))) {
-            spielerNeu(player);
+
+        if (raspiPlayer.userManagement().isBanned()) {
+            String reason = raspiPlayer.userManagement().getBan_message();
+            reason = reason.replace("@", " ");
+            long expire = raspiPlayer.userManagement().getBan_expire();
+
+            if (System.currentTimeMillis() >= expire) {
+                raspiPlayer.userManagement().performUnban();
+            } else {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
+                player.kick(MiniMessage.miniMessage().deserialize(String.format(BAN_MESSAGE, reason, simpleDateFormat.format(expire))));
+                return false;
+            }
         }
 
+
+        if ((raspiPlayer.userData().getAllowed() == null) || (player.getPersistentDataContainer().has(joinErrorKey))) {
+            spielerNeu(player);
+        }
         raspiRequest(raspiPlayer);
         container.put(player.getUniqueId(), new PlayerTime(player));
         welcomeMessage(raspiPlayer);
@@ -52,7 +101,7 @@ public class PlayerJoinTasks {
         if ((!player.isPermissionSet("system.bypass") && (raspiPlayer.hasTimePlayed(100)))) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + player.getName() + " permission set system.bypass");
         }
-
+        return true;
     }
 
 
@@ -111,9 +160,27 @@ public class PlayerJoinTasks {
     /**
      * Handle RaspiPlayer join
      *
-     * @param raspiPlayer Player to Handle
+     * @param raspiPlayer Player who Joined
      */
     private void raspiRequest(RaspiPlayer raspiPlayer) {
+        //raspiPlayer.sendMessage(String.format(REQUEST_MESSSAGE_DENIED, raspiPlayer.getPlayer().getName(), raspiPlayer.getColorName()));
+
+        //MOD Join Handling
+        if (isTeam(raspiPlayer)) {
+            if (unverifiedPlayers.isEmpty()) {
+                return;
+            }
+            for (UUID uuid : unverifiedPlayers) {
+                Player player = Bukkit.getPlayer(uuid);
+                if (player == null) {
+                    unverifiedPlayers.remove(uuid);
+                    continue;
+                }
+                raspiPlayer.sendMessage(String.format(REQUEST_MESSSAGE, player.getName(), player.getName()));
+            }
+            return;
+        }
+
         //Checkt ob der Spieler bereits angenommen wurde
         handleNewbie(raspiPlayer);
         //Was passiert mit einem Spieler, welcher abgelehnt wurde
@@ -130,19 +197,10 @@ public class PlayerJoinTasks {
     private void handleBlocked(RaspiPlayer raspiPlayer) {
         Player player = raspiPlayer.getPlayer();
         RaspiUser user = raspiPlayer.userData();
-
         if (requestManager.isBlocked(user)) {
-            Raspi.playerLifeCycleService().getRaspiPlayersWHP(RaspiPermission.MOD).forEach(team -> {
-                team.sendMessage(String.format("<gray><italic>%s wurde bereits von %s <gray><italic>Abgelehnt!", player.getName(), requestManager.getDeny(user)), true);
-                if (requestManager.isBlocked(user)) {
-                    team.sendMessage(String.format("<gray><italic>Grund: <yellow>%s", requestManager.getReason(user).replace("@", " ")), true);
-                }
-                String message = String.format("<white>[<red>%s<white>] [<green>%s<white>]", String.format("<click:run_command:'/request kick %s'>Kicken<reset>", player.getName()), String.format("<click:run_command:'/request accept %s'>Erlauben<reset>", player.getName()));
-                String banMessage = String.format("// <white>[<gold><click:run_command:'/tempban %s RSP:6723 Überdenk Dein Leben --MOD'>Ban<reset><white>]", player.getName());
-                //TODO SEND BAN BUTTON
-
-                team.sendMessage(message, true);
-
+            List<RaspiPlayer> mods = getModPlayers();
+            mods.forEach(mod -> {
+                mod.sendMessage(String.format(REQUEST_MESSSAGE_DENIED, player.getName(), raspiPlayer.getColorName()));
             });
         }
     }
@@ -153,11 +211,11 @@ public class PlayerJoinTasks {
      * @param player The Player to Check
      */
     private void handleNewbie(RaspiPlayer player) {
-        if (player.userData().getState() == null) {
+        if (player.userData().getAllowed() == null) {
             if (player.hasPermission("group.spieler")) {
                 //Spieler bereits freigeschaltet interne Verarbeitung, freischaltung setzten
                 RaspiUser targetPlayer = player.userData();
-                targetPlayer.setState(true);
+                targetPlayer.setAllowed(true);
                 targetPlayer.setAllowed_since(new SimpleDateFormat("dd/MM/yyyy").format(new Date(System.currentTimeMillis())));
                 targetPlayer.setAllowed_by("SYSTEM");
                 targetPlayer.setDeny_reason(null);
@@ -165,15 +223,28 @@ public class PlayerJoinTasks {
                 plugin.getLogger().info("[PLAYER ALLOW_STATE RECOVER]:: ALLOWED :: " + targetPlayer.getUsername() + " BY SYSTEM");
                 return;
             }
-            List<RaspiPlayer> teams = Raspi.playerLifeCycleService().getRaspiPlayersWHP(RaspiPermission.MOD);
 
+            List<RaspiPlayer> mods = getModPlayers();
 
-            if (!teams.isEmpty()) {
-                teams.forEach(moderator -> {
-                    moderator.sendMessage(String.format("<gray><italic>%s ist noch nicht Registriert!", player.getPlayer().getName()), true);
-                    moderator.sendMessage(String.format("<white>[<green>%s<white>] [<red>%s<white>]", String.format("<click:run_command:'/request accept %s'>Annehmen<reset>", player.getPlayer().getName()), String.format("<click:run_command:'request deny %1$2s -request_start'>Ablehnen <gray>(<green><click:suggest_command:'/request deny %1$2s'>+<reset><gray>)", player.getPlayer().getName())), true);
+            if (!mods.isEmpty()) {
+                //Information an alle Mods mit klickbaren Message OPTIONEN
+                mods.forEach(moderator -> {
+                    moderator.sendMessage(String.format(REQUEST_MESSSAGE, player.getPlayer().getName(), player.getColorName()));
                 });
+                return;
             }
+
+            unverifiedPlayers.add(player.getUUID());
+            player.sendMessage(NO_TEAM_MESSAGE, true);
         }
     }
+
+    public boolean isTeam(RaspiPlayer raspiPlayer) {
+        return getModPlayers().contains(raspiPlayer);
+    }
+
+    public List<RaspiPlayer> getModPlayers() {
+        return Raspi.playerLifeCycleService().getRaspiPlayersWHP(RaspiPermission.MOD);
+    }
+
 }

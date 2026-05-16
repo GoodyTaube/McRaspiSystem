@@ -32,7 +32,7 @@ public class AnimationBlockDisplay extends BukkitRunnable {
                     location.getNearbyEntities(4, 4, 4).forEach(entity -> {
                         Raspi.debugger().debug("FOUND: " + entity.getType().name());
                         if (entity.getType().equals(EntityType.BLOCK_DISPLAY)) {
-                            blockDisplayList.add((BlockDisplay) entity);
+                            //blockDisplayList.add((BlockDisplay) entity);
                         }
                         if (entity.getType().equals(EntityType.TEXT_DISPLAY)) {
                             Raspi.debugger().debug("Added TEXT DISPLAY TO LIST");

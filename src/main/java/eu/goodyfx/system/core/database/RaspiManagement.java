@@ -102,7 +102,7 @@ public class RaspiManagement {
     /**
      * Try to write Data in DB
      */
-    public void writeUser() {
+    public void write() {
         try (Connection connection = databaseManager.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s(uuid, name) VALUES(?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)", table))) {
             statement.setString(1, uuid);
             statement.setString(2, userName);
@@ -136,7 +136,7 @@ public class RaspiManagement {
         }
     }
 
-    public void fetchData() {
+    public void fetch() {
         try (Connection connection = databaseManager.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT * FROM user_moderation WHERE uuid = ?")) {
             statement.setString(1, uuid);
             ResultSet resultSet = statement.executeQuery();

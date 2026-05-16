@@ -43,14 +43,14 @@ public class Transaction {
             final long[] senderCoins = {senderRaspiPlayer.userData().getCoins()};
 
             if (senderCoins[0] < (amount + cost)) {
-                Raspi.debugger().debug(senderRaspiPlayer.getColorName() + " hat nicht genug coins um seine Transaktion zu beenden.");
+                Raspi.debugger().debug(senderRaspiPlayer.getColorName() + " hat nicht genug Coins um seine Transaktion zu beenden.");
                 senderRaspiPlayer.sendMessage("<red>Du hast nicht genug Coins für deine Transaktion an " + receiverOff.getName(), true);
                 canceled.set(true);
                 return;
             }
 
             if (!receiverOff.isOnline()) {
-                Raspi.playerLifeCycleService().getRaspiOffPlayer(receiverOff).thenAccept(account -> {
+                Raspi.playerLifeCycleService().getRaspiAccount(receiver, false).thenAccept(account -> {
                     if (!receiverOff.hasPlayedBefore()) {
                         canceled.set(true);
                         return;
@@ -70,20 +70,20 @@ public class Transaction {
             receiverCoins = receiverCoins + amount;
             receiverRaspiPlayer.userData().setCoins(receiverCoins);
             senderRaspiPlayer.userData().setCoins(senderCoins[0]);
-            receiverRaspiPlayer.sendMessage(String.format("<green>Du hast <aqua>%s RC <green>von <aqua>%s <green>erhalten.", amount, senderRaspiPlayer.getDisplayName()), true);
-            senderRaspiPlayer.sendMessage(String.format("<green>Deine Transaktion an <aqua>%s <green>in höhe von <aqua>%s ist nun beendet.", receiverRaspiPlayer.getDisplayName(), amount));
+            receiverRaspiPlayer.sendMessage(String.format("<green>Du hast <aqua>%s VC <green>von <aqua>%s <green>erhalten.", amount, senderRaspiPlayer.getDisplayName()), true);
+            senderRaspiPlayer.sendMessage(String.format("<green>Deine Transaktion an <aqua>%s <green>in höhe von <aqua>%s VC ist nun beendet.", receiverRaspiPlayer.getDisplayName(), amount));
             return;
         }
 
 
-        Raspi.playerLifeCycleService().getRaspiOffPlayer(senderOff).thenCompose(sender -> {
+        Raspi.playerLifeCycleService().getRaspiAccount(sender, false).thenCompose(sender -> {
             long senderCoins = sender.getRaspiUser().getCoins();
             if (senderCoins < (amount + cost)) {
                 canceled.set(true);
                 return CompletableFuture.completedFuture(null);
             }
             sender.getRaspiUser().setCoins(senderCoins - (amount + cost));
-            return Raspi.playerLifeCycleService().getRaspiOffPlayer(receiverOff);
+            return Raspi.playerLifeCycleService().getRaspiAccount(receiver, false);
         }).thenAccept(receiver -> {
             if (canceled.get() || receiver == null) {
                 return;

@@ -2,7 +2,7 @@ package eu.goodyfx.system.core.utils;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.api.Raspi;
+import eu.goodyfx.system.core.database.RaspiAccount;
 import eu.goodyfx.system.core.database.RaspiManagement;
 import eu.goodyfx.system.core.database.RaspiUser;
 import eu.goodyfx.system.core.managers.ExtraInfos;
@@ -16,6 +16,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
+import org.apache.http.annotation.Experimental;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -39,24 +40,23 @@ public class PlayerInfo {
 
     private final List<String> playerInfoAssets = new ArrayList<>();
 
-    public PlayerInfo(OfflinePlayer player) {
-        this.player = player.getPlayer();
-        Raspi.playerLifeCycleService().getRaspiOffPlayer(player).thenAccept(account -> {
-            this.raspiUser = account.getRaspiUser();
-            this.management = account.getRaspiManagement();
+    public PlayerInfo(OfflinePlayer player, RaspiAccount account) {
+        this.player = player;
 
-            //lastNames();
-            firstDocumentation();
-            parseGroups();
-            registration();
-            timePlayed();
-            lastDeath();
-            lastSeen();
-            playerXP();
-            playerServerInfos();
-
-        });
+        this.raspiUser = account.getRaspiUser();
+        this.management = account.getRaspiManagement();
+        firstDocumentation();
+        parseGroups();
+        registration();
+        timePlayed();
+        lastDeath();
+        lastSeen();
+        playerXP();
+        playerCoins();
+        playerServerInfos();
+        //lastNames();
     }
+
 
     private void parseValueToInfo(PlayerInfosValues info, String value) {
         playerInfoAssets.add(String.format("%s %s<reset>", info.getLabel(), value));
@@ -64,16 +64,23 @@ public class PlayerInfo {
 
     public String buildPlayerInfos() {
 
-        StringBuilder playerInfos = new StringBuilder("<gray>Player Infos: <aqua>" + player.getName() + "<reset><br>");
+        StringBuilder playerInfos = new StringBuilder("<br><gray>Player Infos: <aqua>" + player.getName() + "<reset><br>");
         for (String inf : playerInfoAssets) {
-            playerInfos.append(inf);
+            playerInfos.append(inf).append("<br>");
         }
         playerInfos.setLength(playerInfos.length() - 4);
         return playerInfos.toString();
     }
 
 
-    public Dialog buildPlayerInfosDialog(OfflinePlayer player, Player performer) {
+    /**
+     * Mehtod to Display PLayerINfos as Minecraft Dialog
+     *
+     * @param performer CommandSender
+     * @return A Player Info Dialog
+     */
+    @Experimental()
+    public Dialog buildPlayerInfosDialog(Player performer) {
         List<DialogBody> dialogBodies = new ArrayList<>();
 
         ItemStack stack = new ItemStack(Material.PLAYER_HEAD, 1);
@@ -90,12 +97,12 @@ public class PlayerInfo {
         ExtraInfos extraInfos = new ExtraInfos(performer);
         dialogBodies.add(DialogBody.plainMessage(MiniMessage.miniMessage().deserialize(extraInfos.getExtraInfosForDialog(player))));
 
-        return Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(Component.empty()).body(dialogBodies).canCloseWithEscape(true).build()).type(DialogType.notice()));
+        return Dialog.create(builder -> builder.empty().base(DialogBase.builder(Component.empty()).body(dialogBodies).canCloseWithEscape(true).build()).type(DialogType.notice()));
     }
 
+
     private void registration() {
-        Boolean state = raspiUser.getState();
+        Boolean state = raspiUser.getAllowed();
         if (state == null) {
             parseValueToInfo(PlayerInfosValues.REGISTRATION, "<red>Noch nicht Freigeschaltet.");
             return;
@@ -112,12 +119,13 @@ public class PlayerInfo {
     private void parseGroups() {
         StringBuilder builder = new StringBuilder();
         Set<String> groups = new HashSet<>();
+
+        if (player == null) {
+            return;
+        }
         User user = plugin.getHookManager().getLuckPerms().getUserManager().getUser(player.getUniqueId());
         if (user != null) {
-            groups = user.getNodes(NodeType.INHERITANCE)
-                    .stream()
-                    .map(InheritanceNode::getGroupName)
-                    .collect(Collectors.toSet());
+            groups = user.getNodes(NodeType.INHERITANCE).stream().map(InheritanceNode::getGroupName).collect(Collectors.toSet());
         }
         for (String group : groups) {
             builder.append(group).append(",").append(" ");
@@ -167,7 +175,8 @@ public class PlayerInfo {
     }
 
     private void timePlayed() {
-        long time = player.getStatistic(Statistic.PLAY_ONE_MINUTE);
+        //long time = player.getStatistic(Statistic.PLAY_ONE_MINUTE);
+        //parseValueToInfo(PlayerInfosValues.TIME_PLAYED, String.format("%s Stunde(n)", raspiUser.getOnlineHours()));
         parseValueToInfo(PlayerInfosValues.TIME_PLAYED, String.format("%s Stunde(n)", raspiUser.getOnlineHours()));
     }
 
@@ -196,6 +205,15 @@ public class PlayerInfo {
             assert online != null;
             int xp = online.getLevel();
             parseValueToInfo(PlayerInfosValues.PLAYER_XP, String.valueOf(xp));
+        }
+    }
+
+    public void playerCoins() {
+        if (player.isOnline()) {
+            Player online = player.getPlayer();
+            assert online != null;
+            long coins = raspiUser.getCoins();
+            parseValueToInfo(PlayerInfosValues.VOTING_COINS, String.valueOf(coins));
         }
     }
 

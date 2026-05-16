@@ -136,6 +136,10 @@ public class ExtraInfos {
         return "";
     }
 
+    /**
+     * Send Extra Infos to player with edit buttons
+     * @param target Target player
+     */
     public void getExtraInfos(OfflinePlayer target) {
         modCheck(target); //Check if Asked Player is Moderator
         if (hasEntry(target, false)) {

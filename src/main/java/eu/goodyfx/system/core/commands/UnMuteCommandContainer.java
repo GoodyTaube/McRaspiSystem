@@ -6,11 +6,13 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.database.RaspiSuggestions;
+import eu.goodyfx.system.core.utils.RaspiMessages;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public class UnMuteCommandContainer {
 
@@ -21,24 +23,25 @@ public class UnMuteCommandContainer {
                 context.getSource().getSender().sendRichMessage("COMMAND NOT FOUND FOR ACTION.");
                 return Command.SINGLE_SUCCESS;
             }
+            RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+            String targetName = context.getArgument("player", String.class);
+            UUID uuid = Bukkit.getPlayerUniqueId(targetName);
+            if (uuid == null) {
+                raspiPlayer.sendMessage(String.format(RaspiMessages.PLAYER_NOT_FOUND_NAME, targetName), true);
+                return 1;
+            }
 
-            OfflinePlayer target = Bukkit.getOfflinePlayer(context.getArgument("player", String.class));
-
-            if (!Raspi.playerLifeCycleService().isOnline(target.getUniqueId())) {
-                Raspi.playerLifeCycleService().getRaspiOffPlayer(target).thenAccept(account -> {
+            if (!Raspi.playerLifeCycleService().isOnline(uuid)) {
+                Raspi.playerLifeCycleService().getRaspiAccount(uuid, false).thenAccept(account -> {
                     if (account == null) {
-                        player.sendMessage("PLAYER NOT FOUND");
+                        raspiPlayer.sendMessage(RaspiMessages.PLAYER_NOT_FOUND);
                         return;
                     }
                     account.getRaspiManagement().performUnMute();
-                    player.sendRichMessage("<green>Du hast den Spieler zum Reden Animiert.");
+                    raspiPlayer.sendMessage("<green>Du hast den Spieler zum Reden Animiert.", true);
+                    Raspi.accountService().saveIfOffline(account);
                 });
             }
-
-            assert target.getPlayer() != null;
-            RaspiPlayer targetOnline = Raspi.playerLifeCycleService().getRaspiPlayer(target.getPlayer());
-            targetOnline.userManagement().performUnMute();
-            player.sendRichMessage("<green>Die Anfrage wurde ausgeführt");
             return Command.SINGLE_SUCCESS;
         })).build();
     }

@@ -6,11 +6,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.database.RaspiSuggestions;
+import eu.goodyfx.system.core.utils.RaspiMessages;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public class MuteCommandContainer {
 
@@ -32,9 +34,13 @@ public class MuteCommandContainer {
         String formatted = reason.replace(" ", "@");
 
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
+        UUID targetUUID = Bukkit.getPlayerUniqueId(targetName);
+        if (targetUUID == null) {
+            player.sendRichMessage(String.format(RaspiMessages.PLAYER_NOT_FOUND_NAME, targetName));
+            return 0;
+        }
 
-        Raspi.playerLifeCycleService().getRaspiOffPlayer(target).thenAccept(account -> {
+        Raspi.playerLifeCycleService().getRaspiAccount(targetUUID, false).thenAccept(account -> {
             if (account == null) {
                 player.sendMessage("<red>Der Spieler existiert nicht.");
                 return;
@@ -45,6 +51,7 @@ public class MuteCommandContainer {
             }
             account.getRaspiManagement().performMute(player, formatted);
             player.sendRichMessage("Du hast den Spieler erfolgreich muted.");
+            Raspi.accountService().saveIfOffline(account);
         });
         return Command.SINGLE_SUCCESS;
     }

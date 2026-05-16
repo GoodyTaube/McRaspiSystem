@@ -4,11 +4,14 @@ import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.api.Raspi;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Bed;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -47,16 +50,16 @@ public class RaspiWorldEvents implements Listener {
         if (burnEvent.getSource().getType().equals(Material.FIRE)) {
             burnEvent.setCancelled(true);
             Location location = burnEvent.getBlock().getLocation();
-            Raspi.debugger().debug(String.format("Prevent Fire from Spreading %s", Raspi.debugger().formatLocation(location)));
+            //Raspi.debugger().debug(String.format("Prevent Fire from Spreading %s", Raspi.debugger().formatLocation(location)));
         }
     }
 
     @EventHandler
     public void onBlockDamage(EntityExplodeEvent explodeEvent) {
         EntityType entityType = explodeEvent.getEntityType();
-        if (!(entityType.equals(EntityType.TNT) || entityType.equals(EntityType.END_CRYSTAL))) {
+        if (!entityType.equals(EntityType.TNT)) {
             explodeEvent.blockList().clear();
-            Raspi.debugger().debug(String.format("Cleared Blocklist for %s", explodeEvent.getEntityType().name()));
+            //Raspi.debugger().debug(String.format("Cleared Blocklist for %s", explodeEvent.getEntityType().name()));
         }
 
     }
@@ -70,7 +73,17 @@ public class RaspiWorldEvents implements Listener {
         if (blocked.contains(changeBlockEvent.getEntityType())) {
             Location location = changeBlockEvent.getBlock().getLocation();
             changeBlockEvent.setCancelled(true);
-            Raspi.debugger().debug(String.format("Blocked block Damage %s caused by %s", Raspi.debugger().formatLocation(location), changeBlockEvent.getEntityType().name()));
+            //Raspi.debugger().debug(String.format("Blocked block Damage %s caused by %s", Raspi.debugger().formatLocation(location), changeBlockEvent.getEntityType().name()));
+        }
+    }
+
+    @EventHandler
+    public void onBlockBoom(BlockExplodeEvent blockExplodeEvent) {
+        BlockState state = blockExplodeEvent.getExplodedBlockState();
+
+        if(!state.getType().name().endsWith("BED")){
+            blockExplodeEvent.blockList().clear();
+
         }
     }
 

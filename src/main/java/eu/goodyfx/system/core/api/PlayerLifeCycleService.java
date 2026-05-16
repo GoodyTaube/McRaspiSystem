@@ -10,8 +10,11 @@ import eu.goodyfx.system.core.utils.RaspiPermission;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Objective;
 
 import java.util.*;
@@ -25,24 +28,36 @@ public class PlayerLifeCycleService {
     private final RaspiAccountService raspiAccountService;
     private final Map<UUID, PlayerTime> timeContainer = new HashMap<>();
     @Getter
+    private static NamespacedKey HOURS_MIGRATION_KEY;
+    @Getter
     private final Map<UUID, Location> afkContainer = new HashMap<>();
     private PlayerJoinTasks joinTasks = new PlayerJoinTasks();
+    private final Map<String, UUID> pendingPlayers = new ConcurrentHashMap<>();
 
 
     public PlayerLifeCycleService(McRaspiSystem plugin, RaspiAccountService accountService) {
         this.plugin = plugin;
+        HOURS_MIGRATION_KEY = new NamespacedKey(plugin, "hoursMigration");
         this.raspiAccountService = accountService;
     }
 
     public void playerJoinHandler(Player player) {
-        raspiAccountService.load(player.getUniqueId()).thenAccept(account -> {
+
+        //Custom cache for not saved Players.
+        if (!player.hasPlayedBefore()) {
+            pendingPlayers.put(player.getName(), player.getUniqueId());
+        }
+
+        raspiAccountService.getRaspiAccount(player.getUniqueId(), true).thenAccept(account -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (!player.isOnline()) {
                     return;
                 }
                 RaspiPlayer raspiPlayer = new RaspiPlayer(player, account);
                 playerCache.put(player.getUniqueId(), raspiPlayer);
-                joinTasks.perform(raspiPlayer, timeContainer);
+                if (!joinTasks.perform(raspiPlayer, timeContainer)) {
+                    return;
+                }
                 oldOnlineHours(raspiPlayer);
                 raspiPlayer.nameController.setPlayerList();
                 PlayTimeTask.getJoinCache().put(player.getUniqueId(), System.currentTimeMillis());
@@ -50,23 +65,32 @@ public class PlayerLifeCycleService {
                     Raspi.debugger().debug("WELCOME PLAYER:" + plugin.getModule().getJoinMessageManager().get(raspiPlayer));
                 });
                 player.getPlayer().updateCommands();
+                plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
             });
         });
     }
 
     public void oldOnlineHours(RaspiPlayer raspiPlayer) {
-        int hoursCurrent = raspiPlayer.userData().getOnlineHours();
-        Objective objective = Bukkit.getScoreboardManager().getMainScoreboard().getObjective("Onlinestunden");
-        if (objective == null) {
-            raspiPlayer.sendDebugMessage("404 SCOREBOARD!");
-            return;
-        }
-        int score = objective.getScore(raspiPlayer.getPlayer()).getScore();
+        Player player = raspiPlayer.getPlayer();
+        PersistentDataContainer dataContainer = player.getPersistentDataContainer();
+        player.setScoreboard(PlayTimeTask.getOnlineHours());
+        PlayTimeTask.updatePlayerValue(player);
+        if (!dataContainer.has(HOURS_MIGRATION_KEY, PersistentDataType.BYTE)) {
+            dataContainer.set(HOURS_MIGRATION_KEY, PersistentDataType.BYTE, (byte) 1); //Setzt den Wert in den Spieler (vermeidet) doppel Buchung
+            int hoursCurrent = raspiPlayer.userData().getOnlineHours();
+            Objective objective = Bukkit.getScoreboardManager().getMainScoreboard().getObjective("Onlinestunden");
+            if (objective == null) {
+                raspiPlayer.sendDebugMessage("404 SCOREBOARD!");
+                return;
+            }
+            int score = objective.getScore(raspiPlayer.getPlayer()).getScore();
 
-        if (hoursCurrent < score) {
-            raspiPlayer.userData().setOnlineHours(hoursCurrent + score);
-            raspiPlayer.sendActionBar(String.format("<green>+%s OnlineStunden", score));
+            if (hoursCurrent < score) {
+                raspiPlayer.userData().setOnlineHours(hoursCurrent + score);
+                raspiPlayer.sendActionBar(String.format("<green>+%s OnlineStunden", score));
+            }
         }
+
     }
 
 
@@ -86,8 +110,15 @@ public class PlayerLifeCycleService {
         return playerCache.get(player.getUniqueId());
     }
 
-    public CompletableFuture<RaspiAccount> getRaspiOffPlayer(OfflinePlayer player) {
-        return raspiAccountService.loadOffline(player.getUniqueId());
+    /**
+     * Dont forget to Save!
+     * {@link RaspiAccountService#saveIfOffline(RaspiAccount)}
+     *
+     * @param targetUUID The Requested Player
+     * @return A RaspiAccount
+     */
+    public CompletableFuture<RaspiAccount> getRaspiAccount(UUID targetUUID, boolean putInCache) {
+        return raspiAccountService.getRaspiAccount(targetUUID, putInCache);
     }
 
     public Collection<RaspiPlayer> getCachedRaspiPlayers() {
@@ -95,7 +126,7 @@ public class PlayerLifeCycleService {
     }
 
     public boolean isOnline(UUID uuid) {
-        return playerCache.containsKey(uuid);
+        return plugin.getRaspiAccountService().isCached(uuid);
     }
 
     public List<RaspiPlayer> getRaspiTeamPlayers() {
@@ -117,6 +148,11 @@ public class PlayerLifeCycleService {
             }
         }
         return team;
+    }
+
+    public OfflinePlayer playedBefore(String userName) {
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(userName);
+        return offlinePlayer.hasPlayedBefore() ? offlinePlayer : null;
     }
 
 }

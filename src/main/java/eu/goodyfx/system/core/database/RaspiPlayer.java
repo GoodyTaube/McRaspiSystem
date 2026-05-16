@@ -179,6 +179,25 @@ public class RaspiPlayer implements RaspiUserContext {
         player.sendMessage(MiniMessage.miniMessage().deserialize(builder.toString()));
     }
 
+    /**
+     * Send player a Message with Component API
+     *
+     * @param message The Plain Text Message
+     */
+    public void sendMessage(@Nullable String message, boolean prefix, RaspiSounds sound) {
+        if (message == null) {
+            player.sendMessage(Component.empty());
+            return;
+        }
+        StringBuilder builder = new StringBuilder();
+        if (prefix) {
+            builder.append(plugin.getModule().getRaspiMessages().getPrefix());
+        }
+        builder.append(message);
+        player.sendMessage(MiniMessage.miniMessage().deserialize(builder.toString()));
+        this.playSound(sound);
+    }
+
     public void sendActionBar(String message) {
         player.sendActionBar(MiniMessage.miniMessage().deserialize(message));
     }

@@ -63,7 +63,6 @@ public class RaspiPlayerConnectionEvents implements Listener {
         //REQUEST
         playerJoinEvent.joinMessage(null);
 
-        plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
         plugin.getModule().getItemConverterManager().convert(player.getInventory());
 
     }

@@ -4,6 +4,7 @@ import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.commands.InHeadCommandContainer;
 import eu.goodyfx.system.core.commands.SitCommandContainer;
+import eu.goodyfx.system.core.database.RaspiManagement;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -49,6 +50,7 @@ public class PlayerLifecycleListener implements Listener {
         stopInHead(bukkitPlayer); //Remove InHead
         SitCommandContainer.endSitting(bukkitPlayer); //Falls der Spieler gesessen hat.
         RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(bukkitPlayer);
+        RaspiManagement management = player.userManagement();
         if (plugin.getConfig().getBoolean("Utilities.afk.autoAFK")) {
             player.settings().setAuto_afk(true);
         }
@@ -62,9 +64,12 @@ public class PlayerLifecycleListener implements Listener {
 
         Raspi.playerLifeCycleService().playerLeaveHandler(bukkitPlayer);
         //MESSAGES
-        plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> hat uns verlassen.`", bukkitPlayer.getName()));
-        if (plugin.getConfig().getBoolean("Utilities.leaveMessage")) {
-            event.quitMessage(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getLeave(player.getColorName())));
+
+        if (!management.isBanned()) {
+            plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> hat uns verlassen.`", bukkitPlayer.getName()));
+            if (plugin.getConfig().getBoolean("Utilities.leaveMessage")) {
+                event.quitMessage(MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getLeave(player.getColorName())));
+            }
         }
 
     }

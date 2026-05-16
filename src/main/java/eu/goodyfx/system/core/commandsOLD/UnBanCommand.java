@@ -10,6 +10,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 public class UnBanCommand implements CommandExecutor {
 
     private final RaspiMessages data;
@@ -25,9 +27,15 @@ public class UnBanCommand implements CommandExecutor {
         if (args.length == 1) {
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
+            String name = args[0];
+            UUID uuid = Bukkit.getPlayerUniqueId(name);
+            if (uuid == null) {
+                sender.sendRichMessage(RaspiMessages.PLAYER_NOT_FOUND);
+                return true;
+            }
 
             if (offlinePlayer.hasPlayedBefore()) {
-                Raspi.playerLifeCycleService().getRaspiOffPlayer(offlinePlayer).thenAccept(account -> {
+                Raspi.playerLifeCycleService().getRaspiAccount(uuid, false).thenAccept(account -> {
 
                     if (account.getRaspiManagement().isBanned()) {
                         account.getRaspiManagement().performUnban();
@@ -35,6 +43,7 @@ public class UnBanCommand implements CommandExecutor {
                         return;
                     }
                     sender.sendRichMessage(data.getPrefix() + "<green>" + account.getRaspiUser().getUsername() + " ist nicht gesperrt.");
+                    Raspi.accountService().saveIfOffline(account);
                 });
             }
 

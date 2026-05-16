@@ -51,39 +51,55 @@ public class BookBanFix {
 
 
     private boolean sanitizeItem(ItemStack item) {
-        if (item == null) return false;
+        if (item == null || item.getType() == Material.AIR) return false;
 
-        if (item.getType() == Material.WRITTEN_BOOK ||
-                item.getType() == Material.WRITABLE_BOOK) {
-
+        if (item.getType() == Material.WRITTEN_BOOK || item.getType() == Material.WRITABLE_BOOK) {
             BookMeta meta = (BookMeta) item.getItemMeta();
             if (meta == null) return false;
 
+            boolean modified = false;
+            List<String> pages = meta.getPages();
             List<String> safePages = new ArrayList<>();
 
-            for (String page : meta.getPages()) {
+            // Maximale Anzahl an Seiten begrenzen (Standard Minecraft ist 100)
+            int maxPages = Math.min(pages.size(), 100);
+
+            for (int i = 0; i < maxPages; i++) {
+                String page = pages.get(i);
                 if (page == null) continue;
 
-                // 1. Länge begrenzen
+                // 1. Länge pro Seite hart begrenzen (256 ist sicher)
                 if (page.length() > 256) {
                     page = page.substring(0, 256);
+                    modified = true;
                 }
 
-                // 2. Problematische Zeichen entfernen
-                page = page.replaceAll("[^\\x20-\\x7E\\n]", "");
+                // 2. Erlaubt Buchstaben (inkl. Umlaute), Zahlen, gängige Satzzeichen
+                // \p{L} deckt alle Unicode-Buchstaben ab (Ä, Ö, Ü, ß, é, etc.)
+                String sanitized = page.replaceAll("[^\\p{L}\\p{N}\\p{P}\\p{Z}\\n]", "");
 
-                // 3. Optional: JSON komplett killen
-                if (page.contains("{") || page.contains("}")) {
-                    page = "[Blocked malformed content]";
-                    return true;
+                if (!sanitized.equals(page)) {
+                    page = sanitized;
+                    modified = true;
                 }
+
+                // 3. JSON-Exploit Schutz
+                // Book-Bans nutzen oft verschachtelte JSON-Tags.
+                // Wenn die Seite kein echtes JSON sein muss, blocken wir { }
+                if (page.contains("{") && page.contains("\"")) {
+                    page = "§c[Inhalt blockiert]";
+                    modified = true;
+                }
+
                 safePages.add(page);
             }
 
-            meta.setPages(safePages);
-            item.setItemMeta(meta);
+            if (modified) {
+                meta.setPages(safePages);
+                item.setItemMeta(meta);
+                return true; // Signalisiert, dass das Item geändert wurde
+            }
         }
         return false;
     }
-
 }

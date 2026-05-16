@@ -43,26 +43,27 @@ public class ServerListeners implements Listener {
     @EventHandler
     public void onVote(VotifierEvent event) {
         Vote vote = event.getVote();
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(vote.getUsername());
-        if (offlinePlayer.hasPlayedBefore()) {
 
-            if (offlinePlayer.isOnline()) {
-                Player player = offlinePlayer.getPlayer();
-                RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
-                raspiPlayer.userData().setVoting(raspiPlayer.userData().getVoting() +1);
-                raspiPlayer.sendActionBar("<green>+1 Vote!");
-                return;
-            }
-
-            Raspi.playerLifeCycleService().getRaspiOffPlayer(offlinePlayer).thenAccept(raspiAccount -> {
-                int votes = raspiAccount.getRaspiUser().getVoting();
-                votes = votes + 1;
-                raspiAccount.getRaspiUser().setVoting(votes);
-                raspiAccount.save();
-                Raspi.debugger().debug("Added Vote for %s", "VOTE");
-            });
-
+        UUID targetUUID = Bukkit.getPlayerUniqueId(vote.getUsername());
+        if (targetUUID == null) {
+            return;
         }
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(targetUUID);
+        if (offlinePlayer.isOnline()) {
+            Player player = offlinePlayer.getPlayer();
+            RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+            raspiPlayer.userData().setVoting(raspiPlayer.userData().getVoting() + 1);
+            raspiPlayer.sendActionBar("<green>+1 Vote!");
+            return;
+        }
+        Raspi.playerLifeCycleService().getRaspiAccount(targetUUID, false).thenAccept(raspiAccount -> {
+            int votes = raspiAccount.getRaspiUser().getVoting();
+            votes = votes + 1;
+            raspiAccount.getRaspiUser().setVoting(votes);
+            raspiAccount.save();
+            Raspi.debugger().debug("Added Vote for %s", "VOTE");
+            Raspi.accountService().saveIfOffline(raspiAccount);
+        });
     }
 
     @EventHandler

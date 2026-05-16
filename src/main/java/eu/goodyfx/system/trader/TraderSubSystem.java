@@ -1,18 +1,31 @@
 package eu.goodyfx.system.trader;
 
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.RaspiSubSystem;
-import eu.goodyfx.system.trader.commands.TraderCommand;
+import eu.goodyfx.system.trader.commands.TraderCommandContainer;
 import eu.goodyfx.system.trader.events.TraderListeners;
+import eu.goodyfx.system.trader.managers.TraderDB;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import lombok.Getter;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.Listener;
 
-public class TraderSystem implements RaspiSubSystem {
+import java.util.ArrayList;
+import java.util.List;
+
+public class TraderSubSystem implements RaspiSubSystem {
 
     protected final McRaspiSystem plugin;
+    @Getter
+    private TraderDB traderDB;
+    @Getter
+    private final NamespacedKey traderKey;
     private boolean enabled = false;
 
-    public TraderSystem(McRaspiSystem plugin) {
+    public TraderSubSystem(McRaspiSystem plugin) {
         this.plugin = plugin;
+        this.traderKey = plugin.getNameSpaced("traderKey");
     }
 
 
@@ -35,8 +48,13 @@ public class TraderSystem implements RaspiSubSystem {
 
     @Override
     public void init() {
+        this.traderDB = new TraderDB();
         commands();
         events();
+    }
+
+    public void addCommand(LiteralCommandNode<CommandSourceStack> command) {
+        plugin.commandContainer.add(command);
     }
 
     @Override
@@ -46,12 +64,12 @@ public class TraderSystem implements RaspiSubSystem {
 
     @Override
     public void events() {
-        new TraderListeners();
+        new TraderListeners(this);
     }
 
     @Override
     public void commands() {
-        new TraderCommand();
+        new TraderCommandContainer(this);
     }
 
     @Override

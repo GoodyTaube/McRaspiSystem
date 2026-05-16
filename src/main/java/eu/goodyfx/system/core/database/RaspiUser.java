@@ -25,7 +25,7 @@ public class RaspiUser {
     private String prefix = null;
     private String denied_by = null;
     private String deny_reason = null;
-    private Boolean state = null;
+    private Boolean allowed = null;
     private String allowed_since = null;
     private Integer voting = 0;
     private Boolean played_before = null;
@@ -55,7 +55,7 @@ public class RaspiUser {
                 deny_reason = resultSet.getString("deny_reason");
                 allowed_since = resultSet.getString("allowed_since");
                 allowed_by = resultSet.getString("allowed_by");
-                state = resultSet.getObject("request_state", Boolean.class);
+                allowed = resultSet.getObject("request_state", Boolean.class);
                 lastSeen = resultSet.getObject("last_seen", Long.class);
                 onlineHours = resultSet.getInt("online_hours");
                 color = resultSet.getString("color");
@@ -83,7 +83,7 @@ public class RaspiUser {
         if (databaseManager.getFallBackManager().containOld(UUID.fromString(uuid))) {
             databaseManager.getFallBackManager().perform(this);
             if (allowed_since != null) {
-                state = true;
+                allowed = true;
             }
             updateUserData();
         }
@@ -96,7 +96,7 @@ public class RaspiUser {
             statement.setObject(3, deny_reason, JDBCType.VARCHAR);
             statement.setObject(4, allowed_since, JDBCType.VARCHAR);
             statement.setObject(5, allowed_by, JDBCType.VARCHAR);
-            statement.setObject(6, state, JDBCType.BOOLEAN);
+            statement.setObject(6, allowed, JDBCType.BOOLEAN);
             statement.setObject(7, lastSeen, JDBCType.BIGINT);
             statement.setObject(8, onlineHours, JDBCType.INTEGER);
             statement.setObject(9, color, JDBCType.VARCHAR);

@@ -69,7 +69,7 @@ public class RequestManager {
     public void set(RaspiAccount denyPlayer, String reason, Player player) {
         remove(denyPlayer.getRaspiUser());
         denyPlayer.getRaspiUser().setDenied_by(player.getName());
-        denyPlayer.getRaspiUser().setState(false);
+        denyPlayer.getRaspiUser().setAllowed(false);
         denyPlayer.getRaspiUser().setDeny_reason(reason);
     }
 
@@ -80,7 +80,7 @@ public class RequestManager {
     }
 
     public void remove(RaspiUser player) {
-        player.setState(null);
+        player.setAllowed(null);
         player.setDenied_by(null);
         player.setDeny_reason(null);
         player.setAllowed_since(null);

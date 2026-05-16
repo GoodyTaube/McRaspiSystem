@@ -50,7 +50,9 @@ public class TempBanCommand implements CommandExecutor {
                     return true;
                 }
 
-                Raspi.playerLifeCycleService().getRaspiOffPlayer(offlinePlayer).thenAccept(account -> {
+                Raspi.playerLifeCycleService().getRaspiAccount(offlinePlayer.getUniqueId(), false).thenAccept(account -> {
+
+
                     if (args.length == 5 && (args[4].equals("--MOD"))) {
                         String reason = "RSP:6723@Überdenk@Dein@Leben";
                         Long expire = plugin.getConfig().getInt("Utilities.tempban.time") * RaspiTimes.MilliSeconds.HOUR.getTime();
@@ -110,6 +112,7 @@ public class TempBanCommand implements CommandExecutor {
                     } catch (NumberFormatException e) {
                         player.sendMessage(data.getPrefix() + "<red>Bitte gib einen validen wert an zb '<yellow>1w<red>' für 1 Woche ban.");
                     }
+                    Raspi.accountService().saveIfOffline(account);
                 });
 
             } else {
@@ -124,7 +127,7 @@ public class TempBanCommand implements CommandExecutor {
     private void kickPlayer(OfflinePlayer target) {
         if (target.getPlayer().isOnline()) {
             RaspiPlayer targetP = Raspi.playerLifeCycleService().getRaspiPlayer(target.getPlayer());
-                assert target.getPlayer() != null;
+            assert target.getPlayer() != null;
             Objects.requireNonNull(target.getPlayer().getPlayer()).kick(MiniMessage.miniMessage().deserialize("<red>Du wurdest Temporär gesperrt.\n\n<gray>Du wurdest von: <aqua>" + targetP.userManagement().getBan_owner() + " <gray>für folgendes gesperrt:\n'<yellow>" + targetP.userManagement().getBan_message() + "<gray>'\n\n<gray>Du wirst am <green>" + new SimpleDateFormat("dd/MM/yyyy HH:mm").format(targetP.userManagement().getBan_expire()) + " <gray>entsperrt."));
         }
     }

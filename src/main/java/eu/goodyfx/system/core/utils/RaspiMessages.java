@@ -2,7 +2,6 @@ package eu.goodyfx.system.core.utils;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.managers.RaspiModuleManager;
-import org.bukkit.entity.Player;
 
 import java.util.Objects;
 
@@ -13,6 +12,11 @@ public class RaspiMessages {
     public RaspiMessages(RaspiModuleManager moduleManager) {
         this.plugin = moduleManager.getPlugin();
     }
+
+
+    public static final String PLAYER_NOT_FOUND = "<red>❌ Spieler nicht gefunden";
+    public static final String PLAYER_NOT_FOUND_NAME = "<red>❌ %s nicht gefunden";
+
 
 
     public String getPrefix() {
