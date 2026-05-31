@@ -81,21 +81,22 @@ public class PlayerJoinTasks {
             if (System.currentTimeMillis() >= expire) {
                 raspiPlayer.userManagement().performUnban();
             } else {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                 player.kick(MiniMessage.miniMessage().deserialize(String.format(BAN_MESSAGE, reason, simpleDateFormat.format(expire))));
                 return false;
             }
         }
 
 
-        if ((raspiPlayer.userData().getAllowed() == null) || (player.getPersistentDataContainer().has(joinErrorKey))) {
+        if ((!player.hasPlayedBefore()) || (player.getPersistentDataContainer().has(joinErrorKey))) {
             spielerNeu(player);
         }
         raspiRequest(raspiPlayer);
         container.put(player.getUniqueId(), new PlayerTime(player));
         welcomeMessage(raspiPlayer);
+        String formattedJoinMessage = RaspiFormatting.formattingChatMessage(plugin.getModule().getJoinMessageManager().get(raspiPlayer));
         Bukkit.getOnlinePlayers().forEach(onlinePLayer -> {
-            onlinePLayer.sendRichMessage(RaspiFormatting.formattingChatMessage(plugin.getModule().getJoinMessageManager().get(raspiPlayer)));
+            onlinePLayer.sendRichMessage(formattedJoinMessage);
         });
 
         if ((!player.isPermissionSet("system.bypass") && (raspiPlayer.hasTimePlayed(100)))) {
@@ -170,13 +171,14 @@ public class PlayerJoinTasks {
             if (unverifiedPlayers.isEmpty()) {
                 return;
             }
+
+            unverifiedPlayers.removeIf(uuid -> Bukkit.getPlayer(uuid) == null);
+
             for (UUID uuid : unverifiedPlayers) {
                 Player player = Bukkit.getPlayer(uuid);
-                if (player == null) {
-                    unverifiedPlayers.remove(uuid);
-                    continue;
+                if(player != null){
+                    raspiPlayer.sendMessage(String.format(REQUEST_MESSSAGE, player.getName(), player.getName()));
                 }
-                raspiPlayer.sendMessage(String.format(REQUEST_MESSSAGE, player.getName(), player.getName()));
             }
             return;
         }

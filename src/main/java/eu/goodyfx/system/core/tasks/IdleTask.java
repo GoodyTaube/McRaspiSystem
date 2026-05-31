@@ -4,6 +4,7 @@ package eu.goodyfx.system.core.tasks;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.commands.AFKCommandContainer;
+import eu.goodyfx.system.core.utils.Settings;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -35,11 +36,11 @@ public class IdleTask extends BukkitRunnable {
             }
 
 
-            if (!all.settings().isAuto_afk()) {
+            if (!all.settings().get(Settings.AUTO_AFK)) {
                 //If Player Disabled Auto AFK
                 return;
             }
-            if (all.settings().isAfk()) {
+            if (all.isAfk()) {
                 //Check if Player is already AFK
                 return;
             }

@@ -53,6 +53,8 @@ public class TempBanCommand implements CommandExecutor {
                 Raspi.playerLifeCycleService().getRaspiAccount(offlinePlayer.getUniqueId(), false).thenAccept(account -> {
 
 
+                    // /tempban <player> 1w kleiner kek --MOD
+
                     if (args.length == 5 && (args[4].equals("--MOD"))) {
                         String reason = "RSP:6723@Überdenk@Dein@Leben";
                         Long expire = plugin.getConfig().getInt("Utilities.tempban.time") * RaspiTimes.MilliSeconds.HOUR.getTime();

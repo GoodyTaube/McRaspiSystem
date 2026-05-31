@@ -53,9 +53,9 @@ public class WarteschlangenManager {
         // If max player
         if (getAffectedPlayers().size() - this.playersQueue.size() > getMaxPlayers()) {
             //FINISH
-            if (!this.playersQueue.isEmpty() && !player.settings().isAfk()) {
+            if (!this.playersQueue.isEmpty() && !player.isAfk()) {
                 for (Player all : Bukkit.getOnlinePlayers()) {
-                    if (player.settings().isAfk()) {
+                    if (player.isAfk()) {
                         addToQueue(all.getUniqueId(), all.getLocation());
                         setHeader();
                         break;
@@ -112,7 +112,7 @@ public class WarteschlangenManager {
         if (!world.equalsIgnoreCase(Objects.requireNonNull(waiting.getWorld()).getName())) {
             locationHashMap.put(uuid, location);
         }
-        if (!this.playersQueue.isEmpty() && raspiPlayer.settings().isAfk()) {
+        if (!this.playersQueue.isEmpty() && raspiPlayer.isAfk()) {
             UUID afkUUID = playersQueue.peek();
             this.playersQueue.remove(afkUUID);
             this.playersQueue.add(uuid);
@@ -137,7 +137,7 @@ public class WarteschlangenManager {
 
         AtomicInteger afk = new AtomicInteger();
         Raspi.playerLifeCycleService().getCachedRaspiPlayers().forEach(all -> {
-            if (all.settings().isAfk()) {
+            if (all.isAfk()) {
                 afk.getAndIncrement();
             }
             if (!Raspi.playerLifeCycleService().getAfkContainer().isEmpty()) {

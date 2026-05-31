@@ -59,7 +59,9 @@ public class PvPEvents implements Listener {
             return;
 
         Player player = event.getPlayer();
-
+        if (player == null) {
+            return;
+        }
 
         Block block = event.getBlock();
 

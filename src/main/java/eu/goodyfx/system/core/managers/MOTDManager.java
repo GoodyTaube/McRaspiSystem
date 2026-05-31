@@ -29,7 +29,7 @@ public class MOTDManager {
         reload();
         if (fileManager.exist() && fileManager.contains(upperTextPath) && Boolean.TRUE.equals(fileManager.contains(downTextPath))) {
             String upperText = fileManager.get(upperTextPath, String.class);
-            upperText = upperText.replace("%version%",Bukkit.getServer().getMinecraftVersion());
+            upperText = upperText.replace("%version%", Bukkit.getServer().getMinecraftVersion());
             return MiniMessage.miniMessage().deserialize(upperText + "\n" + getRandom());
         }
         return Component.empty();

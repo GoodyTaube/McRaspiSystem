@@ -7,6 +7,7 @@ import eu.goodyfx.system.core.commands.SitCommandContainer;
 import eu.goodyfx.system.core.database.RaspiManagement;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.managers.WarteschlangenManager;
+import eu.goodyfx.system.core.utils.Settings;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -52,10 +53,10 @@ public class PlayerLifecycleListener implements Listener {
         RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(bukkitPlayer);
         RaspiManagement management = player.userManagement();
         if (plugin.getConfig().getBoolean("Utilities.afk.autoAFK")) {
-            player.settings().setAuto_afk(true);
+            player.settings().set(Settings.AUTO_AFK, true);
         }
         player.userData().setLastSeen(System.currentTimeMillis());
-        if (player.settings().isAfk()) {
+        if (player.isAfk()) {
             Bukkit.dispatchCommand(player.getPlayer(), "afk");
             Raspi.debugger().debug(player.getPlayer().getName() + "  was AFK while Disconnecting! Removed AFK status!");
         }

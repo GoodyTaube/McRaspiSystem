@@ -71,22 +71,22 @@ public class RaspiAccountService {
         RaspiUser raspiUser = new RaspiUser(uuid);
         RaspiManagement raspiManagement = new RaspiManagement(uuid);
         RaspiUsernames raspiUsernames = new RaspiUsernames(uuid);
-        UserSettings raspiUserSettings = new UserSettings(uuid);
+        RaspiSettings raspiRaspiSettings = new RaspiSettings(uuid);
         if (exist) {
             //Daten holen für existierenden Nutzer
             raspiUser.fetch();
             raspiManagement.fetch();
-            raspiUserSettings.fetch();
+            raspiRaspiSettings.fetch();
             raspiUsernames.update();
         } else {
             //Spieler neu Schreiben.
             raspiUser.write();
             raspiManagement.write();
             raspiUsernames.update();
-            raspiUserSettings.write();
+            raspiRaspiSettings.write();
             DatabaseManager.getUserExistCacheUserData().put(uuid, true);
         }
-        return new RaspiAccount(uuid, raspiUser, raspiUserSettings, raspiUsernames, raspiManagement);
+        return new RaspiAccount(uuid, raspiUser, raspiRaspiSettings, raspiUsernames, raspiManagement);
     }
 
     /**

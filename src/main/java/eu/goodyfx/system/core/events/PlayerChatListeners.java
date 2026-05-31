@@ -6,9 +6,11 @@ import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiFormatting;
 import eu.goodyfx.system.core.utils.RaspiPermission;
 import eu.goodyfx.system.core.utils.RaspiTimes;
+import eu.goodyfx.system.core.utils.Settings;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -19,7 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class PlayerChatListeners implements Listener {
 
@@ -38,72 +40,62 @@ public class PlayerChatListeners implements Listener {
             return;
         }
         chatEvent.setCancelled(true);//Disabled the core funktion of normal Minecraft Chat.
-        String[] legacy = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()).split(" ");
-        StringBuilder builder = new StringBuilder();
-        Arrays.stream(legacy).forEach(value -> {
-            if (value.startsWith("https://") || value.startsWith("http://")) {
-                builder.append(value.replace("&", "$")).append(" ");
-            } else {
-                builder.append(value).append(" ");
-            }
-        });
 
-        RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(chatEvent.getPlayer());
-        if (player == null) {
+
+        String rawPlayerInput = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message());
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(chatEvent.getPlayer());
+        if (checkUp(raspiPlayer)) {
             return;
         }
-
-
-        chatEvent.message(LegacyComponentSerializer.legacyAmpersand().deserialize(builder.toString()));
-        String plainMessage = LegacyComponentSerializer.legacyAmpersand().serialize(chatEvent.message()); //Message as Plain Message
-
-        if (checkUp(player)) {
+        if (teamIntegration(raspiPlayer, rawPlayerInput)) {
             return;
         }
-        if (teamIntegration(player, plainMessage)) {
-            return;
-        }
-        lastMessage = plainMessage;
-        plainMessage = cleanUpMessage(plainMessage);
-        plainMessage = url(plainMessage);
-        plainMessage = appendPlayerNameColors(plainMessage);
+        this.lastMessage = rawPlayerInput;
+        Component cleaned = RaspiFormatting.parseInputText(rawPlayerInput);
 
+        for (RaspiPlayer online : Raspi.playerLifeCycleService().getCachedRaspiPlayers()) {
+            String username = online.userData().getUsername();
 
-        String finalPlainMessage = plainMessage;
-        Component checkMessage = MiniMessage.miniMessage().deserialize(finalPlainMessage);
-        if (PlainTextComponentSerializer.plainText().serialize(checkMessage).isEmpty()) {
-            return;
+            cleaned = cleaned.replaceText(config -> config.match(Pattern.compile("(?i)\\b" + Pattern.quote(username) + "\\b"))
+                    .replacement(match -> MiniMessage.miniMessage().deserialize(online.getColorName())));
+
         }
 
 
         for (RaspiPlayer active : Raspi.playerLifeCycleService().getCachedRaspiPlayers()) {
+            Component finalCleaned = cleaned;
             Bukkit.getScheduler().runTask(plugin, () -> {
-                send(player, active, finalPlainMessage);
+                send(raspiPlayer, active, finalCleaned);
             });
         }
-        String log = String.format("[RaspiChat] <%s> %s", player.getPlayer().getName(), PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+        String log = String.format("[RaspiChat] <%s> %s", raspiPlayer.getPlayer().getName(), PlainTextComponentSerializer.plainText().serialize(cleaned));
         plugin.getLogger().info(log);
         //Send Discord Message! 2025
         try {
-            plugin.getHookManager().getDiscordIntegration().send("<" + player.getPlayer().getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(finalPlainMessage)));
+            plugin.getHookManager().getDiscordIntegration().send("<" + raspiPlayer.getPlayer().getName() + ">" + " " + PlainTextComponentSerializer.plainText().serialize(cleaned));
         } catch (Exception ignore) {
         }
     }
 
 
-    public void send(RaspiPlayer sendPlayer, RaspiPlayer player, String finalMessage) {
+    public void send(RaspiPlayer sendPlayer, RaspiPlayer player, Component finalMessage) {
 
         //String team = getTeamMarker(sendPlayer.getPlayer(), player, finalMessage);
-        if (player.settings().isOpt_chat()) {
+        if (player.settings().get(Settings.ADVANCED_CHAT)) {
             String commandClick = commandClick(String.format("/playerinfo %s", sendPlayer.getPlayer().getName()));
             String hoverText = hoverText(String.format("<gray>PlayerInfos<br>Bisher Gespielt: <aqua>%s<br><gray><italic>Klicke um mehr Infos zu bekommen.", RaspiTimes.Ticks.getTimeUnit(sendPlayer.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE)))); //REPLACE DURCH ONLINE_HOURS
             String optMessage = String.format("%s%s", commandClick, hoverText);
             String hoverMessageClock = hoverText(String.format("<aqua>%s", new SimpleDateFormat("HH:mm").format(System.currentTimeMillis())));
-            String message = String.format("<%s%s> %s%s", optMessage, sendPlayer.getDisplayName(), hoverMessageClock, finalMessage);
-            player.sendMessage(message);
+            String message = String.format("<%s%s> %s<message>", optMessage, sendPlayer.getDisplayName(), hoverMessageClock);
+
+            Component parsedMessage = MiniMessage.miniMessage().deserialize(message, Placeholder.component("message", finalMessage));
+
+            player.sendMessage(parsedMessage);
             return;
         }
-        player.sendMessage(String.format("<%s> %s", sendPlayer.getDisplayName(), finalMessage));
+        String sendFormat = String.format("<%s> <message>", sendPlayer.getDisplayName());
+        Component endMessage = MiniMessage.miniMessage().deserialize(sendFormat, Placeholder.component("message", finalMessage));
+        player.sendMessage(endMessage);
     }
 
     private boolean checkUp(RaspiPlayer player) {
@@ -121,28 +113,6 @@ public class PlayerChatListeners implements Listener {
     }
 
 
-    private String url(String raw) {
-        raw = raw.replace("$", "&");
-        String[] args = raw.split(" ");
-        StringBuilder preResult = new StringBuilder();
-
-        for (String arg : args) {
-
-            if (arg.startsWith("www")) {
-                arg = arg.replace(arg, "<aqua><underlined><click:open_url:'http://" + arg + "'>" + arg + "<reset>");
-
-            } else if (arg.startsWith("http")) {
-                arg = arg.replace(arg, "<aqua><underlined><click:open_url:'" + arg + "'>" + arg + "<reset>");
-
-            }
-
-
-            preResult.append(arg).append(" ");
-        }
-        String result = preResult.toString();
-        return result.substring(0, result.length() - 1);
-    }
-
     /**
      * If player is Team Member unlock usage of TeamChat
      *
@@ -157,40 +127,18 @@ public class PlayerChatListeners implements Listener {
                 if (mabeTeam.hasPermission(RaspiPermission.TEAM)) {
                     if (!lastMessage.startsWith("!")) {
                         mabeTeam.getPlayer().sendPlainMessage(" ");
-                        mabeTeam.sendMessage("<gold><b>TEAM<reset><gray>: " + player.getDisplayName() + " : " + url(message.substring(1)));
+                        mabeTeam.sendMessage("<gold><b>TEAM<reset><gray>: " + player.getDisplayName() + " : " + message.substring(1));
                         mabeTeam.getPlayer().sendPlainMessage(" ");
                     } else {
-                        mabeTeam.sendMessage("<gold><b>TEAM<reset><gray>: " + player.getDisplayName() + " : " + url(message.substring(1)));
+                        mabeTeam.sendMessage("<gold><b>TEAM<reset><gray>: " + player.getDisplayName() + " : " + message.substring(1));
                     }
+                    lastMessage = message;
                 }
             });
 
 
         }
         return isTeam;
-    }
-
-    private String cleanUpMessage(String message) {
-        return RaspiFormatting.formattingChatMessage(message);
-    }
-
-    private String appendPlayerNameColors(String rawMessage) {
-
-        String[] args = rawMessage.split(" ");
-        StringBuilder preResult = new StringBuilder();
-        for (int i = 0; i < args.length; i++) {
-            for (RaspiPlayer raspiOnlinePlayer : Raspi.playerLifeCycleService().getCachedRaspiPlayers()) {
-                if (args[i].toLowerCase().contains(raspiOnlinePlayer.getPlayer().getName().toLowerCase()) && !args[i].startsWith("<blue><underlined><click")) {
-                    args[i] = args[i].replaceAll(raspiOnlinePlayer.getPlayer().getName().toLowerCase(), raspiOnlinePlayer.getColorName());
-                    args[i] = args[i].replaceAll(raspiOnlinePlayer.getPlayer().getName(), raspiOnlinePlayer.getColorName());
-
-                }
-
-            }
-            preResult.append(args[i]).append(" ");
-        }
-        String result = preResult.toString();
-        return result.substring(0, result.length() - 1);
     }
 
 

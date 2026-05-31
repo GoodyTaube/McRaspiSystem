@@ -1,7 +1,8 @@
 package eu.goodyfx.system.core;
 
 import eu.goodyfx.system.McRaspiSystem;
-import eu.goodyfx.system.core.commandsOLD.*;
+import eu.goodyfx.system.core.commandsOLD.AdminCommand;
+import eu.goodyfx.system.core.commandsOLD.WarteschlangeCommand;
 import eu.goodyfx.system.core.events.*;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -11,42 +12,31 @@ public class SystemStartUp {
     public final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
 
     public SystemStartUp() {
-        welcome();
-        addCommands(plugin);
+        welcomeScreen();
+        addOldCommands(plugin);
         addEvents(plugin);
     }
 
-    private void welcome() {
+    private void welcomeScreen() {
         Bukkit.getConsoleSender().sendMessage("""
-                
                 
                 ███╗   ███╗ ██████╗██████╗  █████╗ ███████╗██████╗ ██╗      ███████╗██╗   ██╗███████╗████████╗███████╗███╗   ███╗
                 ████╗ ████║██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██║      ██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝██╔════╝████╗ ████║
                 ██╔████╔██║██║     ██████╔╝███████║███████╗██████╔╝██║█████╗███████╗ ╚████╔╝ ███████╗   ██║   █████╗  ██╔████╔██║
                 ██║╚██╔╝██║██║     ██╔══██╗██╔══██║╚════██║██╔═══╝ ██║╚════╝╚════██║  ╚██╔╝  ╚════██║   ██║   ██╔══╝  ██║╚██╔╝██║
                 ██║ ╚═╝ ██║╚██████╗██║  ██║██║  ██║███████║██║     ██║      ███████║   ██║   ███████║   ██║   ███████╗██║ ╚═╝ ██║
-                ╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝      ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝
-                                                                                                                                \s
+                ╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝      ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝                                                                               \s
                 """);
     }
 
-    private void addCommands(McRaspiSystem plugin) {
-        //Main System
+    @Deprecated()
+    private void addOldCommands(McRaspiSystem plugin) {
         new AdminCommand();
-        new MessageCommand(plugin);
-        new PrefixCommand();
-        //new RequestCommand(plugin);
-        new SettingsCommand(plugin);
-        //new SitCommand(plugin);
-        new TempBanCommand(plugin);
-        new UnBanCommand(plugin);
         new WarteschlangeCommand(plugin);
-        //new InHeadCommand(); //REPLACED BY NEW CONTAINER
     }
 
 
     private void addEvents(McRaspiSystem plugin) {
-
         new CommandListeners();
         new PlayerChatListeners();
         new PlayerListeners(plugin);

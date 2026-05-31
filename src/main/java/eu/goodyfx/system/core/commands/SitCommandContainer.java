@@ -61,6 +61,7 @@ public class SitCommandContainer {
             if(entity != null){
                 entity.remove();
             }
+            player.teleport(player.getLocation().add(0, 1, 0));
         }
         sitContainer.remove(player.getUniqueId());
 

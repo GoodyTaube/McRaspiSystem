@@ -1,7 +1,9 @@
 package eu.goodyfx.system.core.utils;
 
+import lombok.Getter;
 import org.bukkit.Sound;
 
+@Getter
 public enum RaspiSounds {
 
     ERROR(Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 1f),
@@ -12,21 +14,10 @@ public enum RaspiSounds {
     private final float volume;
     private final float pitch;
 
-    RaspiSounds(Sound sound, float volume, float pitch){
+    RaspiSounds(Sound sound, float volume, float pitch) {
         this.sound = sound;
         this.volume = volume;
         this.pitch = pitch;
     }
 
-    public float getVolume() {
-        return this.volume;
-    }
-
-    public float getPitch() {
-        return this.pitch;
-    }
-
-    public Sound getSound() {
-        return this.sound;
-    }
 }

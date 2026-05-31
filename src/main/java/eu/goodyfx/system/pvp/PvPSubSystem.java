@@ -2,6 +2,7 @@ package eu.goodyfx.system.pvp;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.RaspiSubSystem;
+import eu.goodyfx.system.core.utils.RaspiSubSystems;
 import eu.goodyfx.system.pvp.commands.PvPToggleCommand;
 import eu.goodyfx.system.pvp.events.PvPEvents;
 import eu.goodyfx.system.pvp.utils.Particles;
@@ -22,7 +23,7 @@ public class PvPSubSystem implements RaspiSubSystem {
 
     public PvPSubSystem(McRaspiSystem plugin) {
         this.plugin = plugin;
-        this.key = new NamespacedKey(plugin, "pvp");
+        this.key = new NamespacedKey(plugin, RaspiSubSystems.PVP.getName());
     }
 
     @Override

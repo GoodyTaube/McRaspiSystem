@@ -3,6 +3,7 @@ package eu.goodyfx.system.trader;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.RaspiSubSystem;
+import eu.goodyfx.system.core.utils.RaspiSubSystems;
 import eu.goodyfx.system.trader.commands.TraderCommandContainer;
 import eu.goodyfx.system.trader.events.TraderListeners;
 import eu.goodyfx.system.trader.managers.TraderDB;
@@ -10,9 +11,6 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import lombok.Getter;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Listener;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class TraderSubSystem implements RaspiSubSystem {
 
@@ -31,7 +29,7 @@ public class TraderSubSystem implements RaspiSubSystem {
 
     @Override
     public String systemKey() {
-        return "raspiTrader";
+        return RaspiSubSystems.TRADER.getName();
     }
 
     @Override

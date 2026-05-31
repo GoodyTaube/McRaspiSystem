@@ -8,6 +8,7 @@ import eu.goodyfx.system.core.utils.PlayerJoinTasks;
 import eu.goodyfx.system.core.utils.PlayerTime;
 import eu.goodyfx.system.core.utils.RaspiPermission;
 import lombok.Getter;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Objective;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -32,7 +34,6 @@ public class PlayerLifeCycleService {
     @Getter
     private final Map<UUID, Location> afkContainer = new HashMap<>();
     private PlayerJoinTasks joinTasks = new PlayerJoinTasks();
-    private final Map<String, UUID> pendingPlayers = new ConcurrentHashMap<>();
 
 
     public PlayerLifeCycleService(McRaspiSystem plugin, RaspiAccountService accountService) {
@@ -41,11 +42,11 @@ public class PlayerLifeCycleService {
         this.raspiAccountService = accountService;
     }
 
-    public void playerJoinHandler(Player player) {
+    public void playerJoinHandler(@NonNull Player player) {
 
-        //Custom cache for not saved Players.
+        //First Join Message.
         if (!player.hasPlayedBefore()) {
-            pendingPlayers.put(player.getName(), player.getUniqueId());
+            Bukkit.broadcast(MiniMessage.miniMessage().deserialize(String.format("<dark_purple>%s ist zum ersten mal auf mcrapsi.com!", player.getName())));
         }
 
         raspiAccountService.getRaspiAccount(player.getUniqueId(), true).thenAccept(account -> {
@@ -61,9 +62,7 @@ public class PlayerLifeCycleService {
                 oldOnlineHours(raspiPlayer);
                 raspiPlayer.nameController.setPlayerList();
                 PlayTimeTask.getJoinCache().put(player.getUniqueId(), System.currentTimeMillis());
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    Raspi.debugger().debug("WELCOME PLAYER:" + plugin.getModule().getJoinMessageManager().get(raspiPlayer));
-                });
+                Raspi.debugger().debug("WELCOME PLAYER:" + plugin.getModule().getJoinMessageManager().get(raspiPlayer));
                 player.getPlayer().updateCommands();
                 plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
             });

@@ -2,9 +2,11 @@ package eu.goodyfx.system.core.database;
 
 import eu.goodyfx.system.McRaspiSystem;
 import eu.goodyfx.system.core.utils.PlayerNameController;
+import eu.goodyfx.system.core.utils.RaspiFormatting;
 import eu.goodyfx.system.core.utils.RaspiPermission;
 import eu.goodyfx.system.core.utils.RaspiSounds;
 import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -26,6 +28,10 @@ public class RaspiPlayer implements RaspiUserContext {
     private final RaspiAccount raspiAccount;
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
     public final PlayerNameController nameController;
+
+    @Getter
+    @Setter
+    public boolean afk = false;
 
 
     public RaspiPlayer(Player player, RaspiAccount account) {
@@ -103,20 +109,6 @@ public class RaspiPlayer implements RaspiUserContext {
         return Bukkit.getOfflinePlayer(player.getUniqueId());
     }
 
-
-    /**
-     * Send player a Message with Component API
-     *
-     * @param message The Plain Text Message
-     */
-    public void sendMessage(@Nullable String message) {
-        if (message == null) {
-            player.sendMessage(Component.empty());
-            return;
-        }
-        player.sendMessage(MiniMessage.miniMessage().deserialize(message));
-    }
-
     public String convertLink(String url) {
         return String.format("<click:open_url:'%s'>%s", url, url);
     }
@@ -160,48 +152,75 @@ public class RaspiPlayer implements RaspiUserContext {
         return player.isPermissionSet(permission);
     }
 
+    //================================================================================================
+    //                                        Message
+    //================================================================================================
 
     /**
-     * Send player a Message with Component API
+     * Master Method to send Player chat Message as Component
      *
-     * @param message The Plain Text Message
+     * @param message    The RAW message
+     * @param prefix     Set true for prefix before Message
+     * @param onlyColor  Set true to limit input for only Colors
+     * @param raspiSound Set {@link RaspiSounds} to play Sound after sending Message
      */
-    public void sendMessage(@Nullable String message, boolean prefix) {
+    public void sendMessage(@Nullable String message, boolean prefix, boolean onlyColor, @Nullable RaspiSounds raspiSound) {
         if (message == null) {
             player.sendMessage(Component.empty());
             return;
         }
-        StringBuilder builder = new StringBuilder();
-        if (prefix) {
-            builder.append(plugin.getModule().getRaspiMessages().getPrefix());
+        //Message Parsing
+        MiniMessage parser = onlyColor ? RaspiFormatting.COLOR_ONLY_MESSAGE : MiniMessage.miniMessage();
+        Component parsedMessage = parser.deserialize(message);
+        if (!prefix) {
+            //Message without prefix
+            player.sendMessage(parsedMessage);
+            return;
         }
-        builder.append(message);
-        player.sendMessage(MiniMessage.miniMessage().deserialize(builder.toString()));
+        Component prefixComponent = MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix());
+        //Message with prefix
+        player.sendMessage(prefixComponent.append(parsedMessage));
+        if (raspiSound != null) {
+            //Play Raspi Sound
+            playSound(raspiSound);
+        }
     }
 
-    /**
-     * Send player a Message with Component API
-     *
-     * @param message The Plain Text Message
-     */
-    public void sendMessage(@Nullable String message, boolean prefix, RaspiSounds sound) {
-        if (message == null) {
-            player.sendMessage(Component.empty());
+    public void sendMessage(@Nullable String message) {
+        sendMessage(message, false, false, null);
+    }
+
+    public void sendMessage(@Nullable String message, boolean prefix) {
+        sendMessage(message, prefix, false, null);
+    }
+
+    public void sendMessage(@Nullable String message, boolean prefix, boolean onlyColor) {
+        sendMessage(message, prefix, onlyColor, null);
+    }
+
+    public void sendMessage(String message, boolean prefix, RaspiSounds raspiSounds) {
+        sendMessage(message, prefix, false, raspiSounds);
+    }
+
+    public void sendMessage(Component message) {
+        sendMessage(message, false);
+    }
+
+    public void sendMessage(Component message, boolean prefix) {
+        if (!prefix) {
+            player.sendMessage(message);
             return;
         }
-        StringBuilder builder = new StringBuilder();
-        if (prefix) {
-            builder.append(plugin.getModule().getRaspiMessages().getPrefix());
-        }
-        builder.append(message);
-        player.sendMessage(MiniMessage.miniMessage().deserialize(builder.toString()));
-        this.playSound(sound);
+        Component prefixComponent = MiniMessage.miniMessage().deserialize(plugin.getModule().getRaspiMessages().getPrefix());
+        player.sendMessage(prefixComponent.append(message));
     }
 
     public void sendActionBar(String message) {
         player.sendActionBar(MiniMessage.miniMessage().deserialize(message));
     }
 
+
+    //=======================================================================================================
 
     public McRaspiSystem getSystem() {
         return this.plugin;

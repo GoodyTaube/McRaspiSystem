@@ -2,16 +2,19 @@ package eu.goodyfx.system.randomlootchest.utils;
 
 import eu.goodyfx.system.randomlootchest.RandomLootChest;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 public class FindAvLocations {
 
     private final Random random;
-    private RandomLootChest system;
     private final FileConfiguration config;
 
     private int biggestX = 0;
@@ -20,7 +23,6 @@ public class FindAvLocations {
     private int smallestZ = 0;
     private int biggestY = 0;
     private int smallestY = 0;
-
 
     public FindAvLocations(RandomLootChest subSystem) {
         this.random = subSystem.getPlugin().getRandom();
@@ -38,55 +40,78 @@ public class FindAvLocations {
     }
 
     public int getRandom(int no1, int no2) {
-        int max;
-        int min;
-        if (no1 > no2) {
-            max = no1;
-            min = no2;
-        } else {
-            max = no2;
-            min = no1;
-        }
-
-
+        int max = Math.max(no1, no2);
+        int min = Math.min(no1, no2);
         return this.random.nextInt(max - min + 1) + min;
-
     }
 
-    public Location findLocation() {
-        Location loc = null;
-        int counter = 0;
-        boolean found = false;
+    /**
+     * Startet die asynchrone Suche. Gibt ein CompletableFuture mit der fertigen Location zurück.
+     */
+    public CompletableFuture<Location> findLocationAsync() {
+        CompletableFuture<Location> resultFuture = new CompletableFuture<>();
 
-        while (!found) {
-            ++counter;
-            if (counter > 10) {
-                break;
-            }
-
-            String worldName = config.getString("World");
-            if (worldName == null) {
-                return null;
-            }
-            World world = Bukkit.getWorld(worldName);
-            if (world == null) {
-                return null;
-            }
-
-            int randomX = getRandom(smallestX, biggestX);
-            int randomZ = getRandom(smallestZ, biggestZ);
-            int randomY = world.getHighestBlockYAt(randomX, randomZ);
-            if (randomY >= smallestY && randomY <= biggestY) {
-                found = true;
-            }
-
-            loc = new Location(world, (double) randomX, (double) randomY, (double) randomZ);
-            if (!loc.getChunk().isLoaded()) {
-                loc.getChunk().load();
-            }
+        String worldName = config.getString("World");
+        if (worldName == null) {
+            resultFuture.complete(null);
+            return resultFuture;
         }
 
-        return loc;
+        World world = Bukkit.getWorld(worldName);
+        if (world == null) {
+            resultFuture.complete(null);
+            return resultFuture;
+        }
+
+        // 1. Koordinaten auswürfeln
+        int randomX = getRandom(smallestX, biggestX);
+        int randomZ = getRandom(smallestZ, biggestZ);
+
+        // 2. Paper den Chunk asynchron laden lassen
+        CompletableFuture<Chunk> chunkFuture = world.getChunkAtAsync(randomX >> 4, randomZ >> 4);
+
+        // 3. Sobald der Chunk geladen ist, die beste Y-Höhe auf Gültigkeit prüfen
+        chunkFuture.thenAccept(chunk -> {
+            // WICHTIG: Die Validierung muss zurück auf den Hauptthread, da wir Blöcke abfragen!
+            Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugins()[0], () -> {
+
+                // Wir testen bis zu 20 Y-Höhen in diesem geladenen Chunk
+                for (int i = 0; i < 20; i++) {
+                    int randomY = getRandom(smallestY, biggestY);
+                    Location checkLoc = new Location(world, randomX, randomY, randomZ);
+
+                    if (isValidSpawnLocation(checkLoc)) {
+                        resultFuture.complete(checkLoc); // Erfolg! Location gefunden
+                        return;
+                    }
+                }
+                resultFuture.complete(null); // Keine gültige Höhe in diesem Chunk gefunden
+            });
+        }).exceptionally(ex -> {
+            resultFuture.complete(null);
+            return null;
+        });
+
+        return resultFuture;
     }
 
+    private boolean isValidSpawnLocation(Location loc) {
+        Block target = loc.getBlock();
+        if (target.getType() == Material.AIR || target.getType() == Material.CAVE_AIR) {
+            Block ground = loc.clone().add(0, -1, 0).getBlock();
+            if (isValidGround(ground.getType())) {
+                Block above = loc.clone().add(0, 1, 0).getBlock();
+                return above.getType() == Material.AIR || above.getType() == Material.CAVE_AIR;
+            }
+        }
+        return false;
+    }
+
+    private boolean isValidGround(Material material) {
+        return material.isSolid()
+                && material != Material.WATER
+                && material != Material.LAVA
+                && material != Material.BARRIER
+                && material != Material.BEDROCK;
+    }
 }

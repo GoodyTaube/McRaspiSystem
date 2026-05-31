@@ -1,7 +1,5 @@
 package eu.goodyfx.system.core.database;
 
-import eu.goodyfx.system.core.utils.PlayerNameController;
-
 import java.util.UUID;
 
 public interface RaspiUserContext {
@@ -22,8 +20,8 @@ public interface RaspiUserContext {
         return account().getRaspiUsernames();
     }
 
-    default UserSettings settings() {
-        return account().getUserSettings();
+    default RaspiSettings settings() {
+        return account().getRaspiSettings();
     }
 
     boolean isOnline();

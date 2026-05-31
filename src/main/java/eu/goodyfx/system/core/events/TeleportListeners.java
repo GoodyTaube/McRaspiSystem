@@ -117,7 +117,6 @@ public record TeleportListeners(McRaspiSystem plugin) implements Listener {
             Player player = (Player) dismountEvent.getEntity();
             SitCommandContainer.endSitting(player);
             dismountEvent.getDismounted().remove();
-            player.teleport(player.getLocation().add(0, 1, 0));
         }
 
         if (dismountEvent.getEntity() instanceof Player player) {

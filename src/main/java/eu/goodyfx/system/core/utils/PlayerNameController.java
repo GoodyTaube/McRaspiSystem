@@ -61,7 +61,7 @@ public class PlayerNameController {
     }
 
     public void setPlayerList() {
-        if (player.settings() != null && player.settings().isAfk()) {
+        if (player.settings() != null && player.isAfk()) {
             player.getPlayer().playerListName(MiniMessage.miniMessage().deserialize(String.format("%s <gray><italic><underlined>AFK", getColorDisplayName())));
         } else {
             player.getPlayer().playerListName(MiniMessage.miniMessage().deserialize(getColorDisplayName()));
@@ -78,7 +78,7 @@ public class PlayerNameController {
         if (player.getPrefix() != null) {
             return String.format("%1$s[%2$s%1$s] <gray>: <reset>%1$s%3$s<reset>", getColorString(), player.getPrefix(), player.getPlayer().getName());
         }
-        return String.format("%s %s <reset>", getColorString(), player.getPlayer().getName());
+        return String.format("%s%s<reset>", getColorString(), player.getPlayer().getName());
     }
 
     public String getColorDisplayName(String optMessage) {

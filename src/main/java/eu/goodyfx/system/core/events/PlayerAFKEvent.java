@@ -17,7 +17,7 @@ public class PlayerAFKEvent extends Event {
 
     public PlayerAFKEvent(RaspiPlayer player) {
         this.player = player;
-        if (player.settings().isAfk()) {
+        if (player.isAfk()) {
             Raspi.playerLifeCycleService().getAfkContainer().put(player.getUUID(), player.getLocation());
         } else {
             Raspi.playerLifeCycleService().getAfkContainer().remove(player.getUUID());
@@ -25,7 +25,7 @@ public class PlayerAFKEvent extends Event {
     }
 
     public boolean isAFK() {
-        return player.settings().isAfk();
+        return player.isAfk();
     }
 
     @Override

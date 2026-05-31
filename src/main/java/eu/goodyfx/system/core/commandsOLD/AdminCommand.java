@@ -6,6 +6,7 @@ import eu.goodyfx.system.core.api.Raspi;
 import eu.goodyfx.system.core.commandsOLD.subcommands.*;
 import eu.goodyfx.system.core.database.RaspiPlayer;
 import eu.goodyfx.system.core.utils.RaspiMessages;
+import eu.goodyfx.system.core.utils.Settings;
 import eu.goodyfx.system.core.utils.SubCommand;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -219,7 +220,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
 
         Raspi.playerLifeCycleService().getCachedRaspiPlayers().forEach(all -> {
-            if (all.settings().isServer_messages()) {
+            if (all.settings().get(Settings.MESSAGES)) {
                 String output = String.format("%s hat Teleport %s benutzt.", raspiPlayer.getColorName(), location);
                 all.sendMessage(output, true);
             }

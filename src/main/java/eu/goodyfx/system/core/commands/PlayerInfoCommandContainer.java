@@ -110,7 +110,7 @@ public class PlayerInfoCommandContainer {
                 public void run() {
                     player.sendRichMessage(new PlayerInfo(Bukkit.getOfflinePlayer(targetUUID), raspiAccount).buildPlayerInfos());
                     ExtraInfos extraInfos = new ExtraInfos(player);
-                    extraInfos.getExtraInfos(player);
+                    extraInfos.getExtraInfos(Bukkit.getOfflinePlayer(targetUUID));
                 }
             }.runTask(plugin);
         });

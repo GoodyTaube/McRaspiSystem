@@ -5,6 +5,9 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import eu.goodyfx.system.McRaspiSystem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -33,14 +36,29 @@ public class BookBanFix {
                     public void onPacketSending(PacketEvent event) {
                         if (event.getPacketType() == PacketType.Play.Server.SET_SLOT) {
                             ItemStack item = event.getPacket().getItemModifier().read(0);
-                            if (sanitizeItem(item)) {
-                                event.setCancelled(true);
+                            if (item != null) {
+                                ItemStack sanitized = sanitizeItem(item);
+                                event.getPacket().getItemModifier().write(0, sanitized);
                             }
                         } else {
                             List<ItemStack> items = event.getPacket().getItemListModifier().read(0);
-                            for (ItemStack item : items) {
-                                if (sanitizeItem(item)) {
-                                    event.setCancelled(true);
+                            if (items != null) {
+                                List<ItemStack> sanatizedList = new ArrayList<>();
+                                boolean isModded = false;
+
+                                for (ItemStack item : items) {
+                                    if (item != null) {
+                                        ItemStack sanitized = sanitizeItem(item.clone());
+                                        if (item != sanitized) {
+                                            isModded = true;
+                                        }
+                                        sanatizedList.add(sanitized);
+                                    } else {
+                                        sanatizedList.add(null);
+                                    }
+                                }
+                                if (isModded) {
+                                    event.getPacket().getItemListModifier().write(0, sanatizedList);
                                 }
                             }
                         }
@@ -50,56 +68,63 @@ public class BookBanFix {
     }
 
 
-    private boolean sanitizeItem(ItemStack item) {
-        if (item == null || item.getType() == Material.AIR) return false;
+    private ItemStack sanitizeItem(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) return item;
 
         if (item.getType() == Material.WRITTEN_BOOK || item.getType() == Material.WRITABLE_BOOK) {
-            BookMeta meta = (BookMeta) item.getItemMeta();
-            if (meta == null) return false;
+            if (item.getItemMeta() == null) return item;
 
-            boolean modified = false;
-            List<String> pages = meta.getPages();
-            List<String> safePages = new ArrayList<>();
-
-            // Maximale Anzahl an Seiten begrenzen (Standard Minecraft ist 100)
-            int maxPages = Math.min(pages.size(), 100);
-
-            for (int i = 0; i < maxPages; i++) {
-                String page = pages.get(i);
-                if (page == null) continue;
-
-                // 1. Länge pro Seite hart begrenzen (256 ist sicher)
-                if (page.length() > 256) {
-                    page = page.substring(0, 256);
-                    modified = true;
+            try {
+                BookMeta meta = (BookMeta) item.getItemMeta();
+                if (meta == null) {
+                    return item;
                 }
 
-                // 2. Erlaubt Buchstaben (inkl. Umlaute), Zahlen, gängige Satzzeichen
-                // \p{L} deckt alle Unicode-Buchstaben ab (Ä, Ö, Ü, ß, é, etc.)
-                String sanitized = page.replaceAll("[^\\p{L}\\p{N}\\p{P}\\p{Z}\\n]", "");
+                boolean modified = false;
+                List<Component> pages = meta.pages();
+                List<Component> safePages = new ArrayList<>();
 
-                if (!sanitized.equals(page)) {
-                    page = sanitized;
-                    modified = true;
+                int maxPages = Math.min(pages.size(), 72);
+                for (int i = 0; i < maxPages; i++) {
+                    Component page = pages.get(i);
+                    if (page == null) continue;
+                    String pageText = PlainTextComponentSerializer.plainText().serialize(page);
+
+                    //Seitenlänge
+                    if (pageText.length() > 256) {
+                        pageText = pageText.substring(0, 256);
+                        modified = true;
+                    }
+
+                    String sanitized = pageText.replaceAll("[^\\p{L}\\p{N}\\p{P}\\p{Z}\\n§<>]", "");
+                    //SONDERZEICHEN
+                    if (!sanitized.equals(pageText)) {
+                        pageText = sanitized;
+                        modified = true;
+                    }
+
+                    //JSON
+                    long bracketCount = pageText.chars().filter(ch -> ch == '{').count();
+                    if (bracketCount > 2 && pageText.contains("\"")) {
+                        pageText = "<red>Inhalt Blockiert";
+                        modified = true;
+                    }
+                    Component safePage = MiniMessage.miniMessage().deserialize(pageText);
+                    safePages.add(safePage);
                 }
 
-                // 3. JSON-Exploit Schutz
-                // Book-Bans nutzen oft verschachtelte JSON-Tags.
-                // Wenn die Seite kein echtes JSON sein muss, blocken wir { }
-                if (page.contains("{") && page.contains("\"")) {
-                    page = "§c[Inhalt blockiert]";
-                    modified = true;
+                if (modified || pages.size() > maxPages) {
+                    meta.pages(safePages);
+                    item.setItemMeta(meta);
+                    return item;
                 }
-
-                safePages.add(page);
-            }
-
-            if (modified) {
-                meta.setPages(safePages);
-                item.setItemMeta(meta);
-                return true; // Signalisiert, dass das Item geändert wurde
+            } catch (Exception e) {
+                //Wenn ganz Korrupt
+                ItemStack freshBook = item.withType(Material.BOOK);
+                freshBook.setItemMeta(null);
+                return freshBook;
             }
         }
-        return false;
+        return item;
     }
 }

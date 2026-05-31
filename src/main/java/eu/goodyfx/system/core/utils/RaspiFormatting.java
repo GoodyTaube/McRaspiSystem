@@ -1,11 +1,20 @@
 package eu.goodyfx.system.core.utils;
 
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Getter
@@ -45,6 +54,56 @@ public enum RaspiFormatting {
     private final boolean blocked_chat;
     private final String legacyValue;
     private final Set<String> aliases;
+
+    public static final MiniMessage COLOR_ONLY_MESSAGE = MiniMessage.builder().tags(StandardTags.color()).build();
+
+    private static final Pattern URL_PATTERN = Pattern.compile("https?://\\S+|www\\.\\S+", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern ALL_COLORS_PATTERN = Pattern.compile("&([0-9a-fA-FrR])");
+
+    public static Component parseInputText(String rawInput) {
+        if (rawInput == null) {
+            return Component.empty();
+        }
+
+        //ZUERST url schützen
+        Matcher matcher = URL_PATTERN.matcher(rawInput);
+        StringBuilder urlBuilder = new StringBuilder();
+        while (matcher.find()) {
+            String found = matcher.group();
+            String protectURL = found.replace("&", "%%AND%%");
+            matcher.appendReplacement(urlBuilder, Matcher.quoteReplacement(protectURL));
+        }
+        matcher.appendTail(urlBuilder);
+        String inputWithURLProtection = urlBuilder.toString();
+
+        Matcher colorMather = ALL_COLORS_PATTERN.matcher(inputWithURLProtection);
+        String colorMatched = colorMather.replaceAll("§$1");
+
+        // Der Text hat noch alles! aus & wird §
+        String nativeSectionColors = LegacyComponentSerializer.legacyAmpersand().serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(inputWithURLProtection)).replace("&", "§");
+
+        //Jetzt haben wir aus &cHallo <blue>IHH ---> <red>Hallo <blue>IHH
+        Component legacyToComp = LegacyComponentSerializer.legacySection().deserialize(colorMatched);
+
+        //Das ist jetzt der die Nachricht ABER mit <click> etc. noch aktiv
+        String totalModernString = MiniMessage.miniMessage().serialize(legacyToComp);
+
+        //Farbkorrektur
+        totalModernString = totalModernString.replace("\\<", "<").replace("\\>", ">");
+
+        //Jetzt wollen wir nur noch Farben
+        Component cleanMessage = COLOR_ONLY_MESSAGE.deserialize(totalModernString);
+
+
+        return cleanMessage.replaceText(config -> config.match(URL_PATTERN).replacement(urlMatcher -> {
+            String url = urlMatcher.content().replace("%%AND%%", "&");
+            String validURL = (url.toLowerCase().startsWith("http://") || url.toLowerCase().startsWith("https://")) ? url : "https://" + url;
+
+            return Component.text(url).clickEvent(ClickEvent.openUrl(validURL)).hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize("<gray>Klicke, um den Link zu öffnen."))).decorate(TextDecoration.UNDERLINED);
+        }));
+    }
+
 
     /**
      * Raspi Formatting Codes

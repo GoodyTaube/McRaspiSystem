@@ -110,25 +110,8 @@ public enum FallBackContents {
         public void apply(RaspiManagement user, String path, FallBackManager manager) {
             fetch(manager, path, Long.class, user::setBan_expire);
         }
-    },
-    SETTING_AUTO_AFK("User.%s.autoAFK") {
-        @Override
-        public void apply(UserSettings user, String path, FallBackManager manager) {
-            fetch(manager, path, Boolean.class, user::setAuto_afk);
-        }
-    },
-    SETTING_SERVER_MESSAGES("User.%s.messages") {
-        @Override
-        public void apply(UserSettings user, String path, FallBackManager manager) {
-            fetch(manager, path, Boolean.class, user::setServer_messages);
-        }
-    },
-    SETTING_OPT_CHAT("User.%s.optChat") {
-        @Override
-        public void apply(UserSettings user, String path, FallBackManager manager) {
-            fetch(manager, path, Boolean.class, user::setOpt_chat);
-        }
     };
+
 
     private final String path;
 
@@ -142,7 +125,7 @@ public enum FallBackContents {
     public void apply(RaspiUser user, String path, FallBackManager manager) {
     }
 
-    public void apply(UserSettings user, String path, FallBackManager manager) {
+    public void apply(RaspiSettings user, String path, FallBackManager manager) {
     }
 
     public void apply(RaspiUsernames user, String path, FallBackManager manager) {

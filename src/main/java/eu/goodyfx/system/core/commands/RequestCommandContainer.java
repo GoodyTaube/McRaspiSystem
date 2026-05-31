@@ -68,7 +68,7 @@ public class RequestCommandContainer {
         String reason = context.getArgument("reason", String.class);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(target);
         if (offlinePlayer.hasPlayedBefore()) {
-            player.getPlayer().performCommand(String.format("tempban %s 3h %s", target, reason));
+            player.getPlayer().performCommand(String.format("tempban %s 3 h --MOD %s", target, reason));
             player.sendMessage(String.format("Du hast %s für %s 3h Gesperrt.<br><i>Danke für deinen Einsatz.", target, reason), true);
             sendDiscordMessage(String.format(DISCORD_REQUEST_BAN, player.getPlayer().getName(), target, reason));
         }

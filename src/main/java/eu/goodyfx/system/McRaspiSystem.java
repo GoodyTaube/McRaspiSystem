@@ -15,6 +15,7 @@ import eu.goodyfx.system.core.tasks.*;
 import eu.goodyfx.system.core.utils.*;
 import eu.goodyfx.system.lootchest.LootChestSystem;
 import eu.goodyfx.system.pvp.PvPSubSystem;
+import eu.goodyfx.system.randomlootchest.RandomLootChest;
 import eu.goodyfx.system.raspievents.RaspiEventsSystem;
 import eu.goodyfx.system.reise.RaspiReiseSystem;
 import eu.goodyfx.system.trader.TraderSubSystem;
@@ -29,6 +30,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -45,16 +48,11 @@ public final class McRaspiSystem extends JavaPlugin {
     private RaspiHookManager hookManager;
     private RaspiDebugger debugger;
     private PluginKeys pluginKeys;
-
-
     private DatabaseManager databaseManager;
     private RaspiAccountService raspiAccountService;
     private PlayerLifeCycleService playerLifeCycleService;
+    private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
     private final Random random = new Random();
-
-    public final List<LiteralCommandNode<CommandSourceStack>> commandContainer = new ArrayList<>();
-
-
     private BukkitTask raspiItemsRunner;
     private BukkitRunnable idleTask;
     private BukkitRunnable weeklyTimer;
@@ -65,13 +63,9 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable tabListTask;
     private BukkitRunnable transactionsTask;
     private final List<BukkitRunnable> tasks = new ArrayList<>();
-
+    public final List<LiteralCommandNode<CommandSourceStack>> commandContainer = new ArrayList<>();
     private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
-
-    private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
-
-    private final List<RaspiSubSystem> raspiSubSystems = List.of(new PvPSubSystem(this), new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSubSystem(this));
+    private final List<RaspiSubSystem> raspiSubSystems = List.of(new RandomLootChest(this), new PvPSubSystem(this), new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSubSystem(this));
 
     @Override
     public void onEnable() {
@@ -79,12 +73,10 @@ public final class McRaspiSystem extends JavaPlugin {
         dataMigration();
     }
 
-
     private void playerInit() {
         Raspi.init(debugger, raspiAccountService, playerLifeCycleService, pluginKeys);
         new PlayerLifecycleListener();
     }
-
 
     private void paperCommandsRegister() {
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
@@ -104,7 +96,10 @@ public final class McRaspiSystem extends JavaPlugin {
             commands.registrar().register(new RandomTeleportCommandContainer(this).command());
             commands.registrar().register(new PrefixCommandContainer(this).command());
             commands.registrar().register(new AdminCommandContainer().command());
-
+            commands.registrar().register(UnBanCommandContainer.command());
+            commands.registrar().register(MessageCommandContainer.command(), "Minecraft Message Command Replacement", List.of("message", "msg", "tell", "w", "whisper"));
+            commands.registrar().register(SettingsCommandContainer.command());
+            commands.registrar().register(new TempBanCommandContainer(this).command());
             commandContainer.forEach(command -> {
                 commands.registrar().register(command);
             });
@@ -126,7 +121,7 @@ public final class McRaspiSystem extends JavaPlugin {
         playerInit();
         new SystemStartUp();
         paperCommandsRegister();
-        systemsActivation();
+        subSystemActivation();
         tasks();
         moduleManager.getMotdManager().set();
         new BookBanFix(this);
@@ -144,7 +139,6 @@ public final class McRaspiSystem extends JavaPlugin {
         tasks.add(weeklyTimer);
         this.restoreInv = new InventoryBackup(this);
         tasks.add(restoreInv);
-
         //this.inHeadTask = new InHeadTask();
         tasks.add(inHeadTask);
         this.playTimeTask = new PlayTimeTask();
@@ -156,6 +150,9 @@ public final class McRaspiSystem extends JavaPlugin {
         tasks.add(transactionsTask);
     }
 
+    /**
+     * OLD Database Migration method
+     */
     private void dataMigration() {
         File file = new File(getDataFolder(), "UserDB.yml");
         if (file.exists()) {
@@ -164,7 +161,7 @@ public final class McRaspiSystem extends JavaPlugin {
             getConfig().set("Utilities.wartung", true);
         } else {
             getServer().setWhitelist(false);
-            getDebugger().info("Keine Dateien zur Migration gefunden // SKIP TASK");
+            getLogger().info("Keine Dateien zur Migration gefunden // SKIP TASK");
         }
     }
 
@@ -217,7 +214,6 @@ public final class McRaspiSystem extends JavaPlugin {
         getDebugger().info(String.format("Registered: %s", listeners.getClass().getSimpleName()));
     }
 
-
     @Override
     public void onDisable() {
         // Plugin shutdown logic
@@ -230,6 +226,7 @@ public final class McRaspiSystem extends JavaPlugin {
             }
         }
         debugger.shutdown();
+        raspiSubSystems.forEach(RaspiSubSystem::onDisable);
     }
 
     /**
@@ -238,11 +235,12 @@ public final class McRaspiSystem extends JavaPlugin {
      * @param key the Value
      * @return A NameSpacedKey out of GoodyUtilities
      */
-    public NamespacedKey getNameSpaced(String key) {
+    @Contract("_ -> new")
+    public @NonNull NamespacedKey getNameSpaced(String key) {
         return new NamespacedKey(this, key);
     }
 
-    public void systemsActivation() {
+    public void subSystemActivation() {
         String systemPath = "raspi.systems.%s";
         for (RaspiSubSystem subSystem : raspiSubSystems) {
             String key = String.format(systemPath, subSystem.systemKey());
@@ -258,13 +256,17 @@ public final class McRaspiSystem extends JavaPlugin {
 
     }
 
+    /**
+     * Method to set Configuration Defaults
+     */
     private void checkDefaults() {
-        if (!getConfig().contains("raspi")) {
-            getConfig().addDefault("raspi.systems.raspiLoot", true);
-            getConfig().addDefault("raspi.systems.pvp", true);
-            getConfig().addDefault("raspi.systems.raspiTrader", true);
-            getConfig().addDefault("raspi.systems.raspiReise", true);
-            getConfig().addDefault("raspi.systems.raspiVoting", false);
+        String path = "raspi.systems.%s";
+        List<RaspiSubSystems> systems = List.of(RaspiSubSystems.values());
+        for (RaspiSubSystems subSystem : RaspiSubSystems.values()) {
+            path = String.format(path, subSystem.getName());
+            if (getConfig().getDefaults() != null && !getConfig().getDefaults().contains(path)) {
+                getConfig().addDefault(path, subSystem.getDefault_enabled());
+            }
         }
     }
 

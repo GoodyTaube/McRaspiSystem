@@ -10,7 +10,9 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import eu.goodyfx.system.core.utils.RaspiFormatting;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -43,8 +45,6 @@ public class ChatColorCommandArgument implements CustomArgumentType.Converted<Ra
                 if (formatting.getValue() != null && formatting.getValue().equalsIgnoreCase(input)) {
                     return formatting;
                 }
-
-
             }
             return RaspiFormatting.valueOf(getNativeType().toString());
         } catch (IllegalArgumentException ignored) {

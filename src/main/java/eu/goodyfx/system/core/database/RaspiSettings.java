@@ -12,47 +12,63 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
 @Getter
 @Setter
-public class UserSettings {
+public class RaspiSettings {
 
     private final String uuid;
     private final String username;
-
-    private boolean afk = false;
-    private boolean auto_afk = false;
-    private boolean opt_chat = false;
-    private boolean server_messages = false;
 
     private final String table = DatabaseTables.USER_SETTINGS.getTableName();
     private final McRaspiSystem plugin;
     private final DatabaseManager databaseManager;
 
-    private final Map<Settings, Boolean> settingsMap = new HashMap<>();
+    private final Map<Settings, Boolean> settingsMap = new EnumMap<>(Settings.class);
 
 
-    public UserSettings(UUID uuid) {
+    public RaspiSettings(UUID uuid) {
         this.plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
         this.databaseManager = plugin.getDatabaseManager();
         this.uuid = uuid.toString();
         this.username = MojangPlayerWrapper.getName(uuid);
+
+        //Standard values for all Settings BEFORE fetch
+        for (Settings setting : Settings.values()) {
+            settingsMap.put(setting, false);
+        }
+
     }
+
+    /**
+     * Helper Method to get Player Setting
+     *
+     * @param setting The Requested Setting
+     * @return TRUE if Setting is set.
+     */
+    public boolean get(Settings setting) {
+        return settingsMap.getOrDefault(setting, false);
+    }
+
+    public void set(Settings setting, boolean value) {
+        settingsMap.put(setting, value);
+    }
+
 
     public void fetch() {
         try (Connection connection = databaseManager.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE uuid = ?", table))) {
             statement.setString(1, uuid);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                afk = resultSet.getBoolean("afk");
-                auto_afk = resultSet.getBoolean("auto_afk");
-                opt_chat = resultSet.getBoolean("opt_chat");
-                server_messages = resultSet.getBoolean("server_messages");
-                plugin.getDebugger().debug(String.format("[UserSettings] Fetched userSettings for %s successfully.", username));
+                for (Settings setting : Settings.values()) {
+                    boolean val = resultSet.getBoolean(setting.getDb_column());
+                    settingsMap.put(setting, val);
+                }
+                plugin.getDebugger().debug(String.format("[RaspiSettings] Fetched userSettings for %s successfully.", username));
             }
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, String.format("[UserSetting] Failed to Fetch userSettings for %s in %s", username, table), e);
@@ -75,13 +91,23 @@ public class UserSettings {
 
     }
 
+    /**
+     * Dynamic DB Update Method
+     */
     public void update() {
-        try (Connection connection = databaseManager.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(String.format("UPDATE %s SET afk = ?, auto_afk = ?, opt_chat = ?, server_messages = ? WHERE uuid = ?", table))) {
-            statement.setBoolean(1, afk);
-            statement.setBoolean(2, auto_afk);
-            statement.setBoolean(3, opt_chat);
-            statement.setBoolean(4, server_messages);
-            statement.setString(5, uuid);
+        StringBuilder sqlStringBuilder = new StringBuilder("UPDATE ").append(table).append(" SET ");
+        for (Settings setting : Settings.values()) {
+            sqlStringBuilder.append(setting.getDb_column()).append(" = ?, ");
+        }
+        //Letzte , entfernen
+        sqlStringBuilder.setLength(sqlStringBuilder.length() - 2);
+        sqlStringBuilder.append(" WHERE uuid = ?");
+        try (Connection connection = databaseManager.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(sqlStringBuilder.toString())) {
+            int index = 1;
+            for (Settings setting : Settings.values()) {
+                statement.setBoolean(index++, get(setting));
+            }
+            statement.setString(index, uuid);
             statement.executeUpdate();
             Raspi.debugger().debug(String.format("Updated User Settings for %s", username), "MYSQL");
         } catch (SQLException e) {
