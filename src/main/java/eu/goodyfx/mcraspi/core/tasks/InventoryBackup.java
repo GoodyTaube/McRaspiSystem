@@ -1,0 +1,35 @@
+package eu.goodyfx.mcraspi.core.tasks;
+
+import eu.goodyfx.mcraspi.McRaspiSystem;
+import eu.goodyfx.mcraspi.core.api.Raspi;
+import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class InventoryBackup extends BukkitRunnable {
+
+    private final McRaspiSystem plugin;
+
+    public InventoryBackup(McRaspiSystem mcRaspiSystem) {
+        this.plugin = mcRaspiSystem;
+        this.runTaskTimerAsynchronously(plugin, 5 * 60 * 20L, 10 * 60 * 20L);
+    }
+
+    private final static Map<UUID, ItemStack[]> inventoryContainer = new HashMap<>();
+
+    @Override
+    public void run() {
+        for (RaspiPlayer player : Raspi.playerLifeCycleService().getCachedRaspiPlayers()) {
+            inventoryContainer.put(player.getUUID(), player.getPlayer().getInventory().getContents());
+        }
+    }
+
+    public static Map<UUID, ItemStack[]> getInventoryContainer() {
+        return inventoryContainer;
+    }
+
+}
