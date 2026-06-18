@@ -16,6 +16,7 @@ import java.util.function.BiConsumer;
  * description, syntax, and execution logic.
  */
 @Getter
+@Deprecated
 public abstract class SubCommand {
 
     private final Map<String, BiConsumer<RaspiPlayer, String[]>> actions = new HashMap<>();

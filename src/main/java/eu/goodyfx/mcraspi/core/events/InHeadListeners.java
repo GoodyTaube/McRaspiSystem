@@ -2,7 +2,7 @@ package eu.goodyfx.mcraspi.core.events;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import eu.goodyfx.mcraspi.McRaspiSystem;
-import eu.goodyfx.mcraspi.core.commandsOLD.InHeadCommand;
+import eu.goodyfx.mcraspi.core.commandsold.InHeadCommand;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

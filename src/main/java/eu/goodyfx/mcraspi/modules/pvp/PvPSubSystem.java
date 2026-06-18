@@ -58,7 +58,7 @@ public class PvPSubSystem implements RaspiSubSystem {
 
     @Override
     public void commands() {
-        plugin.getCommandContainer().add(new PvPCommandContainer(this).command());
+        new PvPCommandContainer(this);
     }
 
     @Override

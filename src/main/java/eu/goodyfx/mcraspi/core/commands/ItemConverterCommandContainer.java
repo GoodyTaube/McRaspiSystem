@@ -14,10 +14,30 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class ItemConverterCommandContainer {
+public class ItemConverterCommandContainer extends RaspiCommand {
 
-    public static LiteralCommandNode<CommandSourceStack> command() {
-        return Commands.literal("convert").executes(context -> {
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public String getName() {
+        return "convert";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+
+    public ItemConverterCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
+
+    public LiteralCommandNode<CommandSourceStack> command() {
+        return Commands.literal(getName()).executes(context -> {
             Entity entity = context.getSource().getExecutor();
             if (!(entity instanceof Player player)) {
                 return Command.SINGLE_SUCCESS;

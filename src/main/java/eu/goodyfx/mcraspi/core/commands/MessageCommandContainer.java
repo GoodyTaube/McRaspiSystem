@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.database.RaspiSuggestions;
@@ -17,7 +18,31 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class    MessageCommandContainer {
+public class MessageCommandContainer extends RaspiCommand {
+
+    @Override
+    public String getName() {
+        return "message";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{"msg", "tell", "reply"};
+    }
+
+    public MessageCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
 
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("message").then(Commands.argument("spieler", StringArgumentType.string()).suggests(((context, builder) -> RaspiSuggestions.suggestOnlinePlayers(builder))).then(Commands.argument("nachricht", StringArgumentType.greedyString()).executes(MessageCommandContainer::perform))).build();

@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.mcraspi.core.api.CommandUtils;
 import eu.goodyfx.mcraspi.core.api.Raspi;
+import eu.goodyfx.mcraspi.core.commands.RaspiCommand;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.database.RaspiSuggestions;
 import eu.goodyfx.mcraspi.core.exceptions.AllReadyExistException;
@@ -22,17 +23,32 @@ import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class TraderCommandContainer {
+public class TraderCommandContainer extends RaspiCommand {
 
     private final List<String> activeTraders;
     private final TraderSubSystem subSystem;
     private final TraderDB traderDB;
 
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    @Override
+    public String getName() {
+        return "trader";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
     public TraderCommandContainer(TraderSubSystem subSystem) {
+        super(subSystem.getTraderDB().getPlugin());
         this.subSystem = subSystem;
         this.traderDB = subSystem.getTraderDB();
         this.activeTraders = subSystem.getTraderDB().getTraders();
-        subSystem.addCommand(command());
     }
 
     private static final String TRADER_UID = "traderUID";
@@ -42,7 +58,7 @@ public class TraderCommandContainer {
      * Gets the traderUID required Argument
      *
      * @param <T> String
-       * @return traderUID
+     * @return traderUID
      */
     private <T> RequiredArgumentBuilder<CommandSourceStack, String> getArgument() {
         return CommandUtils.string(TRADER_UID);

@@ -24,9 +24,8 @@ import java.util.UUID;
 /**
  * A Moderation tool to watch new Players
  */
-public class InHeadCommandContainer {
+public class InHeadCommandContainer extends RaspiCommand {
 
-    private final McRaspiSystem plugin;
 
     @Getter
     private static final Map<UUID, UUID> inHeadCache = new HashMap<>();
@@ -35,11 +34,26 @@ public class InHeadCommandContainer {
     protected boolean blocked = true;
 
     public InHeadCommandContainer(McRaspiSystem plugin) {
-        this.plugin = plugin;
+        super(plugin);
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    @Override
+    public String getName() {
+        return "inhead";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
     }
 
     public LiteralCommandNode<CommandSourceStack> command() {
-        return Commands.literal("inhead").executes(this::executeDisable).then(Commands.argument("player", StringArgumentType.string()).suggests((context, builder) -> RaspiSuggestions.suggestOnlinePlayers(builder)).executes(this::executeInHead)).build();
+        return Commands.literal(getName()).executes(this::executeDisable).then(Commands.argument("player", StringArgumentType.string()).suggests((context, builder) -> RaspiSuggestions.suggestOnlinePlayers(builder)).executes(this::executeInHead)).build();
     }
 
 
@@ -50,7 +64,7 @@ public class InHeadCommandContainer {
 
         RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
         if (inHeadCache.containsKey(raspiPlayer.getUUID())) {
-            stopInHead(plugin, raspiPlayer);
+            stopInHead(getPlugin(), raspiPlayer);
             return 1;
         } else {
             raspiPlayer.sendMessage("<red>Du bist derzeit noch nicht im InHead", true);
@@ -81,7 +95,7 @@ public class InHeadCommandContainer {
         }
 
         if (inHeadCache.containsKey(player.getUniqueId()) && inHeadCache.get(player.getUniqueId()).equals(target.getUniqueId())) {
-            stopInHead(plugin, raspiPlayer);
+            stopInHead(getPlugin(), raspiPlayer);
             return 1;
         }
 
@@ -93,10 +107,10 @@ public class InHeadCommandContainer {
     private void startInHead(RaspiPlayer observer, Player target) {
         Player player = observer.getPlayer();
         oldLocationCache.put(player.getUniqueId(), player.getLocation());
-        target.hidePlayer(plugin, player);
+        target.hidePlayer(getPlugin(), player);
         player.setGameMode(GameMode.SPECTATOR);
         player.setSpectatorTarget(target);
-        InHeadSpectator.sendFakePlayer(plugin, observer, target);
+        InHeadSpectator.sendFakePlayer(getPlugin(), observer, target);
         inHeadCache.put(player.getUniqueId(), target.getUniqueId());
         observer.sendMessage(String.format("Du beobachtest nun %s.", target.getName()), true);
     }

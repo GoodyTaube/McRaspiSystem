@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.CommandUtils;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
@@ -16,13 +17,34 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 
-public class SettingsCommandContainer {
+public class SettingsCommandContainer extends RaspiCommand {
 
     private static final String COMMAND_FAIL_404 = "<red>Die Setting: %s wurde nicht gefunden.";
     private static final String COMMAND_SUCCESS = "<gray>Du hast <blue>%s <gray>nun %s";
 
-    public static LiteralCommandNode<CommandSourceStack> command() {
-        return Commands.literal("settings").requires(CommandUtils.PLAYER_ONLY).then(Commands.argument("setting", StringArgumentType.string()).suggests(createSuggestions()).executes(SettingsCommandContainer::perform)).build();
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    @Override
+    public String getName() {
+        return "settings";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    public SettingsCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
+
+
+    public LiteralCommandNode<CommandSourceStack> command() {
+        return Commands.literal(getName()).requires(CommandUtils.PLAYER_ONLY).then(Commands.argument("setting", StringArgumentType.string()).suggests(createSuggestions()).executes(SettingsCommandContainer::perform)).build();
     }
 
     /**

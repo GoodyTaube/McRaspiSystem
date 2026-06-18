@@ -9,11 +9,28 @@ import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public class RaspiGiveCommandContainer {
+public class RaspiGiveCommandContainer extends RaspiCommand {
 
-    private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
+    @Override
+    public String getName() {
+        return "raspigive";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    public RaspiGiveCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
+
 
     public LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("raspigive").then(Commands.argument("item", StringArgumentType.word()).then(Commands.argument("player", StringArgumentType.string()).executes(source -> {
@@ -21,7 +38,7 @@ public class RaspiGiveCommandContainer {
             Player target = Bukkit.getPlayer(source.getArgument("player", String.class));
             if (target != null) {
                 String item = source.getArgument("item", String.class);
-                plugin.getModule().getRaspiGiveManager().addItem(target, item);
+                getPlugin().getModule().getRaspiGiveManager().addItem(target, item);
             } else executor.sendRichMessage("<red>Error while Handling Player DATA");
             return Command.SINGLE_SUCCESS;
 

@@ -21,15 +21,35 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.UUID;
 
-public class PlayerInfoCommandContainer {
+public class PlayerInfoCommandContainer extends RaspiCommand {
 
-    public static LiteralCommandNode<CommandSourceStack> command() {
-        return Commands.literal("playerinfo")
+
+    public PlayerInfoCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
+
+    @Override
+    public String getName() {
+        return "playerüinfo";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    public LiteralCommandNode<CommandSourceStack> command() {
+        return Commands.literal(getName())
                 .executes(context -> {
                     if (!(context.getSource().getSender() instanceof Player player)) {
                         return com.mojang.brigadier.Command.SINGLE_SUCCESS;
                     }
-                    Bukkit.dispatchCommand(player, "playerinfo " + player.getName());
+                    Bukkit.dispatchCommand(player, getName() + " " + player.getName());
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(Commands.argument("player", StringArgumentType.string())

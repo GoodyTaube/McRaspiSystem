@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiManagement;
 import eu.goodyfx.mcraspi.core.database.RaspiSuggestions;
@@ -15,22 +16,41 @@ import org.bukkit.command.CommandSender;
 
 import java.util.UUID;
 
-public class UnBanCommandContainer {
+public class UnBanCommandContainer extends RaspiCommand {
 
-    public static LiteralCommandNode<CommandSourceStack> command() {
-        return Commands.literal("unban")
-                .then(Commands.argument("player", StringArgumentType.string())
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    @Override
+    public String getName() {
+        return "unban";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    public UnBanCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
+
+    public LiteralCommandNode<CommandSourceStack> command() {
+        return Commands.literal(getName())
+                .then(Commands.argument("spieler", StringArgumentType.string())
                         .suggests(((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder)))
-                        .executes(UnBanCommandContainer::performCommand)).build();
+                        .executes(this::performCommand)).build();
     }
 
     private static final String COMMAND_SUCCESS = "%s <green>wurde erfolgreich entsperrt.";
     private static final String COMMAND_FAIL_NOT_BANNED = "%s <green>wurde erfolgreich entsperrt.";
 
-    private static int performCommand(CommandContext<CommandSourceStack> context) {
+    private int performCommand(CommandContext<CommandSourceStack> context) {
 
         CommandSender sender = context.getSource().getSender();
-        String targetName = context.getArgument("player", String.class);
+        String targetName = context.getArgument("spieler", String.class);
         UUID targetUUID = Bukkit.getPlayerUniqueId(targetName);
         if (targetUUID == null) {
             sender.sendRichMessage(String.format(RaspiMessages.PLAYER_NOT_FOUND_NAME, targetName));

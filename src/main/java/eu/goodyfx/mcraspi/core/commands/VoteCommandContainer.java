@@ -12,19 +12,39 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class VoteCommandContainer {
+public class VoteCommandContainer extends RaspiCommand {
+
+
+    public VoteCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    @Override
+    public String getName() {
+        return "vote";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
 
     private static final String VOTE_LINK_PATH = "Utilities.voteLinks";
 
-    public static LiteralCommandNode<CommandSourceStack> voteCommand(McRaspiSystem plugin) {
-        return Commands.literal("vote").requires(cont -> cont.getSender() instanceof Player).executes(context -> {
+    public LiteralCommandNode<CommandSourceStack> command() {
+        return Commands.literal(getName()).requires(cont -> cont.getSender() instanceof Player).executes(context -> {
             Entity entity = context.getSource().getExecutor();
             if (!(entity instanceof Player player)) {
                 return Command.SINGLE_SUCCESS;
             }
             RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
-            if (plugin.getConfig().contains(VOTE_LINK_PATH)) {
-                List<String> voteLinks = plugin.getConfig().getStringList(VOTE_LINK_PATH);
+            if (getPlugin().getConfig().contains(VOTE_LINK_PATH)) {
+                List<String> voteLinks = getPlugin().getConfig().getStringList(VOTE_LINK_PATH);
                 raspiPlayer.sendMessage("<green>McRaspi braucht deine Unterstützung!", true);
                 String linkMessage = "<dark_gray> - <blue>%s";
 

@@ -21,7 +21,23 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AFKCommandContainer {
+public class AFKCommandContainer extends RaspiCommand {
+
+
+    @Override
+    public String getName() {
+        return "afk";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
 
     private final LocationManager locationManager;
     private final WarteschlangenManager warteschlangenManager;
@@ -30,12 +46,14 @@ public class AFKCommandContainer {
     private static final Map<UUID, Integer> playerIDLE = new ConcurrentHashMap<>();
 
     public AFKCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
         this.locationManager = plugin.getModule().getLocationManager();
         this.warteschlangenManager = plugin.getModule().getWarteschlangenManager();
+
     }
 
     public LiteralCommandNode<CommandSourceStack> command() {
-        return Commands.literal("afk").executes(this::afk).build();
+        return Commands.literal(getName()).executes(this::afk).build();
     }
 
     private int afk(CommandContext<CommandSourceStack> context) {

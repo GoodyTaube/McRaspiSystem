@@ -19,14 +19,33 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.*;
 
-public class RandomTeleportCommandContainer {
+public class RandomTeleportCommandContainer extends RaspiCommand {
 
-    private final McRaspiSystem plugin;
     private final Random random;
 
     public RandomTeleportCommandContainer(McRaspiSystem plugin) {
-        this.plugin = plugin;
+        super(plugin);
         this.random = plugin.getRandom();
+    }
+
+    @Override
+    public String getName() {
+        return "randomTP";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{"rtp"};
     }
 
     public LiteralCommandNode<CommandSourceStack> command() {
@@ -77,7 +96,7 @@ public class RandomTeleportCommandContainer {
             Location safeLocation = new Location(chunk.getWorld(), base.getX(), y + 1, base.getZ());
 
             //SYNC
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            Bukkit.getScheduler().runTask(getPlugin(), () -> {
                 if (!player.isOnline()) {
                     return;
                 }
@@ -111,7 +130,7 @@ public class RandomTeleportCommandContainer {
      */
     private Location getConfigCenterLocation() {
         Location location = new Location(Bukkit.getWorld("world"), 0, 0, 0);
-        FileConfiguration config = plugin.getConfig();
+        FileConfiguration config = getPlugin().getConfig();
         if (!config.contains(CONFIG_PATH_CENTER)) {
             Raspi.debugger().debug(String.format("Cant find random Teleport Center Position on Path:%s", CONFIG_PATH_CENTER));
             return location;
@@ -132,10 +151,10 @@ public class RandomTeleportCommandContainer {
      * @return The Radius or 0
      */
     private int getConfigRadius() {
-        if (!plugin.getConfig().contains(CONFIG_PATH_RADIUS)) {
+        if (!getPlugin().getConfig().contains(CONFIG_PATH_RADIUS)) {
             return 0;
         }
-        return plugin.getConfig().getInt(CONFIG_PATH_RADIUS);
+        return getPlugin().getConfig().getInt(CONFIG_PATH_RADIUS);
     }
 
 }

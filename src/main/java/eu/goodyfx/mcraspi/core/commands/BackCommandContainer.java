@@ -2,6 +2,7 @@ package eu.goodyfx.mcraspi.core.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -15,13 +16,33 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class BackCommandContainer {
+public class BackCommandContainer extends RaspiCommand {
 
     @Getter
     private static final Map<UUID, Location> locationsCache = new HashMap<>();
 
-    public static LiteralCommandNode<CommandSourceStack> backCommand() {
-        return Commands.literal("back")
+    @Override
+    public String getName() {
+        return "back";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Command to reverse Location";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return backCommand();
+    }
+
+    public BackCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
+
+
+    public LiteralCommandNode<CommandSourceStack> backCommand() {
+        return Commands.literal(getName())
                 .executes(context -> {
                     if (!(context.getSource().getSender() instanceof Player player)) {
                         return Command.SINGLE_SUCCESS;
@@ -39,4 +60,5 @@ public class BackCommandContainer {
                     return Command.SINGLE_SUCCESS;
                 }).build();
     }
+
 }

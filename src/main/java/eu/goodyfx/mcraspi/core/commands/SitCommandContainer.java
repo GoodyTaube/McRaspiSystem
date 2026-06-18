@@ -18,12 +18,31 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class SitCommandContainer {
+public class SitCommandContainer extends RaspiCommand {
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public String getName() {
+        return "sit";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    public SitCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
 
     public static Map<UUID, Entity> sitContainer = new HashMap<>();
 
-    public static LiteralCommandNode<CommandSourceStack> sitCommand() {
-        return Commands.literal("sit").executes(context -> {
+    public LiteralCommandNode<CommandSourceStack> command() {
+        return Commands.literal(getName()).executes(context -> {
             Entity entity = context.getSource().getExecutor();
             if (!(entity instanceof Player player)) {
                 return Command.SINGLE_SUCCESS;

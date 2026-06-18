@@ -15,16 +15,30 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 
-public class PrefixCommandContainer {
+public class PrefixCommandContainer extends RaspiCommand {
 
-    private final McRaspiSystem plugin;
 
     public PrefixCommandContainer(McRaspiSystem plugin) {
-        this.plugin = plugin;
+        super(plugin);
+    }
+
+    @Override
+    public String getName() {
+        return "prefix";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
     }
 
     public LiteralCommandNode<CommandSourceStack> command() {
-        return Commands.literal("prefix").
+        return Commands.literal(getName()).
                 then(Commands.argument("prefix", StringArgumentType.greedyString()).executes(this::executes)).executes(this::removePrefix).build();
     }
 
@@ -66,7 +80,7 @@ public class PrefixCommandContainer {
         String tbString = prefix.replace(" ", "@");
 
         if (!lengthCheck(prefix)) {
-            raspiPlayer.sendMessage(String.format(COMMAND_FAIL_LENGTH, getPlainPrefix(prefix).replace(" ", "").length(), plugin.getConfig().getInt(CONFIG_LENGTH_INTEGER)), true);
+            raspiPlayer.sendMessage(String.format(COMMAND_FAIL_LENGTH, getPlainPrefix(prefix).replace(" ", "").length(), getPlugin().getConfig().getInt(CONFIG_LENGTH_INTEGER)), true);
             return 1;
         }
         raspiPlayer.setPrefix(tbString);

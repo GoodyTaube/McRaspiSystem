@@ -3,6 +3,7 @@ package eu.goodyfx.mcraspi.modules.reise.managers;
 import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.exceptions.ValueNotFoundException;
+import eu.goodyfx.mcraspi.core.utils.RaspiMessages;
 import eu.goodyfx.mcraspi.modules.reise.utils.ReiseDisplayBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -119,15 +120,15 @@ public class ReiseLocationManager {
         return config.getString(PATH + rawID + USER).equalsIgnoreCase(name);
     }
 
-    public static boolean checkUser(RaspiPlayer player, String name, McRaspiSystem reise) {
+    public static boolean checkUser(RaspiPlayer player, String playerName, McRaspiSystem plugin) {
         for (String key : getKeys()) {
-            if (config.getString(PATH + key + USER).equalsIgnoreCase(name)) {
-                player.sendMessage("<green>McRaspi <gray>| Der Teleport wurde <green><underlined>erfolgreich</underlined><gray> markiert.");
-                new ReiseDisplayBuilder(reise, get(Integer.parseInt(key))).buildBlockDisplay();
+            if (config.getString(PATH + key + USER).equalsIgnoreCase(playerName)) {
+                player.sendMessage("Der Teleport wurde <green><underlined>erfolgreich</underlined><gray> markiert.", true);
+                new ReiseDisplayBuilder(plugin, get(Integer.parseInt(key))).buildBlockDisplay();
                 return true;
             }
         }
-        player.sendMessage("Der Spieler ist noch nicht Hinterlegt!");
+        player.sendMessage(String.format(RaspiMessages.PLAYER_NOT_FOUND_NAME, playerName), true);
         return false;
     }
 

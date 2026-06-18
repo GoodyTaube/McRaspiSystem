@@ -3,6 +3,7 @@ package eu.goodyfx.mcraspi.core.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.database.RaspiSuggestions;
@@ -14,9 +15,29 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class UnMuteCommandContainer {
+public class UnMuteCommandContainer extends RaspiCommand {
 
-    public static LiteralCommandNode<CommandSourceStack> command() {
+
+    @Override
+    public String getName() {
+        return "unmute";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    public UnMuteCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
+    }
+
+    public LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("unmute").then(Commands.argument("player", StringArgumentType.string()).suggests(((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder))).executes(context -> {
 
             if (!(context.getSource().getSender() instanceof Player player)) {

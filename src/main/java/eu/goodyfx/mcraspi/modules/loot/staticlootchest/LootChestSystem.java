@@ -5,8 +5,7 @@ import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.utils.RaspiSubSystem;
 import eu.goodyfx.mcraspi.core.utils.RaspiSubSystems;
-import eu.goodyfx.mcraspi.modules.loot.staticlootchest.commands.LootChestCommand;
-import eu.goodyfx.mcraspi.modules.loot.staticlootchest.commands.RaspiItemsCommand;
+import eu.goodyfx.mcraspi.modules.loot.staticlootchest.commands.loot.LootCommandContainer;
 import eu.goodyfx.mcraspi.modules.loot.staticlootchest.events.LootChestListeners;
 import eu.goodyfx.mcraspi.modules.loot.staticlootchest.events.LootConsumeEvents;
 import eu.goodyfx.mcraspi.modules.loot.staticlootchest.events.LootSpongeEvents;
@@ -85,8 +84,7 @@ public class LootChestSystem implements RaspiSubSystem {
 
     @Override
     public void commands() {
-        new LootChestCommand();
-        new RaspiItemsCommand(plugin);
+        new LootCommandContainer(this);
     }
 
     @Override

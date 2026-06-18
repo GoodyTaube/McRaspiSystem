@@ -51,9 +51,6 @@ public class TraderSubSystem implements RaspiSubSystem {
         events();
     }
 
-    public void addCommand(LiteralCommandNode<CommandSourceStack> command) {
-        plugin.commandContainer.add(command);
-    }
 
     @Override
     public void onDisable() {

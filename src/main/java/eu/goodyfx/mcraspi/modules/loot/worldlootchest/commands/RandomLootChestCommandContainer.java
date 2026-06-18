@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.mcraspi.core.api.CommandUtils;
 import eu.goodyfx.mcraspi.core.api.Raspi;
+import eu.goodyfx.mcraspi.core.commands.RaspiCommand;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.utils.RaspiSounds;
 import eu.goodyfx.mcraspi.modules.loot.worldlootchest.RandomLootChest;
@@ -16,12 +17,30 @@ import org.bukkit.entity.Player;
 import java.util.function.Predicate;
 
 
-public class RandomLootChestCommandContainer {
+public class RandomLootChestCommandContainer extends RaspiCommand {
 
     private final RandomLootChest system;
 
+    @Override
+    public String getName() {
+        return "rlc";
+    }
+
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
     public RandomLootChestCommandContainer(RandomLootChest system) {
+        super(system.getPlugin());
         this.system = system;
+
     }
 
     private static final String helpString = """

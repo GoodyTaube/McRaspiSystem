@@ -1,26 +1,27 @@
 package eu.goodyfx.mcraspi;
 
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import eu.goodyfx.mcraspi.core.SystemStartUp;
 import eu.goodyfx.mcraspi.core.api.PlayerLifeCycleService;
 import eu.goodyfx.mcraspi.core.api.PluginKeys;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.api.RaspiAccountService;
-import eu.goodyfx.mcraspi.core.commands.*;
+import eu.goodyfx.mcraspi.core.commands.RaspiCommand;
 import eu.goodyfx.mcraspi.core.database.DatabaseManager;
 import eu.goodyfx.mcraspi.core.events.PlayerLifecycleListener;
 import eu.goodyfx.mcraspi.core.managers.RaspiHookManager;
 import eu.goodyfx.mcraspi.core.managers.RaspiModuleManager;
+import eu.goodyfx.mcraspi.core.security.BookBanFix;
 import eu.goodyfx.mcraspi.core.tasks.*;
-import eu.goodyfx.mcraspi.core.utils.*;
+import eu.goodyfx.mcraspi.core.utils.DatabaseUpdate;
+import eu.goodyfx.mcraspi.core.utils.RaspiDebugger;
+import eu.goodyfx.mcraspi.core.utils.RaspiSubSystem;
+import eu.goodyfx.mcraspi.core.utils.RaspiSubSystems;
 import eu.goodyfx.mcraspi.modules.loot.staticlootchest.LootChestSystem;
-import eu.goodyfx.mcraspi.modules.pvp.PvPSubSystem;
 import eu.goodyfx.mcraspi.modules.loot.worldlootchest.RandomLootChest;
+import eu.goodyfx.mcraspi.modules.pvp.PvPSubSystem;
 import eu.goodyfx.mcraspi.modules.raspievents.RaspiEventsSystem;
 import eu.goodyfx.mcraspi.modules.reise.RaspiReiseSystem;
 import eu.goodyfx.mcraspi.modules.trader.TraderSubSystem;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -34,10 +35,8 @@ import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,6 +50,11 @@ public final class McRaspiSystem extends JavaPlugin {
     private DatabaseManager databaseManager;
     private RaspiAccountService raspiAccountService;
     private PlayerLifeCycleService playerLifeCycleService;
+    private SystemStartUp startUp;
+
+    @Getter
+    private final Set<RaspiCommand> commandCache = ConcurrentHashMap.newKeySet();
+
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
     private final Random random = new Random();
     private BukkitTask raspiItemsRunner;
@@ -63,14 +67,12 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable tabListTask;
     private BukkitRunnable transactionsTask;
     private final List<BukkitRunnable> tasks = new ArrayList<>();
-    public final List<LiteralCommandNode<CommandSourceStack>> commandContainer = new ArrayList<>();
     private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private final List<RaspiSubSystem> raspiSubSystems = List.of(new RandomLootChest(this), new PvPSubSystem(this), new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSubSystem(this));
 
     @Override
     public void onEnable() {
         init();
-        dataMigration();
     }
 
     private void playerInit() {
@@ -78,34 +80,9 @@ public final class McRaspiSystem extends JavaPlugin {
         new PlayerLifecycleListener();
     }
 
-    private void paperCommandsRegister() {
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
-            commands.registrar().register(SitCommandContainer.sitCommand());
-            commands.registrar().register(VoteCommandContainer.voteCommand(this));
-            commands.registrar().register(ItemConverterCommandContainer.command());
-            commands.registrar().register(RequestCommandContainer.command());
-            commands.registrar().register(new RaspiGiveCommandContainer().command());
-            commands.registrar().register(BackCommandContainer.backCommand());
-            commands.registrar().register(PlayerInfoCommandContainer.command());
-            commands.registrar().register(MuteCommandContainer.muteCommand());
-            commands.registrar().register(UnMuteCommandContainer.command());
-            commands.registrar().register(CoinCommandContainer.command());
-            commands.registrar().register(ChatColorCommandContainer.chatColorCommand());
-            commands.registrar().register(new InHeadCommandContainer(this).command());
-            commands.registrar().register(new AFKCommandContainer(this).command());
-            commands.registrar().register(new RandomTeleportCommandContainer(this).command());
-            commands.registrar().register(new PrefixCommandContainer(this).command());
-            commands.registrar().register(new AdminCommandContainer(this).command());
-            commands.registrar().register(UnBanCommandContainer.command());
-            commands.registrar().register(MessageCommandContainer.command(), "Minecraft Message Command Replacement", List.of("message", "msg", "tell", "w", "whisper"));
-            commands.registrar().register(SettingsCommandContainer.command());
-            commands.registrar().register(new TempBanCommandContainer(this).command());
-            commandContainer.forEach(command -> {
-                commands.registrar().register(command);
-            });
 
-        });
-
+    public void registerCommand(RaspiCommand command) {
+        commandCache.add(command);
     }
 
     private void init() {
@@ -119,8 +96,7 @@ public final class McRaspiSystem extends JavaPlugin {
         moduleManager = new RaspiModuleManager(this);
         services();
         playerInit();
-        new SystemStartUp();
-        paperCommandsRegister();
+        this.startUp = new SystemStartUp();
         subSystemActivation();
         tasks();
         moduleManager.getMotdManager().set();
@@ -173,15 +149,6 @@ public final class McRaspiSystem extends JavaPlugin {
         saveConfig();
     }
 
-    /**
-     * Setup Command Class and load.
-     *
-     * @param commandLabel    The Command Name / Alias
-     * @param commandExecutor The Executor Class
-     */
-    public void setCommand(String commandLabel, CommandExecutor commandExecutor) {
-        Objects.requireNonNull(getCommand(commandLabel)).setExecutor(commandExecutor);
-    }
 
     /**
      * Get All Raspi "Modules" like Managers and Data Stuff

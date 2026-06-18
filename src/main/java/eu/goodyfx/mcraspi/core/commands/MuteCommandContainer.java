@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiSuggestions;
 import eu.goodyfx.mcraspi.core.utils.RaspiMessages;
@@ -14,16 +15,35 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class MuteCommandContainer {
+public class MuteCommandContainer extends RaspiCommand {
 
-    public static LiteralCommandNode<CommandSourceStack> muteCommand() {
-        return Commands.literal("mute").executes(context -> {
-            context.getSource().getSender().sendRichMessage("<gray>Bitte nutze: <yellow>/mute <player> <grund>");
-            return Command.SINGLE_SUCCESS;
-        }).then(Commands.argument("player", StringArgumentType.string()).suggests(((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder))).then(Commands.argument("reason", StringArgumentType.string()).executes(MuteCommandContainer::execute))).build();
+    public MuteCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
     }
 
-    private static int execute(CommandContext<CommandSourceStack> context) {
+    @Override
+    public String getName() {
+        return "mutes";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    public LiteralCommandNode<CommandSourceStack> command() {
+        return Commands.literal(getName()).executes(context -> {
+            context.getSource().getSender().sendRichMessage("<gray>Bitte nutze: <yellow>/mute <player> <grund>");
+            return Command.SINGLE_SUCCESS;
+        }).then(Commands.argument("player", StringArgumentType.string()).suggests(((context, builder) -> RaspiSuggestions.suggestOfflinePlayer(builder))).then(Commands.argument("reason", StringArgumentType.string()).executes(this::execute))).build();
+    }
+
+    private int execute(CommandContext<CommandSourceStack> context) {
         //TODO NEWBIE CHECK
         if (!(context.getSource().getSender() instanceof Player player)) {
             return Command.SINGLE_SUCCESS;

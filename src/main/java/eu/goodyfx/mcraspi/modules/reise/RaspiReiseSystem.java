@@ -3,9 +3,8 @@ package eu.goodyfx.mcraspi.modules.reise;
 import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.utils.RaspiSubSystem;
 import eu.goodyfx.mcraspi.core.utils.RaspiSubSystems;
-import eu.goodyfx.mcraspi.modules.reise.commands.ReiseCommand;
-import eu.goodyfx.mcraspi.modules.reise.commands.ReisePortCommand;
-import eu.goodyfx.mcraspi.modules.reise.commands.ReiseSucheCommand;
+import eu.goodyfx.mcraspi.modules.reise.commands.RBSucheCommandContainer;
+import eu.goodyfx.mcraspi.modules.reise.commands.reise.ReiseCommandContainer;
 import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -54,9 +53,8 @@ public class RaspiReiseSystem implements RaspiSubSystem {
 
     @Override
     public void commands() {
-        new ReiseCommand(plugin);
-        new ReisePortCommand(plugin);
-        new ReiseSucheCommand(plugin);
+        new ReiseCommandContainer(this);
+        new RBSucheCommandContainer(this);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.utils.RaspiFormatting;
@@ -17,14 +18,40 @@ import org.bukkit.entity.Player;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-public class ChatColorCommandContainer {
+public class ChatColorCommandContainer extends RaspiCommand {
 
-    public static LiteralCommandNode<CommandSourceStack> chatColorCommand() {
-        return Commands.literal("chatcolor").then(Commands.argument("farbe", StringArgumentType.greedyString()).suggests((ChatColorCommandContainer::listSuggestions)).executes(ChatColorCommandContainer::perform)).build();
+
+    @Override
+    public String getName() {
+        return "chatcolor";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Command to Color PlayerName";
+    }
+
+    @Override
+    public LiteralCommandNode<CommandSourceStack> getCommand() {
+        return command();
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{"cc"};
+    }
+
+    public ChatColorCommandContainer(McRaspiSystem plugin) {
+        super(plugin);
     }
 
 
-    private static <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+    public LiteralCommandNode<CommandSourceStack> command() {
+        return Commands.literal(getName()).then(Commands.argument("farbe", StringArgumentType.greedyString()).suggests((this::listSuggestions)).executes(this::perform)).build();
+    }
+
+
+    private <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         for (RaspiFormatting color : RaspiFormatting.chatAllowed()) {
             if (color == RaspiFormatting.HEX) {
                 continue;
@@ -46,7 +73,7 @@ public class ChatColorCommandContainer {
         return builder.buildFuture();
     }
 
-    public static int perform(CommandContext<CommandSourceStack> context) {
+    private int perform(CommandContext<CommandSourceStack> context) {
 
         RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer((Player) context.getSource().getSender());
         String input = context.getArgument("farbe", String.class).split(" ")[0];

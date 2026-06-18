@@ -102,7 +102,7 @@ public class RandomLootChest implements RaspiSubSystem {
 
     @Override
     public void commands() {
-        plugin.commandContainer.add(new RandomLootChestCommandContainer(this).command());
+        new RandomLootChestCommandContainer(this);
     }
 
     @Override
