@@ -5,7 +5,6 @@ import eu.goodyfx.mcraspi.core.database.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 import java.util.UUID;
@@ -67,7 +66,7 @@ public class RaspiAccountService {
      * @return A New Raspi Account for given userID
      */
     @Contract("_, _ -> new")
-    private @NonNull RaspiAccount createAndFetch(@NotNull UUID uuid, boolean exist) {
+    private @NotNull RaspiAccount createAndFetch(@NotNull UUID uuid, boolean exist) {
         RaspiUser raspiUser = new RaspiUser(uuid);
         RaspiManagement raspiManagement = new RaspiManagement(uuid);
         RaspiUsernames raspiUsernames = new RaspiUsernames(uuid);

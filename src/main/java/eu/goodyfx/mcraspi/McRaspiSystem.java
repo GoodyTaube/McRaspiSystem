@@ -32,7 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
@@ -203,7 +203,7 @@ public final class McRaspiSystem extends JavaPlugin {
      * @return A NameSpacedKey out of GoodyUtilities
      */
     @Contract("_ -> new")
-    public @NonNull NamespacedKey getNameSpaced(String key) {
+    public @NotNull NamespacedKey getNameSpaced(String key) {
         return new NamespacedKey(this, key);
     }
 

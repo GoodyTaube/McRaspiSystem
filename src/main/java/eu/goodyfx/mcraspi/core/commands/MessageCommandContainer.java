@@ -73,7 +73,7 @@ public class MessageCommandContainer extends RaspiCommand {
             return 1;
         }
         RaspiPlayer targetRaspi = Raspi.playerLifeCycleService().getRaspiPlayer(target);
-        String whisper_sender_layout = String.format(WHISPER_SENDER, raspiPlayer.getColorName());
+        String whisper_sender_layout = String.format(WHISPER_SENDER, targetRaspi.getColorName());
         Component whisper_sender = MiniMessage.miniMessage().deserialize(whisper_sender_layout, Placeholder.component("message", messageComponent));
         String whisper_receiver_layout = String.format(WHISPER_RECEIVER, raspiPlayer.getPlayer().getName(), raspiPlayer.getColorName());
         Component whisper_receiver = MiniMessage.miniMessage().deserialize(whisper_receiver_layout, Placeholder.component("message", messageComponent));

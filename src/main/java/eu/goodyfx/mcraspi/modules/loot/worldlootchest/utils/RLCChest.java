@@ -52,6 +52,7 @@ public class RLCChest {
             return;
         }
         String message = RaspiFormatting.formattingChatMessage(configMessage);
+        message = message.replace("{WORLD}", location.getWorld().getName());
         message = message.replace("{X}", String.valueOf(location.getBlockX()));
         message = message.replace("{Y}", String.valueOf(location.getBlockY()));
         message = message.replace("{Z}", String.valueOf(location.getBlockZ()));

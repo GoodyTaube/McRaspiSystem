@@ -19,7 +19,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Objective;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +45,7 @@ public class PlayerLifeCycleService {
         this.raspiAccountService = accountService;
     }
 
-    public void playerJoinHandler(@NonNull Player player) {
+    public void playerJoinHandler(@NotNull Player player) {
 
         //First Join Message.
         if (!player.hasPlayedBefore()) {
