@@ -6,6 +6,7 @@ import eu.goodyfx.mcraspi.core.utils.RaspiFormatting;
 import eu.goodyfx.mcraspi.modules.loot.worldlootchest.RandomLootChest;
 import eu.goodyfx.mcraspi.modules.loot.worldlootchest.managers.DatabaseManager;
 import eu.goodyfx.mcraspi.modules.loot.worldlootchest.utils.RLCChest;
+import eu.goodyfx.mcraspi.modules.loot.worldlootchest.utils.WorldNameCompiler;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -63,7 +64,9 @@ public class RandomLootChestPlayerEvents implements Listener {
 
     private void formatMessage(Location location, RaspiPlayer raspiPlayer) {
         String string = RaspiFormatting.formattingChatMessage(system.getConfigManager().getConfig().getString("MessageOnLoot"));
-        string = string.replace("{W}", location.getWorld().getName());
+        String worldName = WorldNameCompiler.compile(location.getWorld());
+        if (worldName == null) worldName = "w:404";
+        string = string.replace("{WORLD}", worldName);
         string = string.replace("{X}", String.valueOf(location.getBlockX()));
         string = string.replace("{Y}", String.valueOf(location.getBlockY()));
         string = string.replace("{Z}", String.valueOf(location.getBlockZ()));

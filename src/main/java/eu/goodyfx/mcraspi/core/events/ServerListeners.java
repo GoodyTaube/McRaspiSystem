@@ -1,6 +1,7 @@
 package eu.goodyfx.mcraspi.core.events;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import eu.goodyfx.mcraspi.McRaspiSystem;

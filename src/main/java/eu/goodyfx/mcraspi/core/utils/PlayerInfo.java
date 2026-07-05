@@ -16,7 +16,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
-import org.apache.http.annotation.Experimental;
+
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -79,7 +79,6 @@ public class PlayerInfo {
      * @param performer CommandSender
      * @return A Player Info Dialog
      */
-    @Experimental()
     public Dialog buildPlayerInfosDialog(Player performer) {
         List<DialogBody> dialogBodies = new ArrayList<>();
 

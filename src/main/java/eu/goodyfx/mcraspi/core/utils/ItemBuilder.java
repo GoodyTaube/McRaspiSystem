@@ -5,7 +5,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.apache.http.annotation.Experimental;
+
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -111,7 +111,6 @@ public class ItemBuilder {
         return stack;
     }
 
-    @Experimental
     public ItemBuilder setIdentifier(int id) {
         PersistentDataContainer container = meta.getPersistentDataContainer();
         NamespacedKey itemKey = Raspi.pluginKeys().getITEM_KEY();

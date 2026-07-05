@@ -10,7 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 
 @Getter
-public class RLCChest {
+public class    RLCChest {
 
     public Location location;
     @Setter
@@ -52,7 +52,9 @@ public class RLCChest {
             return;
         }
         String message = RaspiFormatting.formattingChatMessage(configMessage);
-        message = message.replace("{WORLD}", location.getWorld().getName());
+        String worldName = WorldNameCompiler.compile(location.getWorld());
+        if (worldName == null) worldName = "<red>w:404";
+        message = message.replace("{WORLD}", worldName);
         message = message.replace("{X}", String.valueOf(location.getBlockX()));
         message = message.replace("{Y}", String.valueOf(location.getBlockY()));
         message = message.replace("{Z}", String.valueOf(location.getBlockZ()));

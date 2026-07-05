@@ -6,6 +6,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,8 @@ public class RLCTasks {
     private final Random random;
     private final FileConfiguration config;
     public boolean cancel = false;
+    private BukkitTask spawn;
+    private BukkitTask particles;
     private final List<World> availableWorlds = new ArrayList<>();
 
     private static final String PATH_MIN_X = "World_Settings.%s.min_X";
@@ -52,20 +55,24 @@ public class RLCTasks {
 
     private void startSpawnTimer() {
         int interval = config.getInt("SpawnChestPerTime", 300);
-        new BukkitRunnable() {
+        this.spawn = new BukkitRunnable() {
             @Override
             public void run() {
                 if (cancel) {
                     cancel();
                     return;
                 }
-                tryToSpawnChest();
+                if (Bukkit.getOnlinePlayers().isEmpty()) {
+                    //Try to prevent Spawning Chest when nobody is online.
+                    return;
+                }
+                tryToSpawnChest(0);
             }
         }.runTaskTimer(system.getPlugin(), 20L * interval, 20L * interval);
     }
 
-    private void tryToSpawnChest() {
-        if (availableWorlds.isEmpty()) {
+    private void tryToSpawnChest(int times) {
+        if (availableWorlds.isEmpty() || times > 20) {
             return;
         }
         World world = availableWorlds.get(random.nextInt(availableWorlds.size()));
@@ -78,46 +85,47 @@ public class RLCTasks {
         int conMaxX = config.getInt(String.format(PATH_MAX_X, worldName));
         int conMinZ = config.getInt(String.format(PATH_MIN_Z, worldName));
         int conMaxZ = config.getInt(String.format(PATH_MAX_Z, worldName));
-
+        int minY = config.getInt(String.format(PATH_MIN_Y, world.getName()));
+        int maxY = config.getInt(String.format(PATH_MAX_Y, world.getName()));
 
         int randomX = random.nextInt(Math.max(1, conMaxX - conMinX + 1)) + conMinX;
         int randomZ = random.nextInt(Math.max(1, conMaxZ - conMinZ + 1)) + conMinZ;
-
-        // Paper lädt den Chunk komplett asynchron im Hintergrund
-        World finalWorld = world;
         world.getChunkAtAsync(randomX >> 4, randomZ >> 4).thenAccept(chunk -> {
-            // Sobald geladen, wechseln wir für die Block-Prüfung kurz auf den Hauptthread
             Bukkit.getScheduler().runTask(system.getPlugin(), () -> {
-                Location validLocation = scanVerticalColumn(finalWorld, randomX, randomZ);
-
+                Location validLocation = scanVerticalColumn(chunk, randomX, randomZ, minY, maxY);
                 if (validLocation != null) {
                     int killInterval = config.getInt("KillChestAfterTime", 600);
                     RLCChest chest = new RLCChest(system, validLocation, killInterval);
                     chest.generate();
                 } else {
                     // Wenn kein Ort im Chunk gefunden wurde (z.B. tiefer Ozean): Direkt neu würfeln
-                    Bukkit.getScheduler().runTaskLater(system.getPlugin(), this::tryToSpawnChest, 1L);
+                    Bukkit.getScheduler().runTaskLater(system.getPlugin(), () -> tryToSpawnChest(times + 1), 2L);
                 }
             });
         });
     }
 
-    private Location scanVerticalColumn(World world, int x, int z) {
-        int minY = config.getInt(String.format(PATH_MIN_Y, world.getName()));
-        int maxY = config.getInt(String.format(PATH_MAX_Y, world.getName()));
+    private Location scanVerticalColumn(Chunk chunk, int x, int z, int minY, int maxY) {
+        int relativeX = Math.floorMod(x, 16);
+        int relativeZ = Math.floorMod(z, 16);
 
-        // Wir scannen von oben nach unten, um Höhlen oder die Oberfläche zu treffen
-        for (int y = maxY; y >= minY; y--) {
-            Block block = world.getBlockAt(x, y, z);
+        int worldMin = chunk.getWorld().getMinHeight();
+        int worldMax = chunk.getWorld().getMaxHeight();
+
+        int startY = Math.min(maxY, worldMax - 2);
+        int endY = Math.max(minY, worldMin + 1);
+
+        for (int y = startY; y >= endY; y--) {
+            Block block = chunk.getBlock(relativeX, y, relativeZ);
             Material type = block.getType();
 
             if (type == Material.AIR || type == Material.CAVE_AIR) {
-                Block ground = block.getRelative(0, -1, 0);
+                Block ground = chunk.getBlock(relativeX, y - 1, relativeZ);
 
                 if (isValidGround(ground.getType())) {
-                    Block above = block.getRelative(0, 1, 0);
-                    if (above.getType() == Material.AIR || above.getType() == Material.CAVE_AIR) {
-                        return block.getLocation();
+                    Block above = chunk.getBlock(relativeX, y + 1, relativeZ);
+                    if (above.getType() == Material.AIR || above.getType().equals(Material.CAVE_AIR)) {
+                        return new Location(chunk.getWorld(), x, y, z);
                     }
                 }
             }
@@ -133,8 +141,11 @@ public class RLCTasks {
                 && material != Material.BEDROCK;
     }
 
+    /**
+     * Particle Effects like MobSpawner for the LootChest
+     */
     private void startEffectsTimer() {
-        new BukkitRunnable() {
+        this.particles = new BukkitRunnable() {
             @Override
             public void run() {
                 if (cancel) {
@@ -150,8 +161,9 @@ public class RLCTasks {
                     }
                 }
 
+                List<RLCChest> chests = new ArrayList<>(system.getChestCache().values());
                 // Kisten Lifetime runterzählen und löschen
-                for (RLCChest chest : new ArrayList<>(system.getChestCache().values())) {
+                for (RLCChest chest : chests) {
                     int time = chest.getKillTime();
                     if (time <= 0) {
                         chest.kill();
@@ -163,4 +175,11 @@ public class RLCTasks {
             }
         }.runTaskTimer(system.getPlugin(), 20L, 20L);
     }
+
+    public void cancelTasks() {
+        this.cancel = true;
+        if (spawn != null) spawn.cancel();
+        if (particles != null) particles.cancel();
+    }
+
 }

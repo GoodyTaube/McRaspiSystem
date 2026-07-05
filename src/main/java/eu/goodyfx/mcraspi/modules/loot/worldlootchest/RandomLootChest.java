@@ -117,6 +117,6 @@ public class RandomLootChest implements RaspiSubSystem {
 
     @Override
     public void onDisable() {
-        rlcTasks.cancel = true;
+        rlcTasks.cancelTasks();
     }
 }

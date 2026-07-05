@@ -1,20 +1,27 @@
-# IntelliJ IDEA
+# --- IntelliJ IDEA ---
 .idea/
 *.iml
+out/
+.shelf/
 
-# Maven
-/target/
+# --- Gradle (Das Wichtigste für dich!) ---
+.gradle/
+build/
+startup.bat
+gradle.properties
+# --- Reste von Maven (kann drin bleiben) ---
+target/
 dependency-reduced-pom.xml
 
-# Build Artifacts
+# --- Projekt Ressourcen (Ausgeschlossen) ---
+src/main/resources/
+
+
+# --- Build Artifacts ---
 *.jar
 
-# Shell/Build Scripts (optional)
-UPLOAD.sh
-
-# System-Dateien
+# --- System-Dateien ---
 .DS_Store
 Thumbs.db
 .env
 *.key
-*.gradle

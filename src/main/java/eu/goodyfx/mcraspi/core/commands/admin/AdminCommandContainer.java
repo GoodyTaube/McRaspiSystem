@@ -8,6 +8,7 @@ import eu.goodyfx.mcraspi.core.commands.RaspiCommand;
 import eu.goodyfx.mcraspi.core.commands.RaspiSubCommand;
 import eu.goodyfx.mcraspi.core.commands.admin.sub.CoinsSubCommand;
 import eu.goodyfx.mcraspi.core.commands.admin.sub.MigrationSubCommand;
+import eu.goodyfx.mcraspi.core.commands.admin.sub.RestoreSubCommand;
 import eu.goodyfx.mcraspi.core.commands.admin.sub.SetupSubCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -39,6 +40,7 @@ public class AdminCommandContainer extends RaspiCommand {
         this.subCommands.add(new SetupSubCommand(getPlugin()));
         this.subCommands.add(new MigrationSubCommand());
         this.subCommands.add(new CoinsSubCommand());
+        this.subCommands.add(new RestoreSubCommand());
     }
 
     public AdminCommandContainer(McRaspiSystem plugin) {
