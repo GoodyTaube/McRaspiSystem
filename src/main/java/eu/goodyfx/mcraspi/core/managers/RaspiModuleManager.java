@@ -2,8 +2,7 @@ package eu.goodyfx.mcraspi.core.managers;
 
 import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.utils.RaspiMessages;
-import eu.goodyfx.mcraspi.modules.loot.staticlootchest.managers.LootChestManager;
-import eu.goodyfx.mcraspi.modules.loot.staticlootchest.managers.LootManager;
+import eu.goodyfx.mcraspi.modules.loot.managers.LootManager;
 import lombok.Getter;
 
 @Getter
@@ -16,9 +15,8 @@ public class RaspiModuleManager {
     private final WarteschlangenManager warteschlangenManager;
     private final RaspiMessages raspiMessages;
     private final McRaspiSystem plugin;
-    private final LootManager lootManager;
     private final TimeDBManager timeDBManager;
-    private final LootChestManager lootChestManager;
+    private final LootManager lootManager;
     private final MOTDManager motdManager;
     private final CommandManager commandManager = new CommandManager();
     private final ItemConverterManager itemConverterManager = new ItemConverterManager();
@@ -33,9 +31,8 @@ public class RaspiModuleManager {
         this.locationManager = new LocationManager(system);
         this.requestManager = new RequestManager(this);
         this.warteschlangenManager = new WarteschlangenManager(this);
-        this.lootManager = new LootManager(system);
         this.timeDBManager = new TimeDBManager(system);
-        this.lootChestManager = new LootChestManager(system);
+        this.lootManager = new LootManager(system);
         this.motdManager = new MOTDManager(system);
 
     }

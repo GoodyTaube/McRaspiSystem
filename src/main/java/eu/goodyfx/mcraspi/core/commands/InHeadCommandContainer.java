@@ -26,6 +26,8 @@ import java.util.UUID;
  */
 public class InHeadCommandContainer extends RaspiCommand {
 
+    //TODO Player Only Spectator
+
 
     @Getter
     private static final Map<UUID, UUID> inHeadCache = new HashMap<>();

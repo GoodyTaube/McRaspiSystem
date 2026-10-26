@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     // Paper API (holt Gradle direkt aus dem Online-Repo)
-    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
+    compileOnly("io.papermc.paper:paper-api:26.3.build.+")
 
     // Bibliotheken, die mit in dein Plugin gepackt (geshadet) werden
     implementation 'io.javalin:javalin:6.1.3'

@@ -69,12 +69,18 @@ public class PlayerLifeCycleService {
                 if (!joinTasks.perform(raspiPlayer, timeContainer)) {
                     return;
                 }
+
+
                 oldOnlineHours(raspiPlayer);
                 raspiPlayer.nameController.setPlayerList();
                 PlayTimeTask.getJoinCache().put(player.getUniqueId(), System.currentTimeMillis());
                 Raspi.debugger().debug("WELCOME PLAYER:" + plugin.getModule().getJoinMessageManager().get(raspiPlayer));
                 player.getPlayer().updateCommands();
                 plugin.getHookManager().getDiscordIntegration().send(String.format("`[System] <%s> ist zurückgekehrt.`", player.getName()));
+                //========================= TestMode
+                if (plugin.getConfig().contains("testMode") && plugin.getConfig().getBoolean("testMode")) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format("lp user %s permission set group.testing", player.getName()));
+                }
             });
         });
     }

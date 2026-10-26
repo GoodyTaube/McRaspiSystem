@@ -1,8 +1,8 @@
 package eu.goodyfx.mcraspi.modules.trader.managers;
 
 import eu.goodyfx.mcraspi.McRaspiSystem;
-import eu.goodyfx.mcraspi.core.exceptions.AllReadyExistException;
 import lombok.Getter;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Getter
-@SuppressWarnings("unused")
 public class TraderDB {
 
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
@@ -24,7 +23,6 @@ public class TraderDB {
     private static final String DB_TRADER_NAME = "trader.%s.name";
     private static final String DB_TRADER_SHOP = "trader.%s.shop";
     public static final String DB_TRADER_RANDOM = "trader.%s.random";
-    public static final String DB_TRADER_BANKER = "trader.%s.banker";
     public static final String DB_SHOP_ITEM_1 = "trader.%s.shop.%s.buy1";
     public static final String DB_SHOP_ITEM_2 = "trader.%s.shop.%s.buy2";
     public static final String DB_SHOP_RES = "trader.%s.shop.%s.result";
@@ -44,17 +42,22 @@ public class TraderDB {
         configuration = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), DATABASE_PATH));
     }
 
-    public void create(String name) throws AllReadyExistException {
+    public void create(String name) {
         String display = name;
         name = name.toLowerCase();
         if (!configuration.contains(DB_START) || !configuration.contains(DB_START + name.toLowerCase())) {
             configuration.set(getDatabasePath(DB_TRADER_NAME, name), display);
             configuration.set(getDatabasePath(DB_TRADER_SPECIAL_KEY, name), generateKey());
             save();
-
-        } else {
-            throw new AllReadyExistException(String.format("Trader: %s existiert bereits.", name));
         }
+    }
+
+    public Integer generateNextRecipeID(String traderName) {
+        int id = 0;
+        if (!shopExist(traderName)) {
+            return null;
+        }
+        return Objects.requireNonNull(configuration.getConfigurationSection(getDatabasePath(DB_TRADER_SHOP, traderName))).getKeys(false).size();
     }
 
     public void addItemToShop(String traderName, ItemStack result, ItemStack... buyItems) {
@@ -89,26 +92,17 @@ public class TraderDB {
         save();
     }
 
-    public void setBanker(String trader, boolean value) {
-        if (!value) {
-            configuration.set(getDatabasePath(DB_TRADER_BANKER, trader), null);
-            save();
-            return;
-        }
-        configuration.set(getDatabasePath(DB_TRADER_BANKER, trader), true);
-        save();
-    }
-
-
     public ItemStack getItemStack(String traderName, String path, int id) {
         return configuration.getItemStack(String.format(path, traderName, id));
     }
 
     public List<String> getShopIds(String trader) {
-        if (configuration.contains(getDatabasePath(DB_TRADER_SHOP, trader))) {
-            return Objects.requireNonNull(configuration.getConfigurationSection(getDatabasePath(DB_TRADER_SHOP, trader))).getKeys(false).stream().toList();
+
+        ConfigurationSection section = configuration.getConfigurationSection(getDatabasePath(DB_TRADER_SHOP, trader));
+        if (section == null) {
+            return List.of();
         }
-        return List.of();
+        return section.getKeys(false).stream().toList();
     }
 
 
@@ -122,7 +116,7 @@ public class TraderDB {
         }
     }
 
-    public String getUUID(String name) {
+    public String getUID(String name) {
         return configuration.getString(getDatabasePath(DB_TRADER_SPECIAL_KEY, name.toLowerCase()));
     }
 
@@ -147,9 +141,10 @@ public class TraderDB {
     }
 
     public String getTraderByID(String traderUID) {
-        for (String trader : getTraders()) {
-            if (Objects.requireNonNull(configuration.getString(getDatabasePath(DB_TRADER_SPECIAL_KEY, trader))).equalsIgnoreCase(traderUID)) {
-                return trader;
+        reload();
+        for (String traderName : getTraders()) {
+            if (Objects.requireNonNull(configuration.getString(getDatabasePath(DB_TRADER_SPECIAL_KEY, traderName))).equalsIgnoreCase(traderUID)) {
+                return traderName;
             }
         }
         return "";
@@ -162,6 +157,8 @@ public class TraderDB {
     public void addRecipe(String traderName, ItemStack result, ItemStack... buy) {
         traderName = traderName.toLowerCase();
         configuration.set(getDatabasePath(DB_TRADER_SHOP, traderName), "");
+        save();
+        reload();
     }
 
     public boolean shopExist(String trader) {
@@ -170,10 +167,6 @@ public class TraderDB {
 
     public boolean isRandom(String trader) {
         return configuration.contains(getDatabasePath(DB_TRADER_RANDOM, trader));
-    }
-
-    public boolean isBanker(String trader) {
-        return configuration.contains(getDatabasePath(DB_TRADER_BANKER, trader));
     }
 
 

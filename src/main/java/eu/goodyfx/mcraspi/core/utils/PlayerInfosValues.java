@@ -13,8 +13,7 @@ public enum PlayerInfosValues {
     MUTED("<red>Der Spieler ist Stummgeschaltet für"),
     BANNED("<red>Der Spieler ist gesperrt für"),
     DENIED("<red>Der Spieler wurde bereits abgelehnt!"),
-    PLAYER_XP("Aktuelle Spieler XP-Level"),
-    VOTING_COINS("Aktuelle Spieler Coins");
+    PLAYER_XP("Aktuelle Spieler XP-Level");
 
     private final String label;
 

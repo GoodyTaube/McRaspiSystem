@@ -10,14 +10,12 @@ import eu.goodyfx.mcraspi.core.database.DatabaseManager;
 import eu.goodyfx.mcraspi.core.events.PlayerLifecycleListener;
 import eu.goodyfx.mcraspi.core.managers.RaspiHookManager;
 import eu.goodyfx.mcraspi.core.managers.RaspiModuleManager;
-import eu.goodyfx.mcraspi.core.security.BookBanFix;
 import eu.goodyfx.mcraspi.core.tasks.*;
 import eu.goodyfx.mcraspi.core.utils.DatabaseUpdate;
 import eu.goodyfx.mcraspi.core.utils.RaspiDebugger;
 import eu.goodyfx.mcraspi.core.utils.RaspiSubSystem;
 import eu.goodyfx.mcraspi.core.utils.RaspiSubSystems;
-import eu.goodyfx.mcraspi.modules.loot.staticlootchest.LootChestSystem;
-import eu.goodyfx.mcraspi.modules.loot.worldlootchest.RandomLootChest;
+import eu.goodyfx.mcraspi.modules.loot.RandomLootChest;
 import eu.goodyfx.mcraspi.modules.pvp.PvPSubSystem;
 import eu.goodyfx.mcraspi.modules.raspievents.RaspiEventsSystem;
 import eu.goodyfx.mcraspi.modules.reise.RaspiReiseSystem;
@@ -55,6 +53,8 @@ public final class McRaspiSystem extends JavaPlugin {
     @Getter
     private final Set<RaspiCommand> commandCache = ConcurrentHashMap.newKeySet();
 
+
+
     private final NamespacedKey raspiItemKey = new NamespacedKey(this, "raspiItem");
     private final Random random = new Random();
     private BukkitTask raspiItemsRunner;
@@ -68,7 +68,7 @@ public final class McRaspiSystem extends JavaPlugin {
     private BukkitRunnable transactionsTask;
     private final List<BukkitRunnable> tasks = new ArrayList<>();
     private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    private final List<RaspiSubSystem> raspiSubSystems = List.of(new RandomLootChest(this), new PvPSubSystem(this), new RaspiEventsSystem(this), new LootChestSystem(this), new RaspiReiseSystem(this), new TraderSubSystem(this));
+    private final List<RaspiSubSystem> raspiSubSystems = List.of(new RandomLootChest(this), new PvPSubSystem(this), new RaspiEventsSystem(this), new RaspiReiseSystem(this), new TraderSubSystem(this));
 
     @Override
     public void onEnable() {
@@ -100,7 +100,6 @@ public final class McRaspiSystem extends JavaPlugin {
         subSystemActivation();
         tasks();
         moduleManager.getMotdManager().set();
-        new BookBanFix(this);
     }
 
     private void services() {
@@ -122,7 +121,6 @@ public final class McRaspiSystem extends JavaPlugin {
         this.tabListTask = new TablistAnimator();
         tasks.add(tabListTask);
 
-        this.transactionsTask = new OpenTransactionsTask(this);
         tasks.add(transactionsTask);
     }
 

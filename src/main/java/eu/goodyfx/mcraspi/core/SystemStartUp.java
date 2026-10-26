@@ -3,10 +3,8 @@ package eu.goodyfx.mcraspi.core;
 import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.commands.*;
 import eu.goodyfx.mcraspi.core.commands.admin.AdminCommandContainer;
-import eu.goodyfx.mcraspi.core.commands.coins.CoinCommandContainer;
 import eu.goodyfx.mcraspi.core.commands.request.RequestCommandContainer;
 import eu.goodyfx.mcraspi.core.commands.tempban.TempBanCommandContainer;
-import eu.goodyfx.mcraspi.core.commandsold.AdminCommand;
 import eu.goodyfx.mcraspi.core.events.*;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -20,7 +18,6 @@ public class SystemStartUp {
 
     public SystemStartUp() {
         welcomeScreen();
-        addOldCommands(plugin);
         commands();
         setUpCommands();
         addEvents(plugin);
@@ -28,11 +25,9 @@ public class SystemStartUp {
 
     private void commands() {
         new AdminCommandContainer(plugin);
-        new CoinCommandContainer(plugin);
         new RequestCommandContainer(plugin);
         new TempBanCommandContainer(plugin);
         new AFKCommandContainer(plugin);
-        new BackCommandContainer(plugin);
         new ChatColorCommandContainer(plugin);
         new InHeadCommandContainer(plugin);
         new ItemConverterCommandContainer(plugin);
@@ -43,7 +38,6 @@ public class SystemStartUp {
         new RandomTeleportCommandContainer(plugin);
         new RaspiGiveCommandContainer(plugin);
         new SettingsCommandContainer(plugin);
-        new SitCommandContainer(plugin);
         new UnBanCommandContainer(plugin);
         new UnMuteCommandContainer(plugin);
         new VoteCommandContainer(plugin);
@@ -61,18 +55,12 @@ public class SystemStartUp {
                 """);
     }
 
-    @Deprecated()
-    private void addOldCommands(McRaspiSystem plugin) {
-        new AdminCommand();
-    }
-
 
     private void addEvents(McRaspiSystem plugin) {
         new CommandListeners();
         new PlayerChatListeners();
         new PlayerListeners(plugin);
         new ServerListeners();
-        new TeleportListeners(plugin);
         //new WarteschlangeListeners(plugin);
         new PlayerInteractAtEntitiesListeners(plugin);
         new PlayerInteractListeners(plugin);
@@ -82,7 +70,6 @@ public class SystemStartUp {
         new CompassEvents();
         new InventoryListeners();
         new PlayerAFKHandler();
-        new RaspiCoinsEvents();
         new RaspiWorldEvents(plugin);
     }
 

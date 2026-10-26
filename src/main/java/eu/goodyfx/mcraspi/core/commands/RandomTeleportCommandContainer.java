@@ -11,6 +11,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.entity.TeleportFlag;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -30,7 +31,7 @@ public class RandomTeleportCommandContainer extends RaspiCommand {
 
     @Override
     public String getName() {
-        return "randomTP";
+        return "randomTp";
     }
 
     @Override
@@ -67,7 +68,7 @@ public class RandomTeleportCommandContainer extends RaspiCommand {
 
         RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
         UUID playerUUID = raspiPlayer.getUUID();
-        if (isCached(playerUUID)) {
+        if (isCached(playerUUID) && player.getGameMode().equals(GameMode.SURVIVAL)) {
             raspiPlayer.sendActionBar(WARN_ALREADY_USED);
         }
         teleportAsync(player);
@@ -77,9 +78,9 @@ public class RandomTeleportCommandContainer extends RaspiCommand {
 
     private void teleportAsync(Player player) {
 
-        if (isCached(player.getUniqueId())) {
+        if (isCached(player.getUniqueId()) && player.getGameMode().equals(GameMode.SURVIVAL)) {
             Location cached = locationCache.get(player.getUniqueId());
-            player.teleport(cached, PlayerTeleportEvent.TeleportCause.PLUGIN, TeleportFlag.Relative.VELOCITY_ROTATION);
+            player.teleportAsync(cached, PlayerTeleportEvent.TeleportCause.PLUGIN, TeleportFlag.Relative.VELOCITY_ROTATION);
             player.playSound(cached, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 2);
             return;
         }
@@ -104,9 +105,14 @@ public class RandomTeleportCommandContainer extends RaspiCommand {
                     teleportAsync(player);
                     return;
                 }
+
+                if (safeLocation.getZ() < 64) { //SEA LEVLE
+                    teleportAsync(player);
+                    return;
+                }
                 Raspi.debugger().debug(String.format("New Random Teleport location for %s @%s", player.getUniqueId(), Raspi.debugger().formatLocation(safeLocation)));
                 locationCache.put(player.getUniqueId(), safeLocation);
-                player.teleport(safeLocation, PlayerTeleportEvent.TeleportCause.PLUGIN, TeleportFlag.Relative.VELOCITY_ROTATION);
+                player.teleportAsync(safeLocation, PlayerTeleportEvent.TeleportCause.PLUGIN, TeleportFlag.Relative.VELOCITY_ROTATION);
             });
 
         });

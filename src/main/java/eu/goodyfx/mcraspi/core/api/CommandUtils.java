@@ -13,7 +13,7 @@ public class CommandUtils {
     public static final Predicate<CommandSourceStack> PLAYER_ONLY = commandSourceStack -> commandSourceStack.getSender() instanceof Player;
 
     public static <T> RequiredArgumentBuilder<CommandSourceStack, String> string(String name) {
-        return Commands.argument(name, StringArgumentType.string());
+        return Commands.argument(name, StringArgumentType.greedyString());
     }
 
 }

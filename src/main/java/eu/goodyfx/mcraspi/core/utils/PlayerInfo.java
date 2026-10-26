@@ -52,7 +52,6 @@ public class PlayerInfo {
         lastDeath();
         lastSeen();
         playerXP();
-        playerCoins();
         playerServerInfos();
         //lastNames();
     }
@@ -204,15 +203,6 @@ public class PlayerInfo {
             assert online != null;
             int xp = online.getLevel();
             parseValueToInfo(PlayerInfosValues.PLAYER_XP, String.valueOf(xp));
-        }
-    }
-
-    public void playerCoins() {
-        if (player.isOnline()) {
-            Player online = player.getPlayer();
-            assert online != null;
-            long coins = raspiUser.getCoins();
-            parseValueToInfo(PlayerInfosValues.VOTING_COINS, String.valueOf(coins));
         }
     }
 

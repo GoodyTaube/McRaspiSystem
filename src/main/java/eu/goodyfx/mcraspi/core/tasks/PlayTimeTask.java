@@ -71,7 +71,7 @@ public class PlayTimeTask extends BukkitRunnable {
 
     }
 
-    public static void updatePlayerValue(Player player){
+    public static void updatePlayerValue(Player player) {
         RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
         objective.getScore(player).setScore(raspiPlayer.userData().getOnlineHours());
     }

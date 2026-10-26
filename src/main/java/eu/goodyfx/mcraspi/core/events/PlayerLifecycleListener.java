@@ -3,7 +3,6 @@ package eu.goodyfx.mcraspi.core.events;
 import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.commands.InHeadCommandContainer;
-import eu.goodyfx.mcraspi.core.commands.SitCommandContainer;
 import eu.goodyfx.mcraspi.core.database.RaspiManagement;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.managers.WarteschlangenManager;
@@ -49,7 +48,6 @@ public class PlayerLifecycleListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         Player bukkitPlayer = event.getPlayer();
         stopInHead(bukkitPlayer); //Remove InHead
-        SitCommandContainer.endSitting(bukkitPlayer); //Falls der Spieler gesessen hat.
         RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(bukkitPlayer);
         RaspiManagement management = player.userManagement();
         if (plugin.getConfig().getBoolean("Utilities.afk.autoAFK")) {

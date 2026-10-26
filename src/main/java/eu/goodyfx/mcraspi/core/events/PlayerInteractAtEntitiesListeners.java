@@ -6,8 +6,6 @@ import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.utils.RaspiSounds;
-import eu.goodyfx.mcraspi.modules.loot.staticlootchest.LootChestSystem;
-import eu.goodyfx.mcraspi.modules.loot.staticlootchest.utils.LootChestLoot;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.*;
@@ -36,7 +34,6 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
         villagerInteraction(event);
-        interactLootChest(event);
     }
 
 
@@ -75,25 +72,6 @@ public class PlayerInteractAtEntitiesListeners implements Listener {
                 event.setCancelled(true);
                 event.getPlayer().sendRichMessage("<white>[<green>Trader<white>] <green><Johan> <gray>: Hello there... Ive got something for you!");
                 event.getPlayer().openGrindstone(event.getPlayer().getLocation(), true);
-            }
-        }
-    }
-
-    private void interactLootChest(PlayerInteractAtEntityEvent event) {
-        if (event.getRightClicked() instanceof Interaction) {
-            Interaction interaction = (Interaction) event.getRightClicked();
-            if (interaction.getPersistentDataContainer().has(new NamespacedKey(plugin, "special"))) {
-                event.setCancelled(true);
-                RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(event.getPlayer());
-
-
-                if (LootChestSystem.getLootChestSubSystem().getLootChestTimer().isLootChestReady()) {
-                    new LootChestLoot(plugin).openLoot(player);
-                } else {
-                    player.playSound(RaspiSounds.ERROR);
-                    player.sendActionBar("<red>LootChest ist noch nicht Offen!");
-                }
-
             }
         }
     }

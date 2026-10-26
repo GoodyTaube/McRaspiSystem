@@ -1,16 +1,12 @@
 package eu.goodyfx.mcraspi.core.events;
 
 import eu.goodyfx.mcraspi.McRaspiSystem;
-import eu.goodyfx.mcraspi.core.commands.SitCommandContainer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.type.Slab;
-import org.bukkit.block.data.type.Stairs;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,9 +45,6 @@ public class PlayerInteractListeners implements Listener {
     private void lootSystem(PlayerInteractEvent interactEvent) {
         Player player = interactEvent.getPlayer();
         Action action = interactEvent.getAction();
-
-        sit(interactEvent);
-
         if (action.equals(Action.LEFT_CLICK_BLOCK) || action.equals(Action.LEFT_CLICK_AIR)) {
             lootItemLevelMeet(interactEvent);
         } else if (interactEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
@@ -97,26 +90,6 @@ public class PlayerInteractListeners implements Listener {
                 player.getInventory().setItemInMainHand(stack);
                 stack.addUnsafeEnchantment(Enchantment.UNBREAKING, 1);
                 stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            }
-        }
-    }
-
-    private void sit(PlayerInteractEvent interactEvent) {
-        Player player = interactEvent.getPlayer();
-        Action action = interactEvent.getAction();
-
-        if (action.equals(Action.RIGHT_CLICK_BLOCK) && interactEvent.getHand() == EquipmentSlot.HAND && interactEvent.getPlayer().getInventory().getItem(EquipmentSlot.HAND).getType().equals(Material.AIR) && !SitCommandContainer.sitContainer.containsKey(player.getUniqueId())) {
-            if (interactEvent.getClickedBlock().getLocation().getY() > player.getLocation().getY()) {
-                return;
-            }
-            Block block = interactEvent.getClickedBlock();
-            if (block != null && (block.getBlockData() instanceof Stairs || block.getBlockData() instanceof Slab)) {
-                Location location = block.getLocation();
-                SitCommandContainer.performSit(player, location.add(0.5, 0, 0.5), -0.53);
-            }
-            if (block != null && Tag.WOOL_CARPETS.isTagged(block.getType())) {
-                Location location = block.getLocation();
-                SitCommandContainer.performSit(player, location.add(0.5, 0, 0.5), 0.046);
             }
         }
     }

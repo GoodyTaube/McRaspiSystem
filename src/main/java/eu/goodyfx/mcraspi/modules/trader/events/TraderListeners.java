@@ -4,17 +4,17 @@ import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.modules.trader.TraderSubSystem;
-import eu.goodyfx.mcraspi.modules.trader.commands.TraderCommand;
-import eu.goodyfx.mcraspi.modules.trader.managers.TraderDB;
-import eu.goodyfx.mcraspi.modules.trader.utils.TraderInventories;
+import eu.goodyfx.mcraspi.modules.trader.inventories.RecipeEditor;
+import eu.goodyfx.mcraspi.modules.trader.inventories.TraderSettings;
+import eu.goodyfx.mcraspi.modules.trader.managers.TraderManager;
+import eu.goodyfx.mcraspi.modules.trader.utils.Trader;
+import eu.goodyfx.mcraspi.modules.trader.utils.TraderMenuItem;
+import eu.goodyfx.mcraspi.modules.trader.utils.TraderRecipe;
 import io.papermc.paper.event.player.PlayerNameEntityEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
@@ -22,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -32,12 +33,15 @@ import java.util.List;
 
 public class TraderListeners implements Listener {
 
+
     private final McRaspiSystem plugin = JavaPlugin.getPlugin(McRaspiSystem.class);
-    private final TraderDB traderDB;
-    private static final String TRADER_NAME = "trader";
+    private static final String TRADER_NAME = "traderKey";
+    private final TraderSubSystem system;
+    private final TraderManager traderManager;
 
     public TraderListeners(TraderSubSystem subSystem) {
-        this.traderDB = subSystem.getTraderDB();
+        this.traderManager = subSystem.getTraderManager();
+        this.system = subSystem;
         plugin.setListeners(this);
     }
 
@@ -46,7 +50,7 @@ public class TraderListeners implements Listener {
         Entity entity = event.getEntity();
         if (entity instanceof Villager villager) {
             PersistentDataContainer container = villager.getPersistentDataContainer();
-            if (container.has(plugin.getNameSpaced(TRADER_NAME))) {
+            if (container.has(system.getTraderKey())) {
                 event.setCancelled(true);
                 event.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<red>\"Ah ah ah, you didn't say the magic word\""));
             }
@@ -57,37 +61,46 @@ public class TraderListeners implements Listener {
 
     @EventHandler
     public void onTraderClick(PlayerInteractAtEntityEvent entityEvent) {
-        Entity entity = entityEvent.getRightClicked();
-        if (entity.getType().equals(EntityType.VILLAGER)) {
-            Villager villager = (Villager) entity;
-
-            RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(entityEvent.getPlayer());
-
-            PersistentDataContainer container = villager.getPersistentDataContainer();
-
-            if (player.getPlayer().getGameMode().equals(GameMode.CREATIVE) && player.getPlayer().isSneaking()) {
-                String name = container.get(plugin.getNameSpaced("trader"), PersistentDataType.STRING);
-                player.getPlayer().performCommand(String.format("trader edit %s", traderDB.getTraderByID(name)));
-                return;
-            }
-
-            if (container.has(plugin.getNameSpaced(TRADER_NAME))) {
-                String traderUID = container.get(plugin.getNameSpaced(TRADER_NAME), PersistentDataType.STRING);
-                String traderName = String.format("<green>%s", traderDB.getTraderName(traderDB.getTraderByID(traderUID)));
-                //Generate Merchant and OPEN by Type
-
-                if (traderDB.isBanker(traderName)) {
-                    entityEvent.setCancelled(true);
-                    player.openInventory(MenuType.CRAFTING.builder().location(player.getLocation()).build(player.getPlayer()));
-                    return;
-                }
-
-                entityEvent.setCancelled(true);
-                player.openInventory(MenuType.MERCHANT.builder().merchant(generateMerchant(traderDB.getTraderByID(traderUID))).title(MiniMessage.miniMessage().deserialize(traderName)).build(player.getPlayer()));
-            }
-
-
+        if (!(entityEvent.getRightClicked() instanceof Villager villager)) {
+            return;
         }
+        RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer(entityEvent.getPlayer());
+        PersistentDataContainer container = villager.getPersistentDataContainer();
+        if (!container.has(system.getTraderKey(), PersistentDataType.STRING)) {
+            return;
+        }
+        entityEvent.setCancelled(true);
+
+        String traderUID = container.get(system.getTraderKey(), PersistentDataType.STRING);
+        if (traderUID == null) {
+            return;
+        }
+
+        Trader trader = system.getTraderManager().getOrLoadTrader(traderUID);
+        if (trader == null) {
+            return;
+        }
+        if (player.getPlayer().getGameMode().equals(GameMode.CREATIVE) && player.getPlayer().isSneaking()) {
+            String commandPerform = String.format("trader edit %s", trader.getName());
+            player.getPlayer().performCommand(commandPerform);
+            return;
+        }
+        String traderName = String.format("<green>%s", trader.getName());
+        player.openInventory(MenuType.MERCHANT.builder().merchant(generateMerchant(trader)).title(MiniMessage.miniMessage().deserialize(traderName)).build(player.getPlayer()));
+
+    }
+
+
+    @EventHandler
+    public void onCollideVehicle(VehicleEntityCollisionEvent event) {
+        if (!(event.getEntity() instanceof Villager villager)) {
+            return;
+        }
+        PersistentDataContainer container = villager.getPersistentDataContainer();
+        if (!container.has(system.getTraderKey())) {
+            return;
+        }
+        event.setCancelled(true);
     }
 
     @EventHandler
@@ -96,140 +109,92 @@ public class TraderListeners implements Listener {
             return;
         }
         RaspiPlayer player = Raspi.playerLifeCycleService().getRaspiPlayer((Player) clickEvent.getWhoClicked());
-        String title = LegacyComponentSerializer.legacyAmpersand().serialize(clickEvent.getView().title());
-        if (title.equalsIgnoreCase("Trader Settings")) {
-            ItemStack stack = clickEvent.getCurrentItem();
-            clickedSave(clickEvent, player, stack);
-            clickedDelete(clickEvent, player, stack);
-        }
-        if (title.equalsIgnoreCase("Trader Rezepte")) {
-            clickEvent.setCancelled(true);
-            addItem(player, clickEvent);
-            clickedRandom(player, clickEvent);
-            clickedBanker(player, clickEvent);
-            clickedRecipe(player, clickEvent);
-        }
 
-    }
+        int slot = clickEvent.getSlot();
+        Inventory inventory = clickEvent.getClickedInventory();
+        if (inventory != null && inventory.getHolder(false) instanceof RecipeEditor editor) {
+            //Recipe Editor
+            int recipeID = editor.getId();
+            if (editor.getItemBySlot(slot) != null) {
+                TraderMenuItem traderMenuItem = editor.getItemBySlot(slot);
+                player.sendDebugMessage(traderMenuItem.name());
+                if (traderMenuItem == TraderMenuItem.RECIPE_REMOVE) {
+                    editor.getTrader().removeRecipe(recipeID);
+                    player.getPlayer().closeInventory();
+                    editor.getTrader().openTraderSettings(player);
+                    return;
+                }
+                if (traderMenuItem == TraderMenuItem.RECIPE_SAVE) {
+                    editor.saveRecipe(player);
+                    player.getPlayer().closeInventory();
+                    editor.getTrader().openTraderSettings(player);
+                    traderManager.saveTrader(editor.getTrader());
+                    return;
+                }
+                clickEvent.setCancelled(true);
 
-    private void clickedRecipe(RaspiPlayer player, InventoryClickEvent clickEvent) {
-        ItemStack current = clickEvent.getCurrentItem();
-        if (current == null || !current.hasItemMeta() || !current.getItemMeta().hasCustomModelData()) {
-            return;
-        }
+            }
 
-        if (!isItem(current, -1) && !isItem(current, -21) && !isItem(current, -20)) {
-            int id = clickEvent.getCurrentItem().getItemMeta().getCustomModelData();
-            String trader = TraderCommand.traderEditContainer.get(player.getUUID());
-            TraderCommand.traderSAVEContainer.put(player.getUUID(), id);
-            Inventory inventory = TraderInventories.createRecipeInventory();
-            inventory.setItem(9, traderDB.getItemStack(trader, TraderDB.DB_SHOP_ITEM_1, id));
-            inventory.setItem(10, traderDB.getItemStack(trader, TraderDB.DB_SHOP_ITEM_2, id));
-            inventory.setItem(12, traderDB.getItemStack(trader, TraderDB.DB_SHOP_RES, id));
-            player.getPlayer().closeInventory();
-            player.openInventory(inventory);
-        }
-    }
-
-    public void addItem(RaspiPlayer player, InventoryClickEvent clickEvent) {
-
-        if (isItem(clickEvent.getCurrentItem(), -1)) {
-            player.getPlayer().closeInventory();
-            player.openInventory(TraderInventories.createRecipeInventory());
-        }
-    }
-
-    public void clickedRandom(RaspiPlayer player, InventoryClickEvent clickEvent) {
-        if (isItem(clickEvent.getCurrentItem(), -21)) {
-            //RANDOM MACHEN
-            traderDB.setRandom(TraderCommand.traderEditContainer.get(player.getUUID()), true);
-            player.getPlayer().closeInventory();
-            player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt Random.");
-            TraderCommand.traderEditContainer.remove(player.getUUID());
         }
 
-        if (isItem(clickEvent.getCurrentItem(), -20)) {
-            //RANDOM REVOKE
-            traderDB.setRandom(TraderCommand.traderEditContainer.get(player.getUUID()), false);
-            player.getPlayer().closeInventory();
-            player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt nicht mehr Random.");
-            TraderCommand.traderEditContainer.remove(player.getUUID());
-        }
-    }
-
-    public void clickedBanker(RaspiPlayer player, InventoryClickEvent clickEvent) {
-        if (isItem(clickEvent.getCurrentItem(), -26)) {
-            //Banker MACHEN
-            traderDB.setBanker(TraderCommand.traderEditContainer.get(player.getUUID()), true);
-            player.getPlayer().closeInventory();
-            player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt Banker!");
-            TraderCommand.traderEditContainer.remove(player.getUUID());
-        }
-
-        if (isItem(clickEvent.getCurrentItem(), -25)) {
-            //Banker REVOKE
-            traderDB.setBanker(TraderCommand.traderEditContainer.get(player.getUUID()), false);
-            player.getPlayer().closeInventory();
-            player.sendDebugMessage(TraderCommand.traderEditContainer.get(player.getUUID()) + " ist jetzt nicht mehr Banker.");
-            TraderCommand.traderEditContainer.remove(player.getUUID());
-        }
-    }
-
-    private boolean isItem(ItemStack stack, int modelID) {
-        return stack != null && stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == modelID;
-    }
-
-
-    private void clickedSave(InventoryClickEvent clickEvent, RaspiPlayer player, ItemStack stack) {
-        if (stack != null && stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == 0) {
-            String trader = TraderCommand.traderEditContainer.get(player.getUUID());
-            ItemStack result = clickEvent.getInventory().getItem(12);
-            ItemStack buy1 = clickEvent.getInventory().getItem(9);
-            ItemStack buy2 = clickEvent.getInventory().getItem(10);
-            if (result != null && buy1 != null) {
-                if (TraderCommand.traderSAVEContainer.containsKey(player.getUUID())) {
-                    traderDB.setItemToShop(trader, TraderCommand.traderSAVEContainer.get(player.getUUID()), result, buy1, buy2);
-                } else {
-                    traderDB.addItemToShop(trader, result, buy1, buy2);
+        if (inventory != null && inventory.getHolder(false) instanceof TraderSettings settings) {
+            //Trader Settings
+            Trader trader = settings.getTrader();
+            if (settings.getItemBySlot(slot) != null) {
+                TraderMenuItem menuItem = settings.getItemBySlot(slot);
+                if (menuItem == TraderMenuItem.SETTING_RANDOM_SET) {
+                    trader.setRandom(true);
+                    traderManager.saveTrader(trader);
+                    settings.getSlotContainer().put(slot, TraderMenuItem.SETTING_RANDOM_REMOVE);
+                    clickEvent.getInventory().setItem(slot, TraderMenuItem.SETTING_RANDOM_REMOVE.getItem());
                 }
 
-            } else {
-                player.sendMessage("<red>Bitte gehe sicher das ALLE items für ein Rezept vorhanden sind! (Kauf und Verkauf Items)");
+                if (menuItem == TraderMenuItem.SETTING_RANDOM_REMOVE) {
+                    trader.setRandom(false);
+                    traderManager.saveTrader(trader);
+                    settings.getSlotContainer().put(slot, TraderMenuItem.SETTING_RANDOM_SET);
+                    clickEvent.getInventory().setItem(slot, TraderMenuItem.SETTING_RANDOM_SET.getItem());
+                }
+
+                //Rezept hinzufügen
+                if (menuItem == TraderMenuItem.SETTING_ADD_RECIPE) {
+                    player.openInventory(trader.recipeEditor(trader.getNextRecipeID()));
+                }
             }
-            player.sendDebugMessage("Recipe: SAVED");
-            clickEvent.getWhoClicked().closeInventory();
-            TraderCommand.traderEditContainer.remove(player.getUUID());
-            TraderCommand.traderSAVEContainer.remove(player.getUUID());
-
+            //Rezept bearbeiten
+            ItemStack stack = clickEvent.getCurrentItem();
+            if (stack != null && stack.hasItemMeta()) {
+                PersistentDataContainer container = stack.getItemMeta().getPersistentDataContainer();
+                if (container.has(settings.getRecipeIDKey(), PersistentDataType.INTEGER)) {
+                    Integer recipeID = container.get(settings.getRecipeIDKey(), PersistentDataType.INTEGER);
+                    if (recipeID == null) {
+                        player.getPlayer().closeInventory();
+                        trader.openTraderSettings(player);
+                        return;
+                    }
+                    player.getPlayer().closeInventory();
+                    player.openInventory(trader.recipeEditor(recipeID));
+                }
+            }
+            clickEvent.setCancelled(true);
         }
     }
 
-    private void clickedDelete(InventoryClickEvent clickEvent, RaspiPlayer player, ItemStack stack) {
-        if (stack != null && stack.getType().equals(Material.BARRIER) && stack.hasItemMeta() && stack.getItemMeta().hasCustomModelData() && stack.getItemMeta().getCustomModelData() == 1) {
-            String trader = TraderCommand.traderEditContainer.get(player.getUUID());
-            Integer id = TraderCommand.traderSAVEContainer.get(player.getUUID());
-            traderDB.removeRecipe(trader, id);
-            clickEvent.getWhoClicked().closeInventory();
-            player.sendDebugMessage("Recipe: DELETED");
-        }
-    }
 
+    private Merchant generateMerchant(Trader trader) {
 
-    private Merchant generateMerchant(String traderType) {
         Merchant merchant = Bukkit.createMerchant();
         List<MerchantRecipe> recipes = new ArrayList<>();
+        List<TraderRecipe> list = new ArrayList<>(trader.getRecipes());
 
         //RANDOM
-        if (traderDB.isRandom(traderType)) {
-            List<String> shopID = traderDB.getShopIds(traderType);
-            int size = shopID.size();
 
-            int id = plugin.getRandom().nextInt(size);
-
-            MerchantRecipe merchantRecipe = new MerchantRecipe(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_RES, Integer.parseInt(shopID.get(id))), 999);
-            merchantRecipe.addIngredient(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_ITEM_1, Integer.parseInt(shopID.get(id))));
-            if (traderDB.shopItemExist(traderType, shopID.get(id), TraderDB.DB_SHOP_ITEM_2)) {
-                merchantRecipe.addIngredient(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_ITEM_2, Integer.parseInt(shopID.get(id))));
+        if (trader.isRandom()) {
+            TraderRecipe traderRecipe = list.get(plugin.getRandom().nextInt(list.size()));
+            MerchantRecipe merchantRecipe = new MerchantRecipe(traderRecipe.getResult(), 999);
+            merchantRecipe.addIngredient(traderRecipe.getCurrency_slot1());
+            if (traderRecipe.getCurrency_slot2() != null) {
+                merchantRecipe.addIngredient(traderRecipe.getCurrency_slot2());
             }
             recipes.add(merchantRecipe);
             merchant.setRecipes(recipes);
@@ -237,16 +202,17 @@ public class TraderListeners implements Listener {
         }
 
 
-        for (String ids : traderDB.getShopIds(traderType)) {
-            MerchantRecipe merchantRecipe = new MerchantRecipe(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_RES, Integer.parseInt(ids)), 999);
-            merchantRecipe.addIngredient(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_ITEM_1, Integer.parseInt(ids)));
-            if (traderDB.shopItemExist(traderType, ids, TraderDB.DB_SHOP_ITEM_2)) {
-                merchantRecipe.addIngredient(traderDB.getItemStack(traderType, TraderDB.DB_SHOP_ITEM_2, Integer.parseInt(ids)));
+        for (TraderRecipe traderRecipe : list) {
+            MerchantRecipe merchantRecipe = new MerchantRecipe(traderRecipe.getResult(), 999);
+            merchantRecipe.addIngredient(traderRecipe.getCurrency_slot1());
+            if (traderRecipe.getCurrency_slot2() != null) {
+                merchantRecipe.addIngredient(traderRecipe.getCurrency_slot2());
             }
             recipes.add(merchantRecipe);
         }
         merchant.setRecipes(recipes);
         return merchant;
+
     }
 
 

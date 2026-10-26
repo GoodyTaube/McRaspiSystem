@@ -4,6 +4,7 @@ import eu.goodyfx.mcraspi.McRaspiSystem;
 import eu.goodyfx.mcraspi.core.api.Raspi;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -60,8 +61,16 @@ public class RaspiWorldEvents implements Listener {
     @EventHandler
     public void onBlockDamage(EntityExplodeEvent explodeEvent) {
         EntityType entityType = explodeEvent.getEntityType();
-        if (!entityType.equals(EntityType.TNT)) {
+
+        if (explodeEvent.getLocation().getWorld().getEnvironment().equals(World.Environment.NETHER)) {
+            if (!entityType.equals(EntityType.WITHER_SKULL) && !entityType.equals(EntityType.FIREBALL)) {
+                explodeEvent.blockList().clear();
+            }
+            return;
+        }
+        if (!entityType.equals(EntityType.TNT) && !entityType.equals(EntityType.WIND_CHARGE)) {
             explodeEvent.blockList().clear();
+
             //Raspi.debugger().debug(String.format("Cleared Blocklist for %s", explodeEvent.getEntityType().name()));
         }
 
@@ -69,6 +78,12 @@ public class RaspiWorldEvents implements Listener {
 
     @EventHandler
     public void onMobGrief(EntityChangeBlockEvent changeBlockEvent) {
+        if (changeBlockEvent.getBlock().getLocation().getWorld().getEnvironment().equals(World.Environment.NETHER)) {
+            if (changeBlockEvent.getEntityType().equals(EntityType.WITHER_SKULL) || changeBlockEvent.getEntityType().equals(EntityType.FIREBALL)) {
+                return;
+
+            }
+        }
         List<EntityType> blocked = new ArrayList<>();
         blocked.add(EntityType.ENDERMAN);
         blocked.add(EntityType.ENDER_DRAGON);
@@ -86,7 +101,6 @@ public class RaspiWorldEvents implements Listener {
 
         if (!state.getType().name().endsWith("BED")) {
             blockExplodeEvent.blockList().clear();
-
         }
     }
 

@@ -2,7 +2,7 @@ package eu.goodyfx.mcraspi.core.events;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import eu.goodyfx.mcraspi.McRaspiSystem;
-import eu.goodyfx.mcraspi.core.commandsold.InHeadCommand;
+import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -11,7 +11,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InHeadListeners implements Listener {
 
@@ -21,12 +23,15 @@ public class InHeadListeners implements Listener {
         plugin.setListeners(this);
     }
 
+    @Getter
+    private static final Map<UUID, UUID> inHeadContainer = new ConcurrentHashMap<>();
+
     @EventHandler
     public void onTeleport(PlayerTeleportEvent teleportEvent) {
         Player player = teleportEvent.getPlayer();
-        if (InHeadCommand.getInHeadContainer().containsValue(player.getUniqueId())) {
-            for (UUID uuid : InHeadCommand.getInHeadContainer().keySet()) {
-                if (InHeadCommand.getInHeadContainer().get(uuid).equals(player.getUniqueId())) {
+        if (inHeadContainer.containsValue(player.getUniqueId())) {
+            for (UUID uuid : inHeadContainer.keySet()) {
+                if (inHeadContainer.get(uuid).equals(player.getUniqueId())) {
                     Player target = Bukkit.getPlayer(uuid);
                     assert target != null;
 
@@ -41,9 +46,10 @@ public class InHeadListeners implements Listener {
     @EventHandler
     public void onSpec(PlayerStopSpectatingEntityEvent event) {
         Player player = event.getPlayer();
-        if (InHeadCommand.getInHeadContainer().containsKey(player.getUniqueId())) {
+        if (inHeadContainer.containsKey(player.getUniqueId())) {
             player.sendActionBar(MiniMessage.miniMessage().deserialize("<red>Bitte nutze /inHead um den Modus zu verlassen."));
         }
     }
+
 
 }

@@ -9,25 +9,22 @@ import eu.goodyfx.mcraspi.core.api.Raspi;
 import eu.goodyfx.mcraspi.core.commands.RaspiCommand;
 import eu.goodyfx.mcraspi.core.database.RaspiPlayer;
 import eu.goodyfx.mcraspi.core.database.RaspiSuggestions;
-import eu.goodyfx.mcraspi.core.exceptions.AllReadyExistException;
 import eu.goodyfx.mcraspi.core.utils.RaspiSounds;
 import eu.goodyfx.mcraspi.modules.trader.TraderSubSystem;
-import eu.goodyfx.mcraspi.modules.trader.managers.TraderDB;
-import eu.goodyfx.mcraspi.modules.trader.utils.TraderBuilder;
-import eu.goodyfx.mcraspi.modules.trader.utils.TraderInventories;
+import eu.goodyfx.mcraspi.modules.trader.managers.TraderManager;
+import eu.goodyfx.mcraspi.modules.trader.utils.Trader;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.List;
 import java.util.function.Predicate;
 
 public class TraderCommandContainer extends RaspiCommand {
 
-    private final List<String> activeTraders;
     private final TraderSubSystem subSystem;
-    private final TraderDB traderDB;
+    private final TraderManager traderManager;
+
 
     @Override
     public LiteralCommandNode<CommandSourceStack> getCommand() {
@@ -45,13 +42,14 @@ public class TraderCommandContainer extends RaspiCommand {
     }
 
     public TraderCommandContainer(TraderSubSystem subSystem) {
-        super(subSystem.getTraderDB().getPlugin());
+        super(subSystem.getPlugin());
         this.subSystem = subSystem;
-        this.traderDB = subSystem.getTraderDB();
-        this.activeTraders = subSystem.getTraderDB().getTraders();
+        this.traderManager = subSystem.getTraderManager();
+
     }
 
-    private static final String TRADER_UID = "traderUID";
+
+    private static final String TRADER_NAME = "traderName";
     private static final String FAIL_NON_EXIST_TRADER = "<yellow>`%s` <red>existiert nicht in der DB.";
 
     /**
@@ -61,7 +59,7 @@ public class TraderCommandContainer extends RaspiCommand {
      * @return traderUID
      */
     private <T> RequiredArgumentBuilder<CommandSourceStack, String> getArgument() {
-        return CommandUtils.string(TRADER_UID);
+        return CommandUtils.string(TRADER_NAME);
     }
 
     private static final Predicate<CommandSourceStack> PLAYER_ONLY = CommandUtils.PLAYER_ONLY;
@@ -69,24 +67,14 @@ public class TraderCommandContainer extends RaspiCommand {
 
     public LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("trader").requires(PLAYER_ONLY).executes(this::helpCommand)
-                .then(Commands.literal("create").requires(PLAYER_ONLY).then(getArgument()
-                        .executes(this::createTrader)))
-                .then(Commands.literal("edit").requires(PLAYER_ONLY).then(getArgument()
-                        .suggests(((context, builder) -> RaspiSuggestions.suggestStringList(builder, activeTraders)))
-                        .executes(this::editTrader)))
-                .then(Commands.literal("remove").requires(PLAYER_ONLY).then(getArgument()
-                        .suggests((context, builder) -> RaspiSuggestions.suggestStringList(builder, activeTraders))
-                        .executes(this::removeTrader)))
-                .then(Commands.literal("spawn").requires(PLAYER_ONLY).then(getArgument()))
-                .build();
+                .then(Commands.literal("create").requires(PLAYER_ONLY).then(getArgument().executes(this::createTrader)))
+                .then(Commands.literal("edit").requires(PLAYER_ONLY).then(getArgument().suggests(((context, builder) -> RaspiSuggestions.suggestStringList(builder, traderManager.getActiveNames()))).executes(this::editTrader)))
+                .then(Commands.literal("remove").requires(PLAYER_ONLY).then(getArgument().suggests((context, builder) -> RaspiSuggestions.suggestStringList(builder, traderManager.getActiveNames())).executes(this::removeTrader)))
+                .then(Commands.literal("spawn").requires(PLAYER_ONLY).then(getArgument().suggests(((context, builder) -> RaspiSuggestions.suggestStringList(builder, traderManager.getActiveNames()))).executes(this::spawnTrader))).build();
     }
 
     public Integer helpCommand(CommandContext<CommandSourceStack> context) {
-        context.getSource().getSender().sendRichMessage("Trader Command Hilfe:" +
-                "<br>/trader create <name> #Erzeugt einen Trader mit Namen." +
-                "<br>/trader edit <name> #Öffnet das Menü vom Trader." +
-                "<br>/trader remove <name> #Löscht den Trader aus der Datenbank." +
-                "<br>/trader spawn <name> #Spawnt den Trader falls er gestorben ist.");
+        context.getSource().getSender().sendRichMessage("Trader Command Hilfe:" + "<br>/trader create <name> #Erzeugt einen Trader mit Namen." + "<br>/trader edit <name> #Öffnet das Menü vom Trader." + "<br>/trader remove <name> #Löscht den Trader aus der Datenbank." + "<br>/trader spawn <name> #Spawnt den Trader falls er gestorben ist.");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -94,44 +82,77 @@ public class TraderCommandContainer extends RaspiCommand {
         Player player = (Player) context.getSource().getSender();
         RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
         Location spawnLocation = raspiPlayer.getLocation();
-        String name = context.getArgument(TRADER_UID, String.class);
-        try {
-            new TraderBuilder(name, spawnLocation, subSystem).build();
-            raspiPlayer.sendMessage(String.format("<green>%s wurde an deiner Position erzeugt!", name), true);
-        } catch (AllReadyExistException e) {
-            raspiPlayer.sendMessage(String.format("<yellow>`%s` <red>existiert bereits in der DB!", name), true, RaspiSounds.ERROR);
+        String name = context.getArgument(TRADER_NAME, String.class);
+
+        if (traderManager.traderExists(name)) {
+            raspiPlayer.sendMessage("<red>Der Trader existiert bereits in der DB.", true);
+            return 1;
         }
+
+
+        Trader trader = traderManager.createTrader(name);
+        if (trader == null) {
+            raspiPlayer.sendMessage("Ein Fehler ist aufgetreten.", true);
+            return 1;
+        }
+
+        trader.spawnTraderDummy(subSystem.getPlugin(), spawnLocation);
         return Command.SINGLE_SUCCESS;
     }
 
     public Integer removeTrader(CommandContext<CommandSourceStack> context) {
         Player player = (Player) context.getSource().getSender();
         RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
-        String name = context.getArgument(TRADER_UID, String.class);
-        if (!traderDB.traderExist(name)) {
-            raspiPlayer.sendMessage(String.format(FAIL_NON_EXIST_TRADER, name), true, RaspiSounds.ERROR);
+        String name = context.getArgument(TRADER_NAME, String.class);
+
+        if (!traderManager.traderExists(name)) {
+            raspiPlayer.sendMessage(String.format(FAIL_NON_EXIST_TRADER, name), true);
             return 1;
         }
-        traderDB.remove(name);
-        raspiPlayer.sendMessage(String.format("<green>Du hast `%s` aus der Datenbank entfernt.", name), true);
+
+        Trader trader = traderManager.getTraderByName(name);
+        if (traderManager.delete(trader.getUid())) {
+            raspiPlayer.sendMessage(String.format("<green>Du hast `%s` aus der Datenbank entfernt.", name), true);
+        } else {
+            raspiPlayer.sendDebugMessage("ERROR WHILE DELETE TRADER!");
+        }
         return Command.SINGLE_SUCCESS;
     }
 
     public Integer editTrader(CommandContext<CommandSourceStack> context) {
         Player player = (Player) context.getSource().getSender();
         RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
-        String name = context.getArgument(TRADER_UID, String.class);
+        String name = context.getArgument(TRADER_NAME, String.class);
 
-        if (!traderDB.traderExist(name)) {
+        if (!traderManager.traderExists(name)) {
+            raspiPlayer.sendMessage(String.format(FAIL_NON_EXIST_TRADER, name));
+            return 1;
+        }
+
+        Trader trader = traderManager.getTraderByName(name);
+
+        if (trader.getRecipes().isEmpty()) {
+            raspiPlayer.openInventory(trader.recipeEditor(0));
+        } else {
+            trader.openTraderSettings(raspiPlayer);
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public Integer spawnTrader(CommandContext<CommandSourceStack> context) {
+        Player player = (Player) context.getSource().getSender();
+        RaspiPlayer raspiPlayer = Raspi.playerLifeCycleService().getRaspiPlayer(player);
+        String name = context.getArgument(TRADER_NAME, String.class);
+        if (!traderManager.traderExists(name)) {
             raspiPlayer.sendMessage(String.format(FAIL_NON_EXIST_TRADER, name), true, RaspiSounds.ERROR);
             return 1;
         }
 
-        if (traderDB.shopExist(name)) {
-            player.openInventory(TraderInventories.traderMenu(traderDB, name));
-            return 1;
-        }
-        player.openInventory(TraderInventories.createRecipeInventory());
+        Trader trader = traderManager.getTraderByName(name);
+        trader.spawnTraderDummy(subSystem.getPlugin(), player.getLocation());
+        raspiPlayer.playSound(RaspiSounds.SUCCESS);
         return Command.SINGLE_SUCCESS;
     }
+
+
 }

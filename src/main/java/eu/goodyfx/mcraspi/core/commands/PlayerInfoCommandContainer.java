@@ -30,7 +30,7 @@ public class PlayerInfoCommandContainer extends RaspiCommand {
 
     @Override
     public String getName() {
-        return "playerüinfo";
+        return "playerinfo";
     }
 
     @Override

@@ -87,13 +87,17 @@ public class ServerListeners implements Listener {
         }
     }
 
+    private boolean isTesting(Player player) {
+        return player.isPermissionSet("group.testing") && plugin.getConfig().getBoolean("testMode");
+    }
+
     @EventHandler
     public void onBreak(BlockBreakEvent breakEvent) {
         lastBreak.put(breakEvent.getPlayer().getUniqueId(), breakEvent.getBlock().getType());
         Player player = breakEvent.getPlayer();
         Block block = breakEvent.getBlock();
 
-        if (!player.isPermissionSet("group.spieler")) {
+        if (!player.isPermissionSet("group.spieler") && !isTesting(player)) {
             breakEvent.setCancelled(true);
             player.sendRichMessage("Du bist nicht registriert.");
             return;
@@ -149,7 +153,7 @@ public class ServerListeners implements Listener {
         Block block = placeEvent.getBlock();
         Location location = block.getLocation();
 
-        if (!player.isPermissionSet("group.spieler")) {
+        if (!player.isPermissionSet("group.spieler") && !isTesting(player)) {
             placeEvent.setCancelled(true);
             player.sendRichMessage("Du bist noch nicht registriert.");
             return;
